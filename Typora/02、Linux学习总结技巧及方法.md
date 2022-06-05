@@ -352,6 +352,17 @@ yum install -y vim
 yum install -y net-tools              # 安装后可以用ifconfig查看ip信息
 ```
 
+16、删除ora_data目录下的所有文件：
+
+```shell
+rm -r ora_data/ -f  
+
+-f　　　　-force　　　　　　忽略不存在的文件，强制删除，无任何提示
+-i　　　　--interactive　　进行交互式地删除
+-r | -R　--recursive　　　递归式地删除列出的目录下的所有目录和文件
+-v　　　  --verbose　　　　详细显示进行的步骤
+```
+
 
 
 # 三、软件安装

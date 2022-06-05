@@ -493,7 +493,67 @@ docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.
 
 
 
-​	
+## 4、安装Oracle12C
+
+```shell
+docker pull jag41l/oracle_12c:latest
+
+创建持久化的目录
+mkdir -p /var/local/ora_data
+chmod -R 777 /var/local/ora_data/
+
+创建容器
+docker run -d -p 2122:22 -p 9090:8080 -p 1521:1521 -v /var/local/ora_data:/u01/app/oracle/ --name oracle12c jag41l/oracle_12c
+
+查看启动日志(启动会比较慢)
+docker logs -f 8baf2b9931d4
+```
+
+**OK,现在Oracle数据库已经启动完毕！**
+
+```
+hostname:docker所在宿主机的ip:192.168.137.110
+port:1521
+username1:system
+password:oracle
+sid:xe
+```
+
+```shell
+进入容器(此时也可以直接通过SqlDeveloper客户端进行连接，然后设置)
+docker exec -it 8baf2b9931d4 /bin/bash
+切换成oracle用户
+su oracle
+进入sqlplus
+$ORACLE_HOME/bin/sqlplus / as sysdba       # 直接连上了。。。
+
+select * from v$version;         -- 12.1.0.2.0 - 64bit Production
+
+设置密码有效期为无限制
+ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
+解锁system用户
+alter user SYSTEM account unlock;
+
+创建一个账号为JY17241的用户密码设置为jy17241
+create user JY17241 identified by jy17241;
+为这个用户赋予管理员的权限
+grant connect,resource,dba to JY17241;
+
+此时又多了一个用户 JY17241/jy17241
+```
+
+**可以通过SqlDeveloper进行连接system或者JY17241两个用户了。**
+
+```shell
+链接：https://pan.baidu.com/s/1K97bBKPA3njKSO_Q01OH3g 
+提取码：gzd3
+```
+
+![image-20220605120939176](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220605120946.png)
+
+下次启动docker，直接docker start oracle12c即可。
+
+
 
 # 五、Docker镜像讲解
 
