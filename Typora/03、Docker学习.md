@@ -265,7 +265,10 @@ docker --help : docker search --help
 docker search mysql --limit 10 
 docker pull mysql
 docker images [-aq]
+docker inspect id
 docker history imageid   # 查看镜像构建过程
+docker logs -f 4bfa6bbeb936
+
 
 docker rmi -f feb5d9fea6a5
 docker run -d centos
@@ -551,7 +554,41 @@ grant connect,resource,dba to JY17241;
 
 ![image-20220605120939176](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220605120946.png)
 
-下次启动docker，直接docker start oracle12c即可。
+下次启动docker，docker ps -a 可查看历史启动的容器信息。直接docker start oracle12c即可。
+
+## 5、安装zookeeper
+
+> spring cloud服务注册中心：Eureka/Zookeeper/Consul/Nacos
+
+### （1）单机版
+
+```shell
+docker pull zookeeper:3.5.3-beta
+# 启动
+docker run -d -p 2181:2181 --name zookeeper-standalone zookeeper:3.5.3-beta
+# 进入容器
+docker exec -it zookeeper-standalone bash 
+# 启动zk客户端
+/zookeeper-3.5.3-beta/bin/zkCli.sh
+```
+
+启动成功：
+
+![image-20220611221601209](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220611221601.png)
+
+### （2）集群版
+
+[参阅这个文档 - 非docker](https://github.com/12722097458/spring-cloud-2022/blob/master/SpringCloud%E5%AD%A6%E4%B9%A0-%E5%91%A8%E9%98%B3.md)
+
+## 6、安装Consul
+
+```shell
+docker pull consul:latest
+
+docker run -d --name consul-dev -p 8500:8500 consul:latest
+```
+
+[集群部署](https://www.cnblogs.com/-wenli/p/13867979.html)
 
 
 
