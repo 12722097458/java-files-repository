@@ -12,21 +12,21 @@
 提取码：kb3a
 ```
 
-![image-20220514095113462](D:\我的文件\gitRepository\cloud-image\img\image-20220514095113462.png)
+![image-20220514095113462](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203358.png)
 
 ## 1、安装VMware-workstation客户端
 
 直接双击VMware-Workstation-Lite-16.0.0-1689429.exe，进行安装，选择好安装路径，一直下一步即可。
 
-![image-20220514094618873](D:\我的文件\gitRepository\cloud-image\img\image-20220514094618873.png)
+![image-20220514094618873](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203401.png)
 
 
 
 安装成功后多了VMnet8的网卡界面：
 
-![image-20220514094912107](D:\我的文件\gitRepository\cloud-image\img\image-20220514094912107.png)
+![image-20220514094912107](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203633.png)
 
-![image-20220514095002673](D:\我的文件\gitRepository\cloud-image\img\image-20220514095002673.png)
+![image-20220514095002673](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203406.png)
 
 
 
@@ -34,33 +34,33 @@
 
 （1）点击新建虚拟机，选择自定义
 
-![image-20220514101506355](D:\我的文件\gitRepository\cloud-image\img\image-20220514101506355.png)
+![image-20220514101506355](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203408.png)
 
 （2）选择Vorkstation16
 
-![image-20220514101601111](D:\我的文件\gitRepository\cloud-image\img\image-20220514101601111.png)
+![image-20220514101601111](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203411.png)
 
 （3）稍后安装操作系统
 
-![image-20220514101628962](D:\我的文件\gitRepository\cloud-image\img\image-20220514101628962.png)
+![image-20220514101628962](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203412.png)
 
 （4）选择Linux以及CentOS 7
 
-![image-20220514101708811](D:\我的文件\gitRepository\cloud-image\img\image-20220514101708811.png)
+![image-20220514101708811](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203414.png)
 
 （5）给虚拟机起名以及设置当前配置虚拟机的位置
 
 > 最好进行文件夹分组(CentOS7-110)，当新建多个虚拟机时，最终存在的形式就是文件
 
-![image-20220514102027247](D:\我的文件\gitRepository\cloud-image\img\image-20220514102027247.png)
+![image-20220514102027247](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203418.png)
 
 （6）虚拟机内存设置2048
 
-![image-20220514102144718](D:\我的文件\gitRepository\cloud-image\img\image-20220514102144718.png)
+![image-20220514102144718](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203421.png)
 
 （7）NAT网络模式
 
-![image-20220514102226590](D:\我的文件\gitRepository\cloud-image\img\image-20220514102226590.png)
+![image-20220514102226590](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203423.png)
 
 
 
@@ -68,15 +68,15 @@
 
 * 1.1 镜像路径
 
-  ![image-20220514102509562](D:\我的文件\gitRepository\cloud-image\img\image-20220514102509562.png)
+  ![image-20220514102509562](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203425.png)
 
 * 1.2 网络适配器-NAT
 
-  ![image-20220514102541617](D:\我的文件\gitRepository\cloud-image\img\image-20220514102541617.png)
+  ![image-20220514102541617](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203428.png)
 
 （9）点击完成即可
 
-![image-20220514102651384](D:\我的文件\gitRepository\cloud-image\img\image-20220514102651384.png)
+![image-20220514102651384](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203430.png)
 
 
 
@@ -86,27 +86,27 @@
 
 1.1 选择Install(Ctrl + Alt鼠标退出虚拟机)
 
-![image-20220514102809198](D:\我的文件\gitRepository\cloud-image\img\image-20220514102809198.png)
+![image-20220514102809198](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203432.png)
 
 1.2 语言选择英文即可
 
 1.3 依次点击，不需要做修改。选择最小化安装
 
-![image-20220514103112215](D:\我的文件\gitRepository\cloud-image\img\image-20220514103112215.png)
+![image-20220514103112215](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203433.png)
 
 1.4 设置密码，等待安装完成。
 
-![image-20220514103148524](D:\我的文件\gitRepository\cloud-image\img\image-20220514103148524.png)
+![image-20220514103148524](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203435.png)
 
-![image-20220514103210802](D:\我的文件\gitRepository\cloud-image\img\image-20220514103210802.png)
+![image-20220514103210802](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203437.png)
 
 1.5 结束后重启虚拟机
 
-![image-20220514103536068](D:\我的文件\gitRepository\cloud-image\img\image-20220514103536068.png)
+![image-20220514103536068](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203438.png)
 
 1.6 登录虚拟机(root/root)
 
-![image-20220514103635383](D:\我的文件\gitRepository\cloud-image\img\image-20220514103635383.png)
+![image-20220514103635383](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203440.png)
 
 
 
@@ -122,11 +122,11 @@ NETMASK=255.255.255.0
 
 （1）取消DHCP动态设置：
 
-![image-20220514105238888](D:\我的文件\gitRepository\cloud-image\img\image-20220514105238888.png)
+![image-20220514105238888](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203443.png)
 
 修改后VMnet8的网卡IP会自动同步:
 
-![image-20220514105409194](D:\我的文件\gitRepository\cloud-image\img\image-20220514105409194.png)
+![image-20220514105409194](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203453.png)
 
 
 
@@ -136,7 +136,7 @@ NETMASK=255.255.255.0
 
 2.1首先是对network进行编辑：**cd /etc/sysconfig/**      -->        **vi network **   修改成图二即可
 
-![image-20220514111232504](D:\我的文件\gitRepository\cloud-image\img\image-20220514111232504.png)
+![image-20220514111232504](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203455.png)
 
 ```shell
 NETWORKING=yes
@@ -146,7 +146,7 @@ HOSTNAME=centos7-110
 
 2.2修改系统的网络配置文件，路径为：cd /etc/sysconfig/network-scripts/    --》  vi  ifcfg-eth33
 
-![image-20220514110120025](D:\我的文件\gitRepository\cloud-image\img\image-20220514110120025.png)
+![image-20220514110120025](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203458.png)
 
 ```shell
 TYPE=Ethernet
@@ -177,7 +177,7 @@ DNS2=8.8.8.8                 #*** √
 
 ​								windows:   ping linux的ip
 
-![image-20220514110518080](D:\我的文件\gitRepository\cloud-image\img\image-20220514110518080.png)
+![image-20220514110518080](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203500.png)
 
 2.4 关闭Linux防火墙
 
@@ -187,11 +187,11 @@ systemctl disable firewalld.service    #禁止firewall开机启动
 firewall-cmd --state             ##查看防火墙状态，是否是running
 ```
 
-![image-20220514110808415](D:\我的文件\gitRepository\cloud-image\img\image-20220514110808415.png)
+![image-20220514110808415](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203502.png)
 
 2.5 使用FinalShell终端连接虚拟机
 
-![image-20220514111007894](D:\我的文件\gitRepository\cloud-image\img\image-20220514111007894.png)
+![image-20220514111007894](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203503.png)
 
 
 
@@ -201,19 +201,19 @@ firewall-cmd --state             ##查看防火墙状态，是否是running
 
 1、如果linux无法联通本机，可以尝试修改本机共享设置
 
-![](D:\我的文件\gitRepository\cloud-image\img\image-20210811081643095.png)2、如果本机无法ping通linux, 可以尝试在设置静态ip地址时，和本机VM8的IPV4网段地址保持一致。
+![](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203511.png)2、如果本机无法ping通linux, 可以尝试在设置静态ip地址时，和本机VM8的IPV4网段地址保持一致。
 
 我设置的GATEWAY=192.168.137.2
 
-![image-20210811081845133](D:\我的文件\gitRepository\cloud-image\img\image-20210811081845133.png)
+![image-20210811081845133](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203513.png)
 
 3、突然间外部无法联通linux内部，linuxping本机，百度都正常。
 
-![image-20220509231131645](D:\我的文件\gitRepository\cloud-image\img\image-20220509231131645.png)
+![image-20220509231131645](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203514.png)
 
-![image-20220509231245124](D:\我的文件\gitRepository\cloud-image\img\image-20220509231245124.png)
+![image-20220509231245124](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203517.png)
 
-![image-20220509231400641](D:\我的文件\gitRepository\cloud-image\img\image-20220509231400641.png)
+![image-20220509231400641](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203518.png)
 
 4、虚拟机启动突然无法联网，ip地址也不显示
 
@@ -231,17 +231,17 @@ firewall-cmd --state             ##查看防火墙状态，是否是running
 
 （1）检查虚拟机的网络编辑器是否配置正确
 
-![image-20220512230238494](D:\我的文件\gitRepository\cloud-image\img\image-20220512230238494.png)
+![image-20220512230238494](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203521.png)
 
 （2）如果**将主机虚拟适配器连接到此网络**无法选中
 
 查看Device Install Service和Device Setup Manager是否是自动启动
 
-![image-20220512230518836](D:\我的文件\gitRepository\cloud-image\img\image-20220512230518836.png)
+![image-20220512230518836](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203524.png)
 
 还不行的话下载CCleaner，清空注册表。
 
-![image-20220512230723409](D:\我的文件\gitRepository\cloud-image\img\image-20220512230723409.png)
+![image-20220512230723409](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203639.png)
 
 6、无法访问linux
 
@@ -249,7 +249,7 @@ firewall-cmd --state             ##查看防火墙状态，是否是running
 
 （2）查看windows的vm8是否配置了静态IP
 
-![image-20220513001126002](D:\我的文件\gitRepository\cloud-image\img\image-20220513001126002.png)
+![image-20220513001126002](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203526.png)
 
 7、启动出现蓝屏情况，请更新VMware-workstation
 
@@ -379,7 +379,7 @@ yum -y install lrzsz
 
 1.3 上传安装包jdk-11_linux-x64_bin.tar.gz到/app/tools
 
-![image-20220514131945820](D:\我的文件\gitRepository\cloud-image\img\image-20220514131945820.png)
+![image-20220514131945820](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203532.png)
 
 1.3 然后解压
 
@@ -387,7 +387,7 @@ yum -y install lrzsz
 tar -zxvf jdk-11_linux-x64_bin.tar.gz
 ```
 
-![image-20220514132119593](D:\我的文件\gitRepository\cloud-image\img\image-20220514132119593.png)
+![image-20220514132119593](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203536.png)
 
 1.4 配置环境变量
 
@@ -406,7 +406,7 @@ PATH=$JAVA_HOME/bin:$PATH
 export JAVA_HOME CLASSPATH PATH
 ```
 
-![image-20220514132741378](D:\我的文件\gitRepository\cloud-image\img\image-20220514132741378.png)
+![image-20220514132741378](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203539.png)
 
 1.5 配置后刷新配置文件
 
@@ -416,7 +416,7 @@ source /etc/profile
 
 1.6 执行java -version 查看是否成功
 
-![image-20220514132925414](D:\我的文件\gitRepository\cloud-image\img\image-20220514132925414.png)
+![image-20220514132925414](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203541.png)
 
 > 最后如果  java -version 出问题，（-bash: /usr/local/src/jdk1.8.0_191/bin/java: /lib/ld-linux.so.2: bad ELF interprete）
 >
@@ -430,7 +430,7 @@ source /etc/profile
 https://downloads.mysql.com/archives/community/
 ```
 
-![image-20210327132529716](D:\我的文件\gitRepository\cloud-image\img\image-20210327132529716.png)
+![image-20210327132529716](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203543.png)
 
 
 
@@ -469,9 +469,12 @@ mkdir data
 6、初始化数据库，并会自动生成随机密码，记下等下登录要用 
 
 ```shell
-bin/mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+bin/mysqld --initialize --console --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
 
-2022-05-14T06:03:58.820301Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: ur/zn.e6p)eR
+2022-05-14T06:03:58.820301Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: -vVzkF55?evr
+
+l4iruJ?i8YI?
+可以cat /usr/local/mysql/data/err.log查看
 ```
 
 7、修改/usr/local/mysql当前目录的用户
@@ -586,11 +589,12 @@ export PATH=$PATH:/usr/local/mysql/bin:/usr/local/mysql/lib
 mysql -uroot -p
 密码可以直接粘贴  ur/zn.e6p)eR
 如果出现socket错误，可以尝试启动mysql 的server
+ERROR 2002 (HY000): Can‘t connect to local MySQL server through socket ‘/tmp/mysql.sock‘
  cd support-files/
 ./mysql.server start
 ```
 
-![image-20210327141151718](D:\我的文件\gitRepository\cloud-image\img\image-20210327141151718.png)
+![image-20210327141151718](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203548.png)
 
 16、修改密码
 
@@ -602,7 +606,7 @@ flush privileges;
 
 use mysql;#进入数据库
 select host, user, authentication_string, plugin from user;#查看用户信息
-#授权root用户可以远程登陆
+#授权root用户可以远程登录
 update user set host='%' where user='root' and host='localhost'; 
 
 flush privileges;
@@ -622,7 +626,7 @@ Starting MySQL.. SUCCESS!
 
 17、此时Navicat可以正常连接了
 
-![image-20220514141025823](D:\我的文件\gitRepository\cloud-image\img\image-20220514141025823.png)
+![image-20220514141025823](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203550.png)
 
 
 
@@ -647,7 +651,7 @@ sh startup.sh
  tail -fn 20 catalina.out    # 查看实时日志
 ```
 
-![image-20220514141444928](D:\我的文件\gitRepository\cloud-image\img\image-20220514141444928.png)
+![image-20220514141444928](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203552.png)
 
 ### 4、Redis安装
 
@@ -678,11 +682,11 @@ cp /app/tools/redis-3.0.7/redis.conf /usr/local/tools/redis/bin/
 
 6、再新开一个会话 到bin目录下，启动客户端
 
-![image-20220514143418741](D:\我的文件\gitRepository\cloud-image\img\image-20220514143418741.png)
+![image-20220514143418741](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203554.png)
 
 windows也可正常连接访问。
 
-![image-20220514143434345](D:\我的文件\gitRepository\cloud-image\img\image-20220514143434345.png)
+![image-20220514143434345](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203556.png)
 
 ### 5、MongoDb安装
 
@@ -712,7 +716,7 @@ mkdir -p data/db
 mkdir -p logs
 ```
 
-![image-20210810234609301](D:\我的文件\gitRepository\cloud-image\img\image-20210810234609301.png)
+![image-20210810234609301](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203559.png)
 
 5、创建MongoDB运行时使用的配置文件：mongodb.conf
 
@@ -906,11 +910,11 @@ http://192.168.137.110:15672/#/
 
 2、通过maven打包后把jar包上传到Linux
 
-![image-20220514133717066](D:\我的文件\gitRepository\cloud-image\img\image-20220514133717066.png)
+![image-20220514133717066](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203603.png)
 
 3、直接启动即可(确保Linux的JDK已经安装成功)
 
-![image-20220514133924888](D:\我的文件\gitRepository\cloud-image\img\image-20220514133924888.png)
+![image-20220514133924888](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203605.png)
 
 4、测试
 
@@ -918,7 +922,7 @@ http://192.168.137.110:15672/#/
 http://192.168.137.110:8181
 ```
 
-![image-20220514133945337](D:\我的文件\gitRepository\cloud-image\img\image-20220514133945337.png)
+![image-20220514133945337](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203607.png)
 
 
 
@@ -950,7 +954,7 @@ public class HelloController {
 
 3、在idea中配置remote配置调试端口
 
-![image-20200809131245368](D:\我的文件\Typora\文档\2、Linux学习总结技巧及方法.assets\image-20200809131245368.png)
+![image-20200809131245368](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203610.png)
 
 4、执行以下命令，启动项目
 
@@ -960,11 +964,11 @@ java -Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=9999 
 
 启动成功如下：
 
-![image-20200809131623809](D:\我的文件\Typora\文档\2、Linux学习总结技巧及方法.assets\image-20200809131623809.png)
+![image-20200809131623809](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203611.png)
 
 5、在idea中启动debug
 
-![image-20200809131736744](D:\我的文件\Typora\文档\2、Linux学习总结技巧及方法.assets\image-20200809131736744.png)
+![image-20200809131736744](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203613.png)
 
 此时在项目中打断点即可进行调试。
 
@@ -1004,7 +1008,7 @@ ln -s f1.txt f3.txt创建的f3.txt就是软链接
 
 > 切换用户：su user001
 
-![image-20210811082408121](D:\我的文件\gitRepository\cloud-image\img\image-20210811082408121.png)
+![image-20210811082408121](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203616.png)
 
 exit：推出当前权限用户，回到root用户 
 
@@ -1046,7 +1050,7 @@ passwd -d user001      #清空密码了，也就无法登录
 >
 > du:(检查当前目录磁盘空间使用量)       
 
-![](D:\我的文件\gitRepository\cloud-image\img\image-20210811082431993.png)
+![](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203619.png)
 
 
 
@@ -1091,7 +1095,7 @@ pstree
 
 :1st_place_medal:pstree -pu
 
-![image-20210811082528782](D:\我的文件\gitRepository\cloud-image\img\image-20210811082528782.png)
+![image-20210811082528782](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203623.png)
 
 
 

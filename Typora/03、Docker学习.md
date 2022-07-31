@@ -44,7 +44,7 @@ Docker文档：https://docs.docker.com/
 
 > 传统的虚拟机项目部署
 
-![image-20211207232220317](D:\我的文件\gitRepository\cloud-image\img\GOxQ2skYVRpyEMJ.png)
+![image-20211207232220317](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203654.png)
 
 缺点分析：
 
@@ -58,7 +58,7 @@ Docker文档：https://docs.docker.com/
 
 ## 4、Docker的基本组成
 
-![image-20211213230717545](D:\我的文件\gitRepository\cloud-image\img\image-20211213230717545.png)
+![image-20211213230717545](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203658.png)
 
 ### （1）**镜像（image）**
 
@@ -86,7 +86,7 @@ Docker利用容器技术，独立运行一个或一组应用，是通过镜像�
 
 **容器化技术不是模拟的一个完整的操作系统**
 
-![image-20211207232731813](D:\我的文件\gitRepository\cloud-image\img\image-20211207232731813.png)
+![image-20211207232731813](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203701.png)
 
 比较Docker和虚拟机技术的不同：
 
@@ -235,9 +235,9 @@ sudo systemctl restart docker
 
 首次运行docker run helllo-world的过程：
 
-![image-20211208084927914](D:\我的文件\gitRepository\cloud-image\img\h4Rko2mpOBUXgeH.png)
+![image-20211208084927914](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203704.png)
 
-![image-20211208085638241](D:\我的文件\gitRepository\cloud-image\img\BFb1dt4xkWSAEJu.png)
+![image-20211208085638241](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203705.png)
 
 
 
@@ -249,7 +249,7 @@ docker是一个client-server结构的系统，docker是以守护进程方式在�
 
 宿主机（docker- server） 接收到docker-client的指令，进行执行。
 
-![image-20211208092510035](D:\我的文件\gitRepository\cloud-image\img\wmTug9kG8lVDORY.png)
+![image-20211208092510035](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203707.png)
 
 
 
@@ -434,9 +434,9 @@ exit可以退出
 nginx的配置文件在：/etc/nginx/nginx.conf
 ```
 
-![image-20220514195348597](D:\我的文件\gitRepository\cloud-image\img\image-20220514195348597.png)
+![image-20220514195348597](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203714.png)
 
-![image-20211209091234273](D:\我的文件\gitRepository\cloud-image\img\v3VHxFlJMmGZtI4.png)
+![image-20211209091234273](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203718.png)
 
 
 
@@ -449,7 +449,7 @@ docker rm 8dc5dd5c7e0b
 docker rm -f 8dc5dd5c7e0b  # 强制退出
 ```
 
-![image-20220514195749112](D:\我的文件\gitRepository\cloud-image\img\image-20220514195749112.png)
+![image-20220514195749112](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203720.png)
 
 ==思考：==
 
@@ -552,7 +552,7 @@ grant connect,resource,dba to JY17241;
 提取码：gzd3
 ```
 
-![image-20220605120939176](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220605120946.png)
+![image-20220605120939176](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203724.png)
 
 下次启动docker，docker ps -a 可查看历史启动的容器信息。直接docker start oracle12c即可。
 
@@ -574,7 +574,7 @@ docker exec -it zookeeper-standalone bash
 
 启动成功：
 
-![image-20220611221601209](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220611221601.png)
+![image-20220611221601209](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203726.png)
 
 ### （2）集群版
 
@@ -620,11 +620,11 @@ bootfs(boot file system) 主要包括bootloader和kernel, bootloader主要是引
 
 rootfs，在bootfs之上。包括的就是典型的linux系统中的/etc, /bin等标准目录和文件。rootfs就是各种不同的操作系统发行版。如centos、ubuntu等
 
-![image-20211213230811330](D:\我的文件\gitRepository\cloud-image\img\image-20211213230811330.png)
+![image-20211213230811330](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203728.png)
 
 ![img](https://s2.loli.net/2021/12/10/wfsz7QVvoxG9qUY.gif)
 
-![image-20211213230837372](D:\我的文件\gitRepository\cloud-image\img\image-20211213230837372.png)
+![image-20211213230837372](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203731.png)
 
 
 
@@ -632,7 +632,7 @@ rootfs，在bootfs之上。包括的就是典型的linux系统中的/etc, /bin�
 
 ### （3）我们docker下载的centos，为什么那么小呢？
 
-![image-20211210082849879](D:\我的文件\gitRepository\cloud-image\img\iUQxodzjgX5qNpb.png)
+![image-20211210082849879](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203733.png)
 
 对于精简的OS, rootfs可以很小，只需要包含最基础的命令、工具和程序库。因为底层用的是主机的内核，自己只用提供rootfs即可。由此可见，不同的linux发行版，bootfs基本一致，rootfs可能有差异，因此 不同的发行版可以共用bootfs.
 
@@ -642,9 +642,9 @@ Docker的镜像都是只读的，当容器启动时，一个新的可写层被�
 
 这就是我们通常说的容器层，容器层之下叫镜像层。
 
-![img](D:\我的文件\gitRepository\cloud-image\img\mrCWlbt2k4p5Ras.jpg)
+![img](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203736.jpg)
 
-![image-20211210085345349](D:\我的文件\gitRepository\cloud-image\img\GiVo4HNjSUTsEyc.png)
+![image-20211210085345349](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203739.png)
 
 
 
@@ -707,7 +707,7 @@ docker run --name="centos01" -d -it -v /home/share:/home centos   # 把容器中
 docker inspect centos01
 ```
 
-![image-20211211131951607](D:\我的文件\gitRepository\cloud-image\img\vW6yXuHRIAYjFQg.png)
+![image-20211211131951607](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203742.png)
 
 
 
@@ -841,7 +841,7 @@ docker exec -it mycentos /bin/bash
 docker inspect mycentos
 ```
 
-![image-20211212130515422](D:\我的文件\gitRepository\cloud-image\img\XCipfzbjPKUa254.png)
+![image-20211212130515422](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203745.png)
 
 加入构建镜像时没有挂载卷，要在启动时手动挂载 -v  卷名:容器内路径
 
@@ -851,7 +851,7 @@ docker inspect mycentos
 
 > 容器间实现数据同步
 
-![image-20211212172912201](D:\我的文件\gitRepository\cloud-image\img\7Ot1ZokJnMjHvpu.png)
+![image-20211212172912201](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203749.png)
 
 > 启动三个上述自制的centos, 一个父centos00, 两个子centos01,centos02测试数据共享
 
@@ -891,7 +891,7 @@ Dockerfile是用来构建docker镜像的文件，是一系列参数脚本。通�
 
 4、docker push 发布镜像（dockerhub、阿里云镜像）  
 
-![image-20211214072229760](D:\我的文件\gitRepository\cloud-image\img\image-20211214072229760.png)
+![image-20211214072229760](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203753.png)
 
 很多官方镜像都是纯净版基础包，很多功能都没有，通常我们自己搭建自己需要的镜像内容。
 
@@ -940,7 +940,7 @@ COPY			#类似ADD，将文件拷贝到镜像中
 ENV				#构建的时候设置环境变量
 ```
 
-![image-20211213224925196](D:\我的文件\gitRepository\cloud-image\img\image-20211213224925196.png)
+![image-20211213224925196](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203756.png)
 
 
 
@@ -974,7 +974,7 @@ CMD /bin/bash
 docker build -f /home/dockerfile/my-centos/Dockerfile -t jun/centos-test:1.0 .
 ```
 
-![image-20220515101024338](D:\我的文件\gitRepository\cloud-image\img\image-20220515101024338.png)
+![image-20220515101024338](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203759.png)
 
 
 
@@ -1048,7 +1048,7 @@ CMD top
    • 如果 ENTRYPOINT 使用了 exec 模式，CMD 也应该使用 exec 模式。
 真实的情况要远比这三条规律复杂，好在 docker 给出了官方的解释，如下图所示：
 
-![image-20220515105259217](D:\我的文件\gitRepository\cloud-image\img\image-20220515105259217.png)
+![image-20220515105259217](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203803.png)
 
 
 
@@ -1127,7 +1127,7 @@ docker push registry.cn-beijing.aliyuncs.com/docker-repository-test/jun-repo:1.0
 
 ## 1、Docker0
 
-![image-20211218171638921](D:\我的文件\gitRepository\cloud-image\img\image-20211218171638921.png)
+![image-20211218171638921](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203806.png)
 
 > 如果再启动两个tomcat容器，那么主机和tomcat，以及两个tomcat之间是如何互相访问的？
 
@@ -1137,13 +1137,13 @@ docker push registry.cn-beijing.aliyuncs.com/docker-repository-test/jun-repo:1.0
 
 1、启动一个tomcat01,此时主机的网络以及容器的网络如下：
 
-![image-20211218172121096](D:\我的文件\gitRepository\cloud-image\img\image-20211218172121096.png)
+![image-20211218172121096](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203808.png)
 
-![image-20211218172228982](D:\我的文件\gitRepository\cloud-image\img\image-20211218172228982.png)
+![image-20211218172228982](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203809.png)
 
-![image-20211218172259752](D:\我的文件\gitRepository\cloud-image\img\image-20211218172259752.png)
+![image-20211218172259752](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203811.png)
 
-![image-20211218172307782](D:\我的文件\gitRepository\cloud-image\img\image-20211218172307782.png)
+![image-20211218172307782](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203813.png)
 
 此时主机和容器tomcat01能够互相ping通。
 
@@ -1157,7 +1157,7 @@ evth-pair就是一对的虚拟设备接口，他们都是成对出现的，一�
 
 openstac, docker容器之间的连接，ovs的连接都是通过evth-pair技术实现的。
 
-![image-20211218181307807](D:\我的文件\gitRepository\cloud-image\img\image-20211218181307807.png)
+![image-20211218181307807](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203816.png)
 
 
 
@@ -1276,15 +1276,15 @@ docker exec -it tomcat11 bash
 
 ## 4、网络联通
 
-![image-20211219115643858](D:\我的文件\gitRepository\cloud-image\img\image-20211219115643858.png)
+![image-20211219115643858](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203820.png)
 
 网卡和网卡之间不能互联，而容器和网卡可以。
 
 通过查看API，发现connect命令可以实现网络互联
 
-![image-20211219115835773](D:\我的文件\gitRepository\cloud-image\img\image-20211219115835773.png)
+![image-20211219115835773](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203821.png)
 
-![image-20211219120253831](D:\我的文件\gitRepository\cloud-image\img\image-20211219120253831.png)
+![image-20211219120253831](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203823.png)
 
 ```shell
 # 将tomcat01加入到mynet网络中
@@ -1294,7 +1294,7 @@ docker network connect mynet tomcat01
 docker network inspect mynet
 ```
 
-![image-20211219120905275](D:\我的文件\gitRepository\cloud-image\img\image-20211219120905275.png)
+![image-20211219120905275](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203825.png)
 
 
 
@@ -1342,7 +1342,7 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 
 3、上传文件到 /home/dockerfile/springboot-demo-docker
 
-![image-20220515090112680](D:\我的文件\gitRepository\cloud-image\img\image-20220515090112680.png)
+![image-20220515090112680](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203828.png)
 
 4、构建镜像
 
@@ -1352,7 +1352,7 @@ docker build -f Dockerfile -t boot-server:1.0 .
 
 镜像构建是一步一步来的，openjdk:11.0.15-oraclelinux7在本机镜像库里没有，会先进行下载，再build
 
-![image-20220514211745095](D:\我的文件\gitRepository\cloud-image\img\image-20220514211745095.png)
+![image-20220514211745095](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203830.png)
 
 
 
@@ -1367,15 +1367,15 @@ docker run -it -d -p 8888:9999 --name=boot-server8888 boot-server:1.0
 * -p可以对这个端口向宿主机进行映射  -p 8888:9999 表示将9999映射到宿主机的8888端口。可在宿主机内用8888访问
 * dockerfile中的EXPOSURE可以不进行配置，启动容器时指定-p即可
 
-![image-20220514234340882](D:\我的文件\gitRepository\cloud-image\img\image-20220514234340882.png)
+![image-20220514234340882](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203834.png)
 
 ```shell
 docker inspect 2b57aed8a553
 ```
 
-![image-20220514234405228](D:\我的文件\gitRepository\cloud-image\img\image-20220514234405228.png)
+![image-20220514234405228](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203836.png)
 
-![image-20220514234434852](D:\我的文件\gitRepository\cloud-image\img\image-20220514234434852.png)
+![image-20220514234434852](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203837.png)
 
 6、测试
 
@@ -1392,11 +1392,11 @@ yum install -y net-tools              # 安装后可以用ifconfig查看ip信息
 
 虚拟机内：8888
 
-![image-20220514213403999](D:\我的文件\gitRepository\cloud-image\img\image-20220514213403999.png)
+![image-20220514213403999](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203839.png)
 
 容器内：9999
 
-![image-20220515091650039](D:\我的文件\gitRepository\cloud-image\img\image-20220515091650039.png)
+![image-20220515091650039](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203841.png)
 
-![image-20220515090313074](D:\我的文件\gitRepository\cloud-image\img\image-20220515090313074.png)
+![image-20220515090313074](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203844.png)
 
