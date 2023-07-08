@@ -289,21 +289,26 @@ firewall-cmd --state             ##查看防火墙状态，是否是running
 
 ## 3、工作常用命令
 
-1、ls:查看文件夹下的文件；  **ls -a**查看所有包括隐藏文件  ll -h
+1、ls:查看文件夹下的文件；  **ls -a**查看所有包括隐藏文件  ll -h 文件大小格式化    ll -t 时间倒序排列     ==> ll -aht
 2、cd       cd ../ 回到上一级      cd /    cd ~
 3、pwd查看当前路径   Tab键补全
-4、mkdir 创建目录         mkdir --help查看帮助  **mkdir  -p  aaa/bb/ccc** 创建多级目录  rmdir删除目录（目录不能有内容）
+4、mkdir 创建目录         mkdir --help查看帮助  **mkdir  -p  aaa/bb/ccc** 创建多级目录  **rmdir删除目录**（目录不能有内容）
 
-5、cat  myfile.txt 查看文件内容 ;      more  myfile.txt;      less  myfile.txt    输入/java可以向下查找包含java字符串的;       tail -10  myfile.txt;  查看文件最后10行  ；
+5、cat  myfile.txt 查看文件内容 ;      more  myfile.txt;      less  myfile.txt    输入/java可以向下查找包含java字符串的;    **?xx**可以模糊查询    
+
+tail -10  myfile.txt;  查看文件最后10行;
 
 tail -fn 20 myfile.txt动态查看内容
 
 nl a.txt;输出内容包括行号。
 
-mv  a.txt  newfilename.txt     可以进行改名操作
+tail -n +10 file.txt ==> 从第10行开始输出
 
 6、cp myfile.txt aaa/newname.txt  复制；  mv myfile.txt ./bbb/newname.txt  剪切myfile.txt到bbb文件夹并重命名为 newname.txt 
       rm a.txt;删除文件需要询问；  rm -rf aaa.txt直接删除，不进行确认。危险。
+
+mv  a.txt  newfilename.txt     可以进行文件/文件夹重命名处理-
+
 7、tar -cvf a.tar ./   打包当前目录下的文件，解压后的名字为a.tar ，存放在当前目录下
      tar -zcvf b.tar.gz ./   打包后压缩
 
@@ -332,11 +337,11 @@ netstat -tupln    # 查看Linux 的所有端口占用
 r:read 读         4
 w:write 写       2
 x:excute执行   1
-*chmod u=rwx,g=rx,o=rx a.txt     ====     chmod 755 a.txt*
+chmod u=rwx,g=rx,o=rx a.txt      ==chmod 755 a.txt==
 
 14、上传以及压缩文件
 
-* yum install lrzsz  下载LINUX的lrzsz工具用于，本地机与linux交互传输文件。
+* yum install lrzsz  下载LINUX的lrzsz工具用于，==本地机与linux交互传输文件。
   rz  上传
   sz  a.txt 下载
 
@@ -361,6 +366,21 @@ rm -r ora_data/ -f
 -i　　　　--interactive　　进行交互式地删除
 -r | -R　--recursive　　　递归式地删除列出的目录下的所有目录和文件
 -v　　　  --verbose　　　　详细显示进行的步骤
+```
+
+17、awk 读取对应位置的文件
+
+```shell
+[root@localhost dir]# cat awk.test 
+a|b|c|d|e|f|g
+1|2|3|4|5|6|7
+[root@localhost dir]# 
+[root@localhost dir]# cat awk.test  | awk -F'|' '$1==1 {print $1,$2,$3}'
+1 2 3
+
+# 输出第二列包含 "th"，并打印第二列与第四列
+$ awk '$2 ~ /th/ {print $2,$4}' log.txt
+
 ```
 
 
@@ -888,7 +908,7 @@ http://192.168.137.110:15672/#/
 
 
 
-# 四、Java项目部署
+# 五、Java项目部署
 
 ## 1、实战部署web项目到Linux
 
@@ -974,11 +994,13 @@ java -Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=9999 
 
 
 
-# 五、后续补充内容
+# 六、后续补充内容
 
-> **==Linux的硬链接和软链接：==**
+## 1、**==Linux的硬链接和软链接：==**
 
 1、硬链接B相当于原文件A 的一个备份，这样一个文件就拥有了两个路径，如果一个被删除，另一个还可以使用。
+
+内容会被同步修改。
 
 2、软链接就类似于windows下的快捷方式，如果把原文件A删除了，这个软链接也会失效。
 
@@ -992,7 +1014,7 @@ ln -s f1.txt f3.txt创建的f3.txt就是软链接
 
 
 
->##### ==Linux用户的管理==
+## 2、==Linux用户的管理==
 
 切换到root用户下：
 
@@ -1000,7 +1022,7 @@ ln -s f1.txt f3.txt创建的f3.txt就是软链接
 >
 > -G  xxx分配用户属组
 
-**本质：**linux下一切皆文件，这里的添加用户说白了就是往某个文件中写入了用户的信息！  cat /etc/passwd目录下可以看到有关信息
+**本质：**linux下一切皆文件，这里的添加用户说白了就是往某个文件中写入了用户的信息！  **cat /etc/passwd**目录下可以看到有关信息
 
 > **删除账号：**userdel -r user001
 >
@@ -1024,7 +1046,7 @@ passwd -l user001       #锁定之后就无法登录了
 
 passwd -d user001      #清空密码了，也就无法登录
 
-**==用户组管理：==**
+### 3、**==用户组管理：==**
 
 属主、属组
 
@@ -1044,17 +1066,17 @@ passwd -d user001      #清空密码了，也就无法登录
 
 
 
-**==磁盘管理==**
+## 4、**==磁盘管理==**
 
 > df:(列出文件系统的整体磁盘使用量，相当于windows各个盘符使用情况)    -h  
 >
-> du:(检查当前目录磁盘空间使用量)       
+> du:(检查当前目录磁盘空间使用量)        -a 
 
-![](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203619.png)
+ ![](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203619.png)
 
 
 
-**==进程管理==**
+## 5、**==进程管理==**
 
 1、在linux中，每一个程序都是自己的一个进程，每个进程都有自己的id号
 
@@ -1109,9 +1131,9 @@ netstat -tnlp  查看使用的端口
 
 
 
-# 六、Docker
+# 七、Docker
 
-# 七、Nginx
+# 八、Nginx
 
 
 

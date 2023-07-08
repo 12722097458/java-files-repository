@@ -179,8 +179,8 @@ yum-config-manager \
 #4 更新yum包索引（optional）
 yum makecache fast
     
-#5 引擎下载Install Docker Engine
-yum install docker-ce docker-ce-cli containerd.io   # 默认为最新版本
+#5 引擎下载Install Docker Engine  # 默认为最新版本
+yum install docker-ce docker-ce-cli containerd.io  
 
 #6 Start Docker
 systemctl start docker
