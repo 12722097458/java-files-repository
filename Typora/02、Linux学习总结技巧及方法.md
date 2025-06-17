@@ -7,14 +7,8 @@
 # 一、虚拟机安装及配置
 
 ```shell
-网盘地址:
-<<<<<<< HEAD
 通过网盘分享的文件：20210131新装VM
-链接: https://pan.baidu.com/s/1liubWJEm2lKR_HNBlhpLyw?pwd=z2qb 提取码: z2qb
-=======
-链接：https://pan.baidu.com/s/1euPVoht5DbYt-mIEx0dm_g 
-提取码：kb3a
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
+链接: https://pan.baidu.com/s/1L-4PYVAi-9L8fSPaK2QoTw 提取码: zvsa
 ```
 
 ![image-20220514095113462](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203358.png)
@@ -129,7 +123,7 @@ NETMASK=255.255.255.0
 
 ![image-20220514105238888](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203443.png)
 
-修改后VMnet8的网卡IP会自动同步:
+修改后VMnet8的网卡IP会自动同步（我是手动修改的）:
 
 ![image-20220514105409194](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203453.png)
 
@@ -270,9 +264,8 @@ windows10使用VMware15每次启动虚拟机直接蓝屏。后来使用VMware16�
 
 ```shell
 cd /etc/yum.repos.d/
-<<<<<<< HEAD
 mv  CentOS-Base.repo   CentOS-Base.repo.backup
-vi CentOS-Base.repo  --> find below config
+vi CentOS-Base.repo  --> find in following config
 
 sudo yum clean all
 sudo yum makecache
@@ -281,7 +274,7 @@ wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos
 
 
 --> 验证是否成功修改源
- cat CentOS-Base.repo
+ cat CentOS-Base.repo (图片显示)
 
 成功后
 sudo yum clean all
@@ -344,18 +337,6 @@ enabled=0
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
 ```
 
-
-
-
-
-=======
-yum install wget -y
-mv CentOS-Base.repo CentOS-Base.repo.back
-wget -O CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo 
-yum makecache #生成缓存
-```
-
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ## 2、重启防火墙
 
 ```shell
@@ -427,8 +408,8 @@ chmod u=rwx,g=rx,o=rx a.txt      ==chmod 755 a.txt==
 14、上传以及压缩文件
 
 * yum install lrzsz  下载LINUX的lrzsz工具用于，==本地机与linux交互传输文件。
-  rz  上传
-  sz  a.txt 下载
+  rz  上传 (receive)
+  sz  a.txt 下载 (send)
 
 * alt+p打开sftp窗口，put上传 ，get下载
 
@@ -576,17 +557,10 @@ mkdir data
 ```shell
 bin/mysqld --initialize --console --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
 
-<<<<<<< HEAD
+
 2025-06-16T12:11:25.572728Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: itv)Y:shu9#*
 
-
-itv)Y:shu9#*
-=======
-2022-05-14T06:03:58.820301Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: -vVzkF55?evr
-
-l4iruJ?i8YI?
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
-可以cat /usr/local/mysql/data/err.log查看
+error可以cat /usr/local/mysql/data/err.log查看
 ```
 
 7、修改/usr/local/mysql当前目录的用户
@@ -708,11 +682,7 @@ ERROR 2002 (HY000): Can‘t connect to local MySQL server through socket ‘/tmp
 
 ![image-20210327141151718](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203548.png)
 
-<<<<<<< HEAD
 16、修改密码为root
-=======
-16、修改密码
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 
 ```shell
 # mysql -uroot -p #进入数据库
@@ -757,11 +727,7 @@ tar -zxvf apache-tomcat-8.5.73.tar.gz
 2、到bin目录下，==启动服务==
 
 ```shell
-<<<<<<< HEAD
 sh /app/tools/apache-tomcat-8.5.73/bin/startup.sh
-=======
-sh startup.sh
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 3、测试
@@ -797,11 +763,9 @@ cp /app/tools/redis-3.0.7/redis.conf /usr/local/tools/redis/bin/
 5、==./redis-server redis.conf  启动redis服务器==
 
 ```shell
-<<<<<<< HEAD
  /usr/local/tools/redis/bin/redis-server& ./redis.conf    #后台启动(如在配置文件设置了daemonize属性为yes则跟后台进程方式启动其实一样)
-=======
+
 ./bin/redis-server& ./redis.conf    #后台启动(如在配置文件设置了daemonize属性为yes则跟后台进程方式启动其实一样)
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 6、再新开一个会话 到bin目录下，启动客户端
@@ -873,13 +837,10 @@ cd /app/tools/mongodb/bin
 ./mongod  -f  mongodb.conf   # 启动
 ```
 
-<<<<<<< HEAD
+
 **8、验证**
 
 ![image-20250616124914885](https://gitee.com/yj1109/cloud-image/raw/master/img/20250616124915115.png)
-=======
-
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 
 ### 6、RabbitMq安装
 
@@ -892,8 +853,6 @@ https://packagecloud.io/rabbitmq/rabbitmq-server/packages/el/7/rabbitmq-server-3
 ```
 
 1、安装erlang环境
-
-<<<<<<< HEAD
 `Erlang`和`RabbitMQ`版本对照：https://www.rabbitmq.com/which-erlang.html
 
 ```shell
@@ -937,11 +896,7 @@ systemctl restart rabbitmq-server
 rabbitmq-plugins enable rabbitmq_management
 
 ##访问管理页面
-<<<<<<< HEAD
 http://192.168.137.110:15672
-=======
-http://IP:15672
->>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 4、创建管理用户admin
@@ -971,20 +926,30 @@ vhost    configure    write    read
 
 # 四、软件启动
 
-## 1. 登录Linux
+## 0. 登录Linux
 
 192.168.137.110  root/root
 
 需要关闭防火墙
 
-## 2. 登录mysql
+## 1. JDK
+
+jdk已配置好，自启动
+
+## 2. 登录Mysql
+
+已经配置了开机自启
 
 ```shell
 mysql -uroot -p
 root
 ```
 
-## 3. 登录Redis
+## 3.  Tomcat
+
+按需启动
+
+## 4. 登录Redis
 
 ```shell
 #启动服务端
@@ -998,14 +963,25 @@ cd /usr/local/tools/redis/bin
 ./redis-cli
 ```
 
-## 4.登录Mongo
+## 5.登录Mongo
 
 ```shell
 cd /app/tools/mongodb/bin
 ./mongod  -f  mongodb.conf   # 启动
 ```
 
-## 5.Windows下的nginx
+## 6.登录RabbitMq
+
+```shell
+systemctl start rabbitmq-server
+systemctl status rabbitmq-server
+systemctl restart rabbitmq-server
+systemctl stop rabbitmq-server
+
+http://192.168.137.110:15672/#/
+```
+
+## 7.Windows下的nginx
 
 ```shell
 cd D:\Java\tools-windows\nginx-1.12.0
@@ -1013,7 +989,7 @@ cd D:\Java\tools-windows\nginx-1.12.0
 或者双击启动即可
 ```
 
-## 6.登录Nacos
+## 8.登录Nacos
 
 ```shell
 解压nacos-server-1.1.4.zip
@@ -1026,17 +1002,6 @@ D:\Java\tools-windows\nacos-server-1.1.4\nacos\bin
 http://localhost:8848/nacos
 nacos/nacos
 
-```
-
-## 7.登录RabbitMq
-
-```shell
-systemctl start rabbitmq-server
-systemctl status rabbitmq-server
-systemctl restart rabbitmq-server
-systemctl stop rabbitmq-server
-
-http://192.168.137.110:15672/#/
 ```
 
 
@@ -1129,7 +1094,7 @@ java -Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=9999 
 
 # 六、后续补充内容
 
-## 1、**==Linux的硬链接和软链接：==**
+## 1、Linux的硬链接和软链接
 
 1、硬链接B相当于原文件A 的一个备份，这样一个文件就拥有了两个路径，如果一个被删除，另一个还可以使用。
 
@@ -1147,7 +1112,7 @@ ln -s f1.txt f3.txt创建的f3.txt就是软链接
 
 
 
-## 2、==Linux用户的管理==
+## 2、Linux用户的管理
 
 切换到root用户下：
 
@@ -1179,7 +1144,7 @@ passwd -l user001       #锁定之后就无法登录了
 
 passwd -d user001      #清空密码了，也就无法登录
 
-### 3、**==用户组管理：==**
+## 3、用户组管理
 
 属主、属组
 
@@ -1199,7 +1164,7 @@ passwd -d user001      #清空密码了，也就无法登录
 
 
 
-## 4、**==磁盘管理==**
+## 4、磁盘管理
 
 > df:(列出文件系统的整体磁盘使用量，相当于windows各个盘符使用情况)    -h  
 >
@@ -1209,7 +1174,7 @@ passwd -d user001      #清空密码了，也就无法登录
 
 
 
-## 5、**==进程管理==**
+## 5、进程管理
 
 1、在linux中，每一个程序都是自己的一个进程，每个进程都有自己的id号
 
