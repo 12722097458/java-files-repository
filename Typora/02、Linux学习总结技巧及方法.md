@@ -8,8 +8,13 @@
 
 ```shell
 网盘地址:
+<<<<<<< HEAD
 通过网盘分享的文件：20210131新装VM
 链接: https://pan.baidu.com/s/1liubWJEm2lKR_HNBlhpLyw?pwd=z2qb 提取码: z2qb
+=======
+链接：https://pan.baidu.com/s/1euPVoht5DbYt-mIEx0dm_g 
+提取码：kb3a
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 ![image-20220514095113462](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203358.png)
@@ -265,6 +270,7 @@ windows10使用VMware15每次启动虚拟机直接蓝屏。后来使用VMware16�
 
 ```shell
 cd /etc/yum.repos.d/
+<<<<<<< HEAD
 mv  CentOS-Base.repo   CentOS-Base.repo.backup
 vi CentOS-Base.repo  --> find below config
 
@@ -342,6 +348,14 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
 
 
 
+=======
+yum install wget -y
+mv CentOS-Base.repo CentOS-Base.repo.back
+wget -O CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo 
+yum makecache #生成缓存
+```
+
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ## 2、重启防火墙
 
 ```shell
@@ -562,10 +576,16 @@ mkdir data
 ```shell
 bin/mysqld --initialize --console --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
 
+<<<<<<< HEAD
 2025-06-16T12:11:25.572728Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: itv)Y:shu9#*
 
 
 itv)Y:shu9#*
+=======
+2022-05-14T06:03:58.820301Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: -vVzkF55?evr
+
+l4iruJ?i8YI?
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 可以cat /usr/local/mysql/data/err.log查看
 ```
 
@@ -688,7 +708,11 @@ ERROR 2002 (HY000): Can‘t connect to local MySQL server through socket ‘/tmp
 
 ![image-20210327141151718](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203548.png)
 
+<<<<<<< HEAD
 16、修改密码为root
+=======
+16、修改密码
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 
 ```shell
 # mysql -uroot -p #进入数据库
@@ -733,7 +757,11 @@ tar -zxvf apache-tomcat-8.5.73.tar.gz
 2、到bin目录下，==启动服务==
 
 ```shell
+<<<<<<< HEAD
 sh /app/tools/apache-tomcat-8.5.73/bin/startup.sh
+=======
+sh startup.sh
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 3、测试
@@ -769,7 +797,11 @@ cp /app/tools/redis-3.0.7/redis.conf /usr/local/tools/redis/bin/
 5、==./redis-server redis.conf  启动redis服务器==
 
 ```shell
+<<<<<<< HEAD
  /usr/local/tools/redis/bin/redis-server& ./redis.conf    #后台启动(如在配置文件设置了daemonize属性为yes则跟后台进程方式启动其实一样)
+=======
+./bin/redis-server& ./redis.conf    #后台启动(如在配置文件设置了daemonize属性为yes则跟后台进程方式启动其实一样)
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 6、再新开一个会话 到bin目录下，启动客户端
@@ -841,9 +873,13 @@ cd /app/tools/mongodb/bin
 ./mongod  -f  mongodb.conf   # 启动
 ```
 
+<<<<<<< HEAD
 **8、验证**
 
 ![image-20250616124914885](https://gitee.com/yj1109/cloud-image/raw/master/img/20250616124915115.png)
+=======
+
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 
 ### 6、RabbitMq安装
 
@@ -857,6 +893,7 @@ https://packagecloud.io/rabbitmq/rabbitmq-server/packages/el/7/rabbitmq-server-3
 
 1、安装erlang环境
 
+<<<<<<< HEAD
 `Erlang`和`RabbitMQ`版本对照：https://www.rabbitmq.com/which-erlang.html
 
 ```shell
@@ -873,6 +910,13 @@ Erlang/OTP 23 [erts-11.1.8] [source] [64-bit] [smp:1:1] [ds:1:1:10] [async-threa
 Eshell V11.1.8  (abort with ^G)
 1> 
 
+=======
+```shell
+wget https://packages.erlang-solutions.com/erlang-solutions-1.0-1.noarch.rpm
+yum install epel-release
+rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
+## 安装完成后输入erl看是否能正确显示版本号
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 2、安装rabbitmq
@@ -893,7 +937,11 @@ systemctl restart rabbitmq-server
 rabbitmq-plugins enable rabbitmq_management
 
 ##访问管理页面
+<<<<<<< HEAD
 http://192.168.137.110:15672
+=======
+http://IP:15672
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
 4、创建管理用户admin

@@ -377,7 +377,11 @@ public @interface AutoConfigurationPackage {}
 ```java
 1. AutoConfigurationImportSelector.selectImports中的getAutoConfigurationEntry(annotationMetadata)批量获取所有的组件
 2. List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+<<<<<<< HEAD
 3. 最终通过工厂加载loadSpringFactories(classLoaderToUse)得到所有组件
+=======
+3. 最终通过工厂架子啊loadSpringFactories(classLoaderToUse)得到所有组件
+>>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 4. Enumeration<URL> urls = classLoader.getResources("META-INF/spring.factories");
 默认扫描我们系统中所有目录下的META-INF\spring.factories
 主要是spring-boot-autoconfigure-2.6.6.jar!\META-INF\spring.factories下org.springframework.boot.autoconfigure.EnableAutoConfiguration属性，其中2.6.6有134个，在程序中又引入了@EnableKnife4j，所以一共有加载了135个组件配置类
