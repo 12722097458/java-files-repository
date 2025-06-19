@@ -37,13 +37,13 @@
 > 面向过程思想：
 >
 > 	1. 步骤清晰简单，第一步要做什么，第二步要做什么......
->		
+>			
 > 	2. 面向过程适合处理一些较为简单的问题
 
 > 面向对象思想：
 >
 > 	1. 物以类聚。分类的思想模式，对这些分类进行独立的思考。最后再对分类下的细节进行面向过程的思索。
->		
+>			
 > 	2. 面向对象适合处理较为复杂的问题，适合处理需要多人协作的问题。
 
 
@@ -104,34 +104,6 @@ wait()和sleep()的异同
 ```
 
 
-
-## 字符串
-
-```java
-	@Test
-    public void testString(){
-        String s1 = "good";
-        String s2 = "morning";
-        String s3 = "goodmorning";
-
-        String s4 = "good" + "morning";
-        String s5 = s1 + "morning";
-        String s6 = s1 + s2;
-        /**
-         * 1. 常量与常量的拼接结果放在常量池中，并且常量池中不会存在相同的内容
-         * 2. 只要其中一值是变量，就会存在堆中，再指向常量池。  == 判断的是地址，所以下面案例中的后三个值为false
-         * 3. 当调用s5.intern()方法时，地址指向常量池
-         *
-         */
-        System.out.println(s4 == s3);   // true
-        System.out.println(s5 == s3);   // false
-        System.out.println(s6 == s3);   // false
-        System.out.println(s6 == s5);   // false
-
-        System.out.println("测试intern()方法："+(s5.intern() == s3));
-    }
-
-```
 
 
 
@@ -242,3 +214,158 @@ int e = 10 ^ 10;  // 0
 | 1       | 0       | 1            | 0          |
 | 0       | 1       | 1            | 0          |
 | 0       | 0       | 0            | 1          |
+
+
+
+## String字符串学习
+
+### 1. split()
+
+```java
+String str = "a,b,c,,,";
+String[] split = str.split(",");  // length=3 末尾的空字符串默认被删除, 中间和开头的空字符串默认被保留
+System.out.println(split.length);
+
+String[] split2 = str.split(",", -1); // length = 6 使用 split(regex, -1) 可以保留所有空字符串
+System.out.println("split2 = " + split2.length);
+```
+
+
+
+### 2. 字符串比较
+
+```java
+@Test
+public void testString(){
+    String s1 = "good";
+    String s2 = "morning";
+    String s3 = "goodmorning";
+
+    String s4 = "good" + "morning";
+    String s5 = s1 + "morning";
+    String s6 = s1 + s2;
+    /**
+     * 1. 常量与常量的拼接结果放在常量池中，并且常量池中不会存在相同的内容
+     * 2. 只要其中一值是变量，就会存在堆中，再指向常量池。  == 判断的是地址，所以下面案例中的后三个值为false
+     * 3. 当调用s5.intern()方法时，地址指向常量池
+     *
+     */
+    System.out.println(s4 == s3);   // true
+    System.out.println(s5 == s3);   // false
+    System.out.println(s6 == s3);   // false
+    System.out.println(s6 == s5);   // false
+
+    System.out.println("测试intern()方法："+(s5.intern() == s3));
+}
+```
+
+
+
+## 数组
+
+### 1. 冒泡排序
+
+```java
+@Test
+public void testSort() {
+    Integer[] arr = {5,3,2,1,7,9,0};
+    for (int i = 0; i < arr.length - 1; i++) {
+        for (int j = 0; j < arr.length - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int tmp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = tmp;
+            }
+        }
+    }
+    System.out.println(Arrays.toString(arr));
+}
+```
+
+
+
+### 2. ArrayList默认大小以及扩容
+
+```java
+/**
+ * ArrayList源码解析：
+ * ==底层是数组==
+ jdk1.7和1.8是不同的。
+ jdk1.7：初始化的时候默认创建的集合长度是 10的Object[]
+ 1.7的扩容是1.5倍进行的：int newCapacity = oldCapacity + (oldCapacity >> 1);
+
+
+ jdk1.8: 初始化时默认没有创建数组，节省内存：private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+ 第一次调用add()方法时，会进行默认初始化长度为10的数组、
+ 后续和1.7一致
+
+
+ 总结：jdk7的ArrayList创建类似于单例中的饿汉式，而jdk8中的ArrayList创建类似于懒汉式。
+ */
+@Test
+public void arrayListTest(){
+    List<String> list = new ArrayList<>();
+    list.add("1");
+    list.add("2");
+    list.add("3");
+    list.add("4");
+    list.add("5");
+    list.add("6");
+    list.add("7");
+    list.add("8");
+    list.add("9");
+    list.add("10");
+    list.add("11");   // 第11次调用需要扩容   10 -->  15
+    list.add("12");
+    System.out.println(list.size());
+}
+```
+
+
+
+### 3. LinkedList 
+
+```java
+/**
+ *      ==底层双向链表==
+ *   内部声明了Node的first 和 last属性，默认值都是null
+ *   进行新增：list.add(123);   将123封装到Node中，创建了Node对象
+ *
+ *      可以体现LinkedList的双向链表结构
+ *
+ *private static class Node<E> {
+     E item;
+     Node<E> next;
+     Node<E> prev;
+
+     Node(Node<E> prev, E element, Node<E> next) {
+     this.item = element;
+     this.next = next;
+     this.prev = prev;
+     }
+  }
+ */
+@Test
+public void linkedListTest() {
+    List list = new LinkedList();
+    list.add("1");
+    list.add("2");
+}
+```
+
+
+
+### 4. Vector扩容
+
+```java
+/**
+ *  ==底层是：数组== protected Object[] elementData
+ *  初始化长度10，扩容方式也不太一样，2倍扩容
+ *  同步，线性安全。很少使用
+ */
+@Test
+public void vectorTest() {
+    List list = new Vector();
+    list.add(1);
+}
+```

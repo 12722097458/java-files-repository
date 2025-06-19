@@ -64,7 +64,7 @@ git clone https://ghp_afhmNy4JAa9EDGdajJrLHwIXXXXXX@github.com/12722097458/image
 
 ####  1、如果push443 timeout
 
-取消全局代理即可
+取消全局代理/多试几次/网络不好
 
 ```shell
 取消全局代理：
