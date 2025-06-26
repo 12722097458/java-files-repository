@@ -37,13 +37,13 @@
 > 面向过程思想：
 >
 > 	1. 步骤清晰简单，第一步要做什么，第二步要做什么......
->			
+>					
 > 	2. 面向过程适合处理一些较为简单的问题
 
 > 面向对象思想：
 >
 > 	1. 物以类聚。分类的思想模式，对这些分类进行独立的思考。最后再对分类下的细节进行面向过程的思索。
->			
+>					
 > 	2. 面向对象适合处理较为复杂的问题，适合处理需要多人协作的问题。
 
 
@@ -282,9 +282,9 @@ public void testSort() {
 }
 ```
 
+## List
 
-
-### 2. ArrayList默认大小以及扩容
+### 1. ArrayList默认大小以及扩容
 
 ```java
 /**
@@ -317,13 +317,21 @@ public void arrayListTest(){
     list.add("10");
     list.add("11");   // 第11次调用需要扩容   10 -->  15
     list.add("12");
+    list.add("12");
+    list.add("13");
+    list.add("14");
+    list.add("15");
+    list.add("16"); // 第16次进行扩容   15 --> 22
+    list.add("17");
+    list.add("18");
+    list.add("19");
     System.out.println(list.size());
 }
 ```
 
 
 
-### 3. LinkedList 
+### 2. LinkedList
 
 ```java
 /**
@@ -355,7 +363,7 @@ public void linkedListTest() {
 
 
 
-### 4. Vector扩容
+### 3. Vector扩容
 
 ```java
 /**
@@ -369,3 +377,193 @@ public void vectorTest() {
     list.add(1);
 }
 ```
+
+## Set
+
+### 1. HashSet
+
+底层是HashMap
+
+```java
+public HashSet() {
+    map = new HashMap<>();
+}
+```
+
+
+
+### 2. LinkedHashSet
+
+public class LinkedHashSet<E> extends HashSet<E>
+
+```java
+public LinkedHashSet() {
+    super(16, .75f, true);
+}
+
+HashSet(int initialCapacity, float loadFactor, boolean dummy) {
+    map = new LinkedHashMap<>(initialCapacity, loadFactor);
+}
+
+```
+
+
+
+### 3. TreeSet
+
+它实现了 NavigableSet -> SortedSet 接口，基于 TreeMap 实现。默认是自然排序
+
+```java
+public TreeSet() {
+    this(new TreeMap<>());
+}
+```
+
+- 元素按照自然顺序或指定的比较器进行排序
+- 不允许重复元素
+- 不允许 null 元素（取决于比较器实现）
+- 基本操作（add、remove、contains）的时间复杂度为 O(log n)
+
+```java
+// 1. 使用自然顺序（元素必须实现 Comparable 接口）
+TreeSet<String> treeSet1 = new TreeSet<>();
+
+// 2. 使用自定义比较器
+TreeSet<String> treeSet2 = new TreeSet<>(Comparator.reverseOrder());
+
+// 3. 从其他集合初始化
+Set<String> otherSet = new HashSet<>(Arrays.asList("b", "a", "c"));
+TreeSet<String> treeSet3 = new TreeSet<>(otherSet);
+```
+
+
+
+## Map
+
+### 1. HashMap
+
+第一次add初始话大小为16  -- newCap=16 newThr = 16 * 0.75 = 12
+
+```
+static final int DEFAULT_INITIAL_CAPACITY = 1 << 4; // aka 16
+```
+
+
+
+map添加第13个元素后开始第二次扩容 newCap = oldCap << 1 = 32， newThr = oldThr << 1 = 24   扩容完需要把old node[] 复制到 new node[]
+
+```java
+public void testHashMap(){
+        Map<String,String> map = new HashMap<>();
+        map.put("A","1"); // newCap=16 newThr = 16 * 0.75 = 12
+        map.put("B","2");
+        map.put("C","3");
+        map.put("D","4");
+        map.put("E","5");
+        map.put("F","6");
+        map.put("G","7");
+        map.put("H","8");
+        map.put("I","9");
+        map.put("J","10");
+        map.put("K","11");
+        map.put("L","12");
+        map.put("M","13"); // 第13次add时会扩容，newCap = oldCap << 1 = 32， newThr = oldThr << 1 = 24   扩容完需要把old node[] 复制到 new node[]
+        map.put("N","14");
+        map.put("O","15");
+        map.put("P","16");
+        map.put("P","hhhhh");
+        map.put(null,"hhhhh");
+        map.put("Q","17");
+    }
+```
+
+
+
+1. 当同一个node长度超过8并且， 链表长度超过64时转化为红黑树TreeNode
+2. 在扩容resize()后会对红黑树进行校验，如果红黑树节点数小于6时，红黑树退化为链表
+
+```java
+final Node<K,V>[] resize() {
+    // ... 其他代码
+    
+    else if (e instanceof TreeNode)
+        // 如果是树节点，调用split方法处理
+        ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+    
+    // ... 其他代码
+}
+```
+
+
+
+### 2. LinkedHashMap
+
+有序，不重复
+
+```java
+
+public LinkedHashMap() {
+    super();
+    accessOrder = false;
+}
+
+public class LinkedHashMap<K,V> extends HashMap<K,V>
+```
+
+
+
+LinkedHashMap重写了newNode方法，用的是双向链表。所以能够实现有序
+
+```java
+Node<K,V> newNode(int hash, K key, V value, Node<K,V> e) {
+    LinkedHashMap.Entry<K,V> p =
+        new LinkedHashMap.Entry<>(hash, key, value, e);
+    linkNodeLast(p);
+    return p;
+}
+```
+
+
+
+### 3. TreeMap
+
+- TreeMap是Java集合框架中的一个重要实现类，具有以下主要特性：
+  1. **基于红黑树实现**：TreeMap内部使用红黑树(一种自平衡的二叉查找树)数据结构来存储键值对。
+  2. **有序映射**：
+     - 默认按键的自然顺序排序(键必须实现Comparable接口)
+     - 也可以通过Comparator在构造时指定自定义排序规则
+     - 可以方便地获取第一个(first)、最后一个(last)元素，或某一范围的子映射
+  3. **时间复杂度**：
+     - 基本操作(put, get, remove)的时间复杂度为O(log n)
+     - 比HashMap的O(1)稍慢，但比线性结构快
+  4. **非同步**：不是线程安全的，多线程环境下需要外部同步
+  5. **不允许null键：但允许null值**
+  6. **视图支持**：提供keySet(), values(), entrySet()等视图方法
+
+
+
+### 4. HashTable
+
+```java
+public Hashtable() {
+    this(11, 0.75f);
+}
+```
+
+- **与HashMap比较**：
+  - Hashtable是线程安全的，HashMap不是
+  - Hashtable**不允许null键或值**，HashMap允许
+  - Hashtable是早期Java版本的一部分，HashMap是Java集合框架的一部分
+- **与数组比较**：
+  - 数组通过整数索引访问，哈希表可以通过任意类型的键访问
+  - 数组查找时间复杂度为O(1)，但插入删除可能为O(n)
+
+
+
+
+
+
+
+
+
+​          

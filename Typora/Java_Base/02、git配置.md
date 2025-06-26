@@ -55,6 +55,8 @@ git push origin master // 命令行会报错 remote: Support for password authen
 clone的时候直接配置好token, 后续push的时候就不会校验用户了
 
 git clone https://github.com/12722097458/images-cloud-repo.git
+
+git clone https://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@github.com/12722097458/java-files-repository.git
 git clone https://ghp_afhmNy4JAa9EDGdajJrLHwIXXXXXX@github.com/12722097458/images-cloud-repo.git  // 亲测可用
 ```
 
@@ -85,6 +87,14 @@ git remote -v
 git pull -r origin master --allow-unrelated-histories
 
 ```
+
+#### 3、Git解决Filename too long的问题
+
+```shell
+git config --global core.longpaths true
+```
+
+
 
 
 
