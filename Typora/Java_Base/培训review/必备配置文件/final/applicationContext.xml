@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <!-- 1、 首先支持扫描dao service mapper包的注解，并排除controller的注解-->
+    <context:component-scan base-package="com.igeek.ssm">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- 2、 引入数据源-->
+    <context:property-placeholder location="classpath:common/jdbcConfig.properties"/>
+    <!--<bean id="propertyConfigurer"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:common/jdbcConfig.properties" />
+    </bean>-->
+
+    <!-- 3、 连接池数据源-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!-- 4、 spring中提供的mybatis的SqlSession的工厂-->
+    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean" >
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 别名设置 -->
+        <property name="typeAliasesPackage" value="com.igeek.ssm.domain"/>
+        <!-- 加载配置mybatis配置 -->
+        <property name="configLocation"
+                  value="classpath:mybatis/applicationContext-mybatis.xml" />
+    </bean>
+
+    <!-- 5、mybatis自动扫描加载Sql映射文件/接口 : 配置UserMapper.java接口所在的包-->
+    <bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--指定sql映射文件/接口所在的包（自动扫描） -->
+        <!-- spring会帮我们维护mapper接口的实现类对象 -->
+        <property name="basePackage" value="com.igeek.ssm.mapper"/>
+
+        <!-- 依赖现有的sqlSessionFactory -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"/>
+    </bean>
+
+    <!-- 6、 配置事务管理器 -->
+    <!-- 第一步：定义具体的平台事务管理器（DataSource事务管理器） -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+
+    <!-- 第二步：配置事务的通知，通知中要处理的就是事务
+            id:唯一标记
+            transaction-manager：给事务提供一个事务管理器的引用
+    -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--所有以query开头的方法都是只读的 -->
+            <tx:method name="query*" read-only="true" propagation="SUPPORTS" />
+            <tx:method name="get*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+            <tx:method name="select*" read-only="true" />
+            <!--其他方法使用默认事务策略 -->
+            <tx:method name="*" />
+        </tx:attributes>
+    </tx:advice>
+
+
+    <!-- 第三步：配置切入点，让通知关联切入点，即事务控制业务层的方法 -->
+    <aop:config>
+        <!--pointcut元素定义一个切入点，execution中的第一个星号 用以匹配方法的返回类型，
+        这里星号表明匹配所有返回类型。 com.abc.dao.*.*(..)表明匹配cn.itcast.mybatis.service包下的所有类的所有 
+        方法 -->
+        <aop:pointcut id="pt1" expression="execution(* com.igeek.ssm.service.*.*(..))" />
+        <!--将定义好的事务处理策略应用到上述的切入点 -->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pt1" />
+    </aop:config>
+
+
+</beans>

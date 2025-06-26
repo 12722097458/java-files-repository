@@ -1,3 +1,6 @@
+对应代码：
+https://github.com/12722097458/java-base-learning-20250625
+
 # 一、计算机基本介绍
 
 ## 1、bit(比特)和byte(字节)

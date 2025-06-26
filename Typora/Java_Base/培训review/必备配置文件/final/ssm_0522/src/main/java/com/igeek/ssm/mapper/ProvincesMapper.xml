@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.igeek.ssm.mapper.ProvincesMapper">
+
+    <resultMap id="provincesMap" type="Provinces">
+        <id property="id" column="id"/>
+        <result property="provinceid" column="provinceid"/>
+        <result property="provincename" column="province"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="provincesMap">
+        select * from provinces;
+    </select>
+
+</mapper>

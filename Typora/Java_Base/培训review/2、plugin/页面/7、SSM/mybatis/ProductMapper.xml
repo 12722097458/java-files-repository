@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	为这个mapper指定一个唯一的namespace，
+	namespace的值习惯上设置成包名+sql映射文件名，这样就能够保证namespace的值是唯一的
+	例如namespace="com.my.mapping.EmpMapper"就是com.my.mapping (包名)+EmpMapper (EmpMapper.xml文件去除后缀)
+-->
+
+<mapper namespace="com.igeek.shop.mapper.ProductMapper">
+    <!--
+        在select标签中编写查询的SQL语句， 设置select标签的id属性为select，id属性值必须是唯一的，不能够重复
+         使用parameterType属性指明查询时使用的参数类型，resultType属性指明查询返回的结果集类型
+        resultType="com.my.entity.Emp"就表示将查询结果封装成一个User类的对象返回
+        User类就是users表所对应的实体类
+    -->
+    <resultMap id="resultMapProduct" type="Product">
+        <id column="pid" property="pid"></id>
+        <result column="pname" property="pname"></result>
+        <result column="market_price" property="market_price"></result>
+        <result column="shop_price" property="shop_price"></result>
+        <result column="pimage" property="pimage"></result>
+        <result column="pdate" property="pdate"></result>
+        <result column="is_hot" property="is_hot"></result>
+        <result column="pdesc" property="pdesc"></result>
+        <result column="pflag" property="pflag"></result>
+        <result column="cid" property="cid"></result>
+        <association property="category" javaType="Category">
+            <id column="cid" property="cid"></id>
+            <result column="cname" property="cname"></result>
+        </association>
+    </resultMap>
+
+    <!-- 声明sql片段 -->
+    <sql id="productFields">
+        p.pid,p.pname,p.market_price,p.shop_price,p.pimage,p.pdate,p.is_hot,p.pdesc,p.pflag,
+        c.cid,c.cname
+    </sql>
+    
+    <select id="selectByCondition" parameterType="ProductCondition" resultMap="resultMapProduct">
+         select <include refid="productFields"></include>
+         FROM product p LEFT JOIN category c ON p.cid=c.cid
+         <where>
+             <if test="conditionBean != null">
+
+                 <if test="conditionBean.pname != null and conditionBean.pname !=''">
+                     <bind name="likePname" value="'%'+conditionBean.pname+'%'"></bind>
+                     and p.pname like #{likePname}
+                 </if>
+
+                 <if test="conditionBean.cid != null and conditionBean.cid !=''">
+                     and c.cid=#{conditionBean.cid}
+                 </if>
+             </if>
+
+             <if test="beginDate != null">
+                 and p.pdate>=#{beginDate}
+             </if>
+             <if test="endDate != null">
+                 and p.pdate &lt;= #{endDate}
+             </if>
+             <if test="beginPrice != null and beginPrice > 0">
+                 and p.market_price>=#{beginPrice}
+             </if>
+             <if test="endPrice != null and endPrice > 0">
+                 and p.market_price &lt; = #{endPrice}
+             </if>
+         </where>
+         ORDER BY p.pdate DESC LIMIT #{beginIndex},#{count};
+    </select>
+
+    <select id="countByCondition" parameterType="ProductCondition" resultType="Integer">
+        select count(p.pid)
+        FROM product p LEFT JOIN category c ON p.cid=c.cid
+        <where>
+            <if test="conditionBean != null">
+
+                <if test="conditionBean.pname != null and conditionBean.pname !=''">
+                    <bind name="likePname" value="'%'+conditionBean.pname+'%'"></bind>
+                    and p.pname like #{likePname}
+                </if>
+
+                <if test="conditionBean.cid != null and conditionBean.cid !=''">
+                    and c.cid=#{conditionBean.cid}
+                </if>
+            </if>
+
+            <if test="beginDate != null">
+                and p.pdate>=#{beginDate}
+            </if>
+            <if test="endDate != null">
+                and p.pdate &lt;= #{endDate}
+            </if>
+            <if test="beginPrice != null and beginPrice > 0">
+                and p.market_price>=#{beginPrice}
+            </if>
+            <if test="endPrice != null and endPrice > 0">
+                and p.market_price &lt; = #{endPrice}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" parameterType="string" resultMap="resultMapProduct">
+      select <include refid="productFields"></include>
+      from product p left join category c on c.cid=p.cid where p.pid=#{pid}
+    </select>
+
+    <insert id="insert" parameterType="Product">
+        INSERT INTO product(pid,pname,market_price,shop_price,pimage,pdate,is_hot,pdesc,pflag,cid)
+        VALUES(#{pid},#{pname},#{market_price},#{shop_price},#{pimage},#{pdate},#{is_hot},#{pdesc},#{pflag},#{cid});
+    </insert>
+
+    <delete id="delete" parameterType="string">
+      delete from product where pid=#{pid}
+    </delete>
+    
+    <update id="update" parameterType="Product">
+        UPDATE product
+        SET pname=#{pname},market_price=#{market_price},shop_price=#{shop_price},pimage=#{pimage},pdate=#{pdate},is_hot=#{is_hot},pdesc=#{pdesc},pflag=#{pflag},cid=#{cid}
+        WHERE pid=#{pid};
+    </update>
+
+    <select id="selectNewProducts" parameterType="ProductCondition" resultType="Product">
+         select p.pid,p.pname,p.market_price,p.shop_price,p.pimage,p.pdate,p.is_hot,p.pdesc,p.pflag,p.cid
+         FROM product p ORDER BY p.pdate desc limit #{beginIndex},#{count};
+    </select>
+    <select id="selectHotProducts" parameterType="ProductCondition" resultType="Product">
+         select p.pid,p.pname,p.market_price,p.shop_price,p.pimage,p.pdate,p.is_hot,p.pdesc,p.pflag,p.cid
+         FROM product p where p.is_hot=1 limit #{beginIndex},#{count};
+    </select>
+    
+</mapper>

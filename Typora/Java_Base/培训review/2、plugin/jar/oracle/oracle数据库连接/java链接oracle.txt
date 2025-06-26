@@ -1,0 +1,33 @@
+import java.sql.*;
+
+public class DBConnection {
+	public Connection getConnection()
+	{ 
+     Connection conn=null;
+    
+    String CLASSFORNAME = "oracle.jdbc.driver.OracleDriver";
+    String SERVANDDB = "jdbc:oracle:thin:@localhost:1521:orcl";
+    //oracle
+    String USER="scott";
+	 String PWD="orcl";
+	try
+	{
+	  Class.forName(CLASSFORNAME);
+      conn=DriverManager.getConnection(SERVANDDB,USER,PWD);	  
+	}catch(Exception ex)
+	{
+		ex.printStackTrace();
+	}
+	 return conn;
+	}   
+
+
+ public static void main(String[] args)
+	  {
+		  
+		    ResultSet rs=null;
+		    DBConnection db=new DBConnection();
+	       	
+	            System.out.println(db.getConnection());
+	  }
+}

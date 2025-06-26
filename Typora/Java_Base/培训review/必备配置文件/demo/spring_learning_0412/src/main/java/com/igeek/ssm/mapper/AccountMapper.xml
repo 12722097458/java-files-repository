@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.igeek.ssm.mapper.AccountMapper">
+    <select id="selectById" parameterType="Integer" resultType="com.igeek.ssm.domain.Account">
+        SELECT * FROM account where id=#{id} ;
+    </select>
+
+    <select id="updateAccount" parameterType="com.igeek.ssm.domain.Account" resultType="integer">
+        update account set id=#{id},name=#{name},money=#{money} where id = #{id}
+    </select>
+</mapper>

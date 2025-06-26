@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.igeek.ssm.mapper.UserMapper">
+    <select id="selectAll" resultType="com.igeek.ssm.domain.User">
+        SELECT * FROM USER ;
+    </select>
+
+    <select id="selectByUserUid" parameterType="Integer" resultType="com.igeek.ssm.domain.User">
+        SELECT * FROM USER where userId = #{id};
+    </select>
+
+    <select id="updateUserInfo" parameterType="com.igeek.ssm.domain.User" resultType="Integer">
+        update user set username=#{username},password=#{password} where userid=#{userid};
+    </select>
+</mapper>

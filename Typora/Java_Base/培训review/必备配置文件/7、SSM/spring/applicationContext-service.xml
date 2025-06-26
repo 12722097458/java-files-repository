@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="categoryService" class="com.igeek.shop.service.mybatisspring.CategoryServiceImpl"></bean>
+    <bean id="userService" class="com.igeek.shop.service.mybatisspring.UserServiceImpl"></bean>
+    <bean id="productService" class="com.igeek.shop.service.mybatisspring.ProductServiceImpl"></bean>
+    <bean id="ordersService" class="com.igeek.shop.service.mybatisspring.OrdersServiceImpl"></bean>
+
+</beans>

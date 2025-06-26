@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--配置全局变量，代替web.xml中的部分数据。在需要的地方注入即可！-->
+    <bean id="springconfig" class="com.igeek.shop.convert.Springconfig">
+        <property name="contextpath" value="shop_spring"/>
+        <property name="localPort" value="9090"/>
+        <property name="adminEmail" value="ayinjun1109@163.com"/>
+        <property name="serverHost" value="smtp.163.com"/>
+    </bean>
+
+    <!--配合alibaba.fastjson使用的-->
+    <bean id="fastJsonConfig" class="com.alibaba.fastjson.support.config.FastJsonConfig">
+        <property name="dateFormat" value="yyyy-MM-dd"/>
+    </bean>
+
+    <!--自动扫描的控制包名 -->
+    <!-- 控制器包，就是放springmvc的控制器类@Controller注解 -->
+    <context:component-scan base-package="com.igeek.shop.controller"/>
+
+
+    <!-- 注解驱动，后续很多功能都是依据此配置来自动完成 -->
+    <mvc:annotation-driven conversion-service="conversionService">
+        <!--对于json返回值，需要配置以下，增加扩展性。让页面上的数据格式为text/html。默认application/json
+        默认使用jackson的json。class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+        建议使用fastjson,其响应的数据较少，减少了冗余。FastJsonHttpMessageConverter
+        -->
+        <mvc:message-converters register-defaults="true">
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list><value>text/html;charset=UTF-8</value></list>
+                </property>
+                <!-- 设置fastjosn的配置 -->
+                <property name="fastJsonConfig" ref="fastJsonConfig"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+
+     <!-- 视图解释类，此配置说明jsp作为显示页面技术，并且可以使用jstl -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--可为空,方便实现自已的依据扩展名来选择视图解释类的逻辑 -->
+        <property name="viewClass"
+                  value="org.springframework.web.servlet.view.JstlView" />
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+
+
+    <!-- 对静态资源文件的访问  方案一 （二选一） -->
+    <mvc:default-servlet-handler/>
+
+
+    <!-- 转换器配置 -->
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="formatters">
+            <set>
+                <bean class="com.igeek.shop.convert.DateFormatter">
+                    <property name="pattern" value="yyyy-MM-dd"/>
+                </bean>
+            </set>
+        </property>
+    </bean>
+
+
+    <!-- springmvc提供的简单异常处理器 -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <!-- 定义默认的异常处理页面/WEB-INF/jsp/root/error.jsp -->
+        <property name="defaultErrorView" value="root/error"/>
+        <!-- 定义异常处理页面用来获取异常信息的变量名，也可不定义，默认名为exception -->
+        <property name="exceptionAttribute" value="ex"/>
+        <!-- 定义需要特殊处理的异常，这是重要点 -->
+        <!-- 定义需要特殊处理的异常，这是重要点 -->
+    </bean>
+
+
+
+
+
+
+
+
+
+    <bean id="multipartResolver"
+          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <!-- 指定所上传文件的总大小不能超过2MB。
+        注意maxUploadSize属性的限制不是针对单个文件，而是所有文件的容量之和 -->
+        <property name="maxUploadSize" value="2000000"/>
+        <!-- 最大内存大小 (40960)-->
+        <property name="maxInMemorySize" value="40960" />
+    </bean>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- 配置拦截器 -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!-- 所有的请求都进入拦截器 -->
+            <mvc:mapping path="/admin/**" />
+            <!-- 配置具体的拦截器 -->
+            <mvc:exclude-mapping path="/admin/toIndex"/>
+            <mvc:exclude-mapping path="/admin/doLogin"/>
+            <bean class="com.igeek.shop.interceptor.AdminInterceptor" />
+        </mvc:interceptor>
+
+    </mvc:interceptors>
+
+</beans>

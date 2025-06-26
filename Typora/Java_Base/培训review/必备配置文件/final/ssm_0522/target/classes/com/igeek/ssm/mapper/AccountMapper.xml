@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	为这个mapper指定一个唯一的namespace，
+	namespace的值习惯上设置成包名+sql映射文件名，这样就能够保证namespace的值是唯一的
+	例如namespace="com.my.mapping.EmpMapper"就是com.my.mapping (包名)+EmpMapper (EmpMapper.xml文件去除后缀)
+-->
+<mapper namespace="com.igeek.ssm.mapper.AccountMapper">
+
+    <!--
+        id:唯一标记，后续应用
+        type:java的尸体类型
+    -->
+    <resultMap id="accountResultMap" type="Account">
+        <!--
+            指定主键：
+                property:java实体类中的属性名
+                column:数据库中的列名
+        -->
+        <id property="uid" column="id"/>
+        <!--用result  配置相关的属性对应-->
+        <result property="uname" column="name"/>
+        <result property="umoney" column="money"/>
+    </resultMap>
+
+    <select id="selectAllAccounts" resultMap="accountResultMap">
+        select * from account;
+    </select>
+
+    <select id="selectAccountById" parameterType="int" resultMap="accountResultMap">
+        select * from account where id=#{id};
+    </select>
+
+    <update id="updateAccount" parameterType="Account">
+        update account a set a.money=#{umoney} where a.id=#{uid}
+    </update>
+
+</mapper>
