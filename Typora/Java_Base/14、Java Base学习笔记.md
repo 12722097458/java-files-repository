@@ -75,7 +75,7 @@ B： 父类，基类、超类，superclass
 
 多态性:
 
-> 一个事物的多种形态
+> 一个事物的多种形态。 向上转型
 >
 > Person p = new Man();  // 子类对象的多态性 --》 父类的引用指向子类的对象
 
@@ -236,3 +236,283 @@ System.out.println("j = " + j);
 ![image-20250701143142887](https://gitee.com/yj1109/cloud-image/raw/master/img/20250701143142958.png)
 
 ![image-20250701162145253](https://gitee.com/yj1109/cloud-image/raw/master/img/20250701162955435.png)
+
+
+
+### 1.3 基本数据类型的自动装箱与拆箱
+
+```java
+// 装箱
+Integer in = new Integer(1);
+Integer in2 = Integer.valueOf(1);
+// 自动装箱
+Integer in3 = Integer.parseInt("1");
+
+
+//自动拆箱
+int a = in;
+int i = in.intValue();
+```
+
+
+
+#### 面试题
+
+##### 1.  IntegerCache默认会存储-128  ~ 127
+
+```java
+Integer i1 = new Integer(123);
+Integer i2 = new Integer(123);
+System.out.println(i1 == i2);// false  --  new 的两个不同的对象
+
+Integer i3 = 222;
+Integer i4 = 222;
+System.out.println(i3 == i4);  // false
+
+Integer i5 = 11;
+Integer i6 = 11;
+System.out.println(i5 == i6);  // true IntegerCache默认会存储-128 - 127的数。 如果用自动装箱的方式给Integer赋值这个范围内的数。会直接从cache里拿。
+```
+
+
+
+##### 2. 三元表达式会默认将两边的数值类型一致化
+
+```java
+boolean flag = (int) (Math.random()  * 100) % 2 == 1;
+Object o1 = flag ? new Integer(1) : new Double(2.2D);
+System.out.println("o1 = " + o1);  //返回是一个double类型
+```
+
+编译后的代码
+
+![image-20250702121542389](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702121542472.png)
+
+### 1.4 == 和equals()
+
+![ddcddbb0fc83fa3e7a9ff7198f3449f](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702121713129.jpg)
+
+
+
+### 1.5 static关键字
+
+#### 1. 静态修饰变量
+
+##### 1.1 静态变量(类变量)
+
+![image-20250702123650311](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702123650402.png)
+
+##### 1.2 static内存解析
+
+![image-20250702123526980](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702123527070.png)
+
+
+
+#### 2. static修饰方法
+
+![image-20250702124128479](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702124128560.png)
+
+![image-20250702124412266](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702124412342.png)
+
+ 
+
+#### 3. static应用 - 单例设计模式(饿汉式/懒汉式)
+
+#### 4. 静态代码块 vs 非静态代码块
+
+![image-20250702142359648](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702142359845.png)
+
+### 1.6 类的成员之四-代码块 (属性，方法，构造器)
+
+![image-20250702133712600](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702133712704.png)
+
+
+
+执行顺序：
+
+有父类，先父类。 由父及子，静态先行
+
+静态代码块，普通代码块， 构造方法
+
+![image-20250702134303923](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702134304136.png)
+
+
+
+
+
+### 1.7 final 关键字
+
+static final可以修饰属性- 全局常量
+
+也可以修饰方法
+
+![image-20250702140157528](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702140157717.png)
+
+```java
+
+public class A007_FinalTest {
+    
+    // 成员变量被final修饰， 可直接赋值，可代码块赋值， 可构造方法赋值
+    final int A = 1;
+    final int B;
+    final int C;
+    {
+        B = 2;
+    }
+
+    public A007_FinalTest (int n) {
+        C = n;
+    }
+    
+    // 局部变量+final 赋值后不能改变
+    public static void main(String[] args) {
+        final int num = 3;
+        // num = 12; 局部变量一旦赋值不能修改
+
+        final int num2;
+        num2 = 3;
+        // num2 = 4; 不能修改
+        Order order = new Order();
+        A007_FinalTest test = new A007_FinalTest(3);
+        test.method(order);
+        System.out.println("order.id = " + order.id);  // 123
+    }
+    
+    // 形参被final修饰，不能改变
+    private void method(final int num) {
+        //num = 3;
+    }
+
+    // order 不可变，但里面的属性可变
+    private void method(final Order order) {
+        order.id = 123;
+        // order = new Order(); Cannot assign a value to final variable 'order'
+    }
+
+}
+
+class Order {
+    public int id;
+}
+
+```
+
+
+
+### 1.8 abstract
+
+![image-20250702144705745](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702144705878.png)
+
+
+
+####  模板方法设计模式 - 用到abstract
+
+![image-20250702145155393](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702145155490.png)
+
+![image-20250702145330176](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702145530861.png)
+
+### 1.9 interface
+
+![image-20250702151907516](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702151907688.png)
+
+![image-20250702152341762](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702152341905.png)
+
+类可以实现多个接口------C extends M implements A, B {}
+
+
+
+接口可以继承多个接口。
+
+```java
+public interface MyInterface extends MyInterface2, MyInterface3 {
+
+    // 常量
+    public static final double PI = 3.14D;
+
+    // 抽象方法，abstract可省略
+    void invoke();
+    abstract int getData();
+
+    // 静态方法
+    static void method() {
+        System.out.println("MyInterface.static method...");
+    }
+    // 默认方法
+    default void method2() {}
+
+}
+```
+
+
+
+#### 应用 - 代理模式
+
+
+
+静态代理
+
+```java
+package com.ityj.base;
+
+// interface 的应用。  代理模式
+public class A008_ProxyTest {
+    public static void main(String[] args) {
+        Server server = new Server();
+        ProxyServer proxyServer = new ProxyServer(server);
+        proxyServer.browse();
+    }
+
+}
+
+// 同一个接口
+interface NetWork {
+    void browse();
+}
+
+// 被代理类
+class Server implements NetWork {
+    @Override
+    public void browse() {
+        System.out.println("Server 真实方法执行。。。");
+    }
+}
+
+// 代理类
+class ProxyServer implements NetWork {
+
+    private NetWork netWork;
+
+    public ProxyServer (NetWork netWork) {
+        this.netWork = netWork;
+    }
+
+    private void check () {
+        System.out.println("ProxyServer 做一些检查工作。。。");
+    }
+
+    @Override
+    public void browse() {
+        System.out.println("ProxyServer 代理方法开始执行。。。");
+        check();
+        netWork.browse();
+    }
+}
+```
+
+
+
+#### 应用- 工厂模式
+
+
+
+### 1.10 类的成员之五-内部类
+
+#### 1.1 成员内部类（静态和非静态）
+
+![image-20250702162806615](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702162806724.png)
+
+![image-20250702162844421](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702162844529.png)
+
+内部类调用外部类
+
+![image-20250702163055895](https://gitee.com/yj1109/cloud-image/raw/master/img/20250702163056011.png)
