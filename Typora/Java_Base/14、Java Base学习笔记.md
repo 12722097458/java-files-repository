@@ -539,6 +539,8 @@ class ProxyServer implements NetWork {
 
 ## 1. 多线程
 
+### 1.1 基本概念
+
 ![b4d125522557b1693dedb4655cadf13](https://gitee.com/yj1109/cloud-image/raw/master/img/20250703120321127.jpg)
 
 ![b5cec2cb3a9ab46d64fe0a6daf721ef](https://gitee.com/yj1109/cloud-image/raw/master/img/20250703120333813.jpg)
@@ -552,3 +554,89 @@ class ProxyServer implements NetWork {
 ![e9473921725a6b0357dffff9a93c416](https://gitee.com/yj1109/cloud-image/raw/master/img/20250703120313581.jpg)
 
 ![image-20250703162217463](https://gitee.com/yj1109/cloud-image/raw/master/img/20250703162217595.png)
+
+
+
+### 1.2 线程的生命周期
+
+![image-20250704103052360](https://gitee.com/yj1109/cloud-image/raw/master/img/20250704103052668.png)
+
+### 1.3 解决线程安全
+
+#### （1）同步代码块
+
+![image-20250704105954174](https://gitee.com/yj1109/cloud-image/raw/master/img/20250704105954498.png)
+
+
+
+#### （2）同步方法
+
+![image-20250704111235744](https://gitee.com/yj1109/cloud-image/raw/master/img/20250704111236019.png)
+
+#### （3）ReentrantLock
+
+![image-20250704155914018](https://gitee.com/yj1109/cloud-image/raw/master/img/20250704155914221.png)
+
+#### （4）应用
+
+可以解决单例懒汉模式的线程安全问题
+
+```java
+class Lazy {
+
+    private static volatile Lazy INSTANCE;
+    private Lazy() {};
+
+    // 效率差。。 其实只有第一次会出现现成问题
+    public synchronized static Lazy getInstance2() {// 锁的是Lazy.class
+        if (INSTANCE == null) {
+            INSTANCE = new Lazy();
+        }
+        return INSTANCE;
+    }
+    public static Lazy getInstance2_2() {
+        synchronized (Lazy.class) {
+            if (INSTANCE == null) {
+                INSTANCE = new Lazy();
+            }
+            return INSTANCE;
+        }
+    }
+
+
+    // 双重校验锁  效率更高
+    public static Lazy getInstance() {
+        if (INSTANCE == null) {
+            synchronized (Lazy.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new Lazy();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+}
+```
+
+
+
+#### (5) 死锁问题
+
+![image-20250704155629887](https://gitee.com/yj1109/cloud-image/raw/master/img/20250704155630139.png)
+
+### 1.4 线程创建的4种方法
+
+```java
+new Thread()
+new Runnable()
+new Callable()
+new ThreadPoolExecutor()
+```
+
+
+
+## 2. Java常用类
+
+### 1.1 String
+
+![image-20250704160717482](https://gitee.com/yj1109/cloud-image/raw/master/img/20250704160717824.png)
