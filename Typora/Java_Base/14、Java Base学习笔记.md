@@ -640,3 +640,223 @@ new ThreadPoolExecutor()
 ### 1.1 String
 
 ![image-20250704160717482](https://gitee.com/yj1109/cloud-image/raw/master/img/20250704160717824.png)
+
+
+
+### 1.2 内存结构
+
+栈，堆，方法区(字符串常量池在这里)
+
+两个**常量**相加，最终还是指向字符串常量池。
+
+其他情况都是StringBuffer. append 出新的字符串  -- 堆中
+
+```java
+// public final class String
+String str = "abc";   //  常量池
+String str2 = "abc";   //  常量池
+String m = "a";   //  常量池
+String m2 = "bc";   //  常量池
+String s2 = new String("abc");  //堆
+String abc = new String("abc").intern();   //  常量池
+System.out.println(str == abc);   // true
+
+String m3 = m + m; // 堆
+System.out.println("m3==str = " + (m3==str));  //false
+
+String m4 = m + "bc";  // 堆
+System.out.println("m4==str = " + (m4==str));  //false
+
+final String mm = "a";  // final是个常量
+String m5 = mm + "bc";  // 常量池   编译器会直接优化为  String m5 = "abc";
+System.out.println("m5==str = " + (m5==str));  //true
+```
+
+
+
+### 1.3 字符串和Byte[] 和Char[]转换
+
+```java
+String stt = "09AZaz中国";
+char[] charArray = stt.toCharArray();
+System.out.println("charArray = " + Arrays.toString(charArray));
+String s1 = new String(charArray);
+System.out.println("s1 = " + s1);
+
+// 编码 ： 把能看懂的转换成看不懂的(二进制)
+byte[] bytes = stt.getBytes(StandardCharsets.UTF_8);  // UTF-8   一个中文3个字节
+System.out.println("bytes = " + Arrays.toString(bytes));
+byte[] gbkBytes = stt.getBytes("gbk");  // GBK  一个中文2字节
+System.out.println("gbkBytes = " + Arrays.toString(gbkBytes));
+
+// 解码
+// 乱码
+String mismatch = new String(gbkBytes, StandardCharsets.UTF_8);
+System.out.println("mismatch = " + mismatch);
+// 正确
+String correct = new String(gbkBytes, "GBK");
+System.out.println("correct = " + correct);
+```
+
+### 1.4 String, StirngBuilder, StringBuffer对比
+
+![f6c6ee1c990ac7c2df48aae55da0acc](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707152327665.jpg)
+
+
+
+![bef2ce386f8c8fed000162c8e27b0af](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707152401694.jpg)
+
+
+
+### 1.5 JDK8 日期类
+
+![0547e10bc39a3f2e455eeaf8e7c6fcd](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155211821.jpg)
+
+![9a138c008f737022249ffb8f42592f6](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155214760.jpg)
+
+### 1.6 枚举类enum
+
+![732136b9567ade0b82d5bc9b3f4e1db](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155627355.jpg)
+
+![894e037362e00b6d534e1c30e195444](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155206228.jpg)
+
+### 1.7 注解
+
+![c923827dfbbc1d01bb89037f8f353f6](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155352606.jpg)
+
+![79ed33bf0f948f6558a09224d740006](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155618773.jpg)
+
+![7553891b665dc7b4411c04eef00d9a5](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155637642.jpg)
+
+
+
+## 3. 集合框架
+
+### 1.1  List
+
+有序可重复
+
+![d0975307a6f4eb4704d82a20cda8e59](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155535786.jpg)
+
+![5c43d69ee4405480f19903d921d2b28](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155547624.jpg)
+
+![c33e150193bd1d8cb150589787220c4](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707155552995.jpg)
+
+```java
+package com.ityj.advance.collection;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
+
+/**
+ *
+ *  List : 有序、可重复  '动态'数组：长度不固定(jdk1.2)
+ *      ArrayList：List的主要实现类(jdk1.2) ,线程不安全，效率高;低层使用数组Object[] elementData 存储
+ *      LinkedList：(jdk1.2) 底层使用的是双向链表：对频繁的插入以及删除操作效率较高。
+ *      Vector：最早的实现类（JDK1.0）  线性安全、效率低，低层使用数组Object[] elementData 存储
+ *
+ *      同：三个类都实现了List接口，存储数据的特点相同：有序，可重复
+ */
+
+public class ListTest {
+    public static void main(String[] args) {
+
+        int num = 3;
+
+        int num2 = num >> 1;
+
+        System.out.println("num2 = " + num2);
+    }
+
+    /**
+     * ArrayList源码解析：
+     * ==底层是数组==
+     jdk1.7和1.8是不同的。
+     jdk1.7：初始化的时候默认创建的集合长度是 10的Object[]
+     1.7的扩容是1.5倍进行的：int newCapacity = oldCapacity + (oldCapacity >> 1);
+
+
+     jdk1.8: 初始化时默认没有创建数组，节省内存：private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA = {};
+     第一次调用add()方法时，会进行默认初始化长度为10的数组、
+     后续和1.7一致
+
+     总结：jdk7的ArrayList创建类似于单例中的饿汉式，而jdk8中的ArrayList创建类似于懒汉式。
+     */
+    @Test
+    public void arrayListTest(){
+        List<String> list = new ArrayList<>();
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        list.add("4");
+        list.add("5");
+        list.add("6");
+        list.add("7");
+        list.add("8");
+        list.add("9");
+        list.add("10");
+        list.add("11");   // 第11次调用需要扩容   10 -->  15
+        list.add("12");
+        list.add("13");
+        list.add("14");
+        list.add("15");
+        list.add("16"); // 第16次进行扩容   15 --> 22
+        list.add("17");
+        list.add("18");
+        list.add("19");
+        System.out.println(list.size());
+    }
+
+    /**
+     *      ==底层双向链表==
+     *   内部声明了Node的first 和 last属性，默认值都是null
+     *   进行新增：list.add(123);   将123封装到Node中，创建了Node对象
+     *
+     *      可以体现LinkedList的双向链表结构
+     *
+     *private static class Node<E> {
+         E item;
+         Node<E> next;
+         Node<E> prev;
+
+         Node(Node<E> prev, E element, Node<E> next) {
+         this.item = element;
+         this.next = next;
+         this.prev = prev;
+         }
+      }
+     */
+    @Test
+    public void linkedListTest() {
+        List list = new LinkedList();
+        list.add("1");
+        list.add("2");
+    }
+
+
+    /**
+     *  ==底层是：数组== protected Object[] elementData
+     *  初始化长度10，扩容方式也不太一样，2倍扩容
+     *  同步，线性安全。很少使用      public synchronized boolean add(E e) {}
+     */
+    @Test
+    public void vectorTest() {
+        List list = new Vector();
+        list.add(1);
+    }
+}
+```
+
+
+
+
+
+### 1.2  Set
+
+无序不可重复
+
+![image-20250707161355978](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707161356375.png)
