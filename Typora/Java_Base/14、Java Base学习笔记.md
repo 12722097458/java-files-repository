@@ -732,6 +732,78 @@ System.out.println("correct = " + correct);
 
 ## 3. 集合框架
 
+以下是Java中主要Collection和Map实现类的总结，包括初始化大小、数据结构、扩容方式以及JDK7与JDK8的差异：
+
+------
+
+### **List实现类**
+
+| **类名**                 | **初始化大小** | **数据结构** | **扩容方式**                                                 | **JDK7 vs JDK8差异**                                       |
+| :----------------------- | :------------- | :----------- | :----------------------------------------------------------- | :--------------------------------------------------------- |
+| **ArrayList**            | 10             | 动态数组     | 扩容至1.5倍（`newCapacity = oldCapacity + (oldCapacity >> 1)`） | JDK7：直接创建大小为10的数组 JDK8：首次`add()`时初始化为10 |
+| **Vector**               | 10             | 动态数组     | 扩容至2倍（默认），或按构造函数的增量扩容                    | 无显著差异                                                 |
+| **LinkedList**           | -              | 双向链表     | 无需扩容，动态添加节点                                       | 无差异                                                     |
+| **CopyOnWriteArrayList** | 0              | 动态数组     | 每次修改时复制新数组（大小+1）                               | 无差异                                                     |
+
+------
+
+### **Set实现类**
+
+| **类名**                | **初始化大小** | **底层实现**         | **数据结构**    | **扩容方式**           |
+| :---------------------- | :------------- | :------------------- | :-------------- | :--------------------- |
+| **HashSet**             | 16             | HashMap              | 哈希表          | 同HashMap              |
+| **LinkedHashSet**       | 16             | LinkedHashMap        | 哈希表+双向链表 | 同HashMap              |
+| **TreeSet**             | -              | TreeMap              | 红黑树          | 无需扩容               |
+| **CopyOnWriteArraySet** | 0              | CopyOnWriteArrayList | 动态数组        | 同CopyOnWriteArrayList |
+
+------
+
+### **Map实现类**
+
+| **类名**              | **初始化大小** | **数据结构**                                        | **扩容方式**                                              | **JDK7 vs JDK8差异**                                         |
+| :-------------------- | :------------- | :-------------------------------------------------- | :-------------------------------------------------------- | :----------------------------------------------------------- |
+| **HashMap**           | 16             | JDK7：数组+链表 JDK8：数组+链表/红黑树              | 扩容至2倍（当`size > threshold = capacity * loadFactor`） | **JDK7**：链表头插法（多线程可能死链） **JDK8**：链表尾插法；链表≥8且数组≥64时转红黑树 |
+| **LinkedHashMap**     | 16             | 同HashMap + 双向链表维护顺序                        | 同HashMap                                                 | 无显著差异                                                   |
+| **Hashtable**         | 11             | 数组+链表                                           | 扩容至`2n + 1`                                            | 无差异                                                       |
+| **TreeMap**           | -              | 红黑树                                              | 无需扩容                                                  | 无差异                                                       |
+| **ConcurrentHashMap** | 16             | JDK7：Segment分段锁+链表 JDK8：数组+链表/红黑树+CAS | JDK7：段内扩容至2倍 JDK8：整体扩容至2倍（多线程协同）     | **JDK7**：分段锁（并发度=Segment数） **JDK8**：CAS+synchronized锁链表头，粒度更细 |
+
+------
+
+### **关键区别总结**
+
+1. **HashMap扩容**
+   - **JDK7**：头插法（可能环形链）、纯链表
+   - **JDK8**：尾插法、链表转红黑树、扩容优化（高位运算确定新位置）
+2. **ConcurrentHashMap并发机制**
+   - **JDK7**：分段锁（`Segment`），并发度固定
+   - **JDK8**：`CAS`+`synchronized`锁链表头，并发度=数组大小
+3. **ArrayList初始化**
+   - **JDK7**：立即分配10个空间
+   - **JDK8**：首次`add()`时分配（懒加载）
+4. **树化条件（JDK8 HashMap）**
+   - 链表长度 ≥ `8` **且** 数组长度 ≥ `64`，否则仅扩容。
+
+------
+
+### **扩容公式汇总**
+
+| **类名**  | **扩容公式**                                     |
+| :-------- | :----------------------------------------------- |
+| ArrayList | `newCapacity = oldCapacity + (oldCapacity >> 1)` |
+| Vector    | `newCapacity = oldCapacity * 2`（默认）          |
+| HashMap   | `newCapacity = oldCapacity << 1`（2倍）          |
+| Hashtable | `newCapacity = (oldCapacity << 1) + 1`           |
+
+> **注**：
+>
+> - 所有默认负载因子（`loadFactor`）均为 **0.75**（除`TreeMap`无此概念）。
+> - 并发容器（如`ConcurrentHashMap`）在JDK8中性能显著优化，推荐替代`Hashtable`。
+
+
+
+
+
 ### 1.1  List
 
 有序可重复
@@ -860,3 +932,471 @@ public class ListTest {
 无序不可重复
 
 ![image-20250707161355978](https://gitee.com/yj1109/cloud-image/raw/master/img/20250707161356375.png)
+
+
+
+### 1.3 Map
+
+#### (1) HashMap基本概念
+
+![image-20250709110508957](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709110509163.png)
+
+
+
+(2) HashMap扩容以及put()
+
+![image-20250709112301307](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709112301510.png)
+
+![image-20250709131522590](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709131522783.png)
+
+![image-20250709131744198](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709131744338.png)
+
+
+
+## 4. 泛型
+
+### 1.1 泛型类
+
+![image-20250709142412360](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250709142412360.png)
+
+### 1.2 泛型方法
+
+![image-20250709133136368](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709133136517.png)
+
+### 1.3 通配符
+
+![image-20250709133702059](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709133702214.png)
+
+![image-20250709134505751](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709134505899.png)
+
+
+
+## 5. IO流
+
+![image-20250709142742218](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709142742385.png)
+
+![image-20250709143920136](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709145817151.png)
+
+
+
+
+
+### (1) 字符集
+
+![image-20250709151812293](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709151812448.png)
+
+![image-20250709151920379](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709151920542.png)
+
+![image-20250709152026081](https://gitee.com/yj1109/cloud-image/raw/master/img/20250709152913093.png)
+
+| **编码格式**   | **单中文字符占用字节数** | **特点说明**                                                 |
+| :------------- | :----------------------- | :----------------------------------------------------------- |
+| **UTF-8**      | **3字节**                | 变长编码，中文字符通常占3字节（Unicode基本多语言平面）       |
+| **GBK**        | **2字节**                | 固定双字节中文编码                                           |
+| **GB2312**     | 2字节                    | 固定双字节（兼容GB2312字符集内的中文）                       |
+| **UTF-16BE**   | 2字节                    | 大端序，无BOM（Byte Order Mark）                             |
+| **UTF-16LE**   | 2字节                    | 小端序，无BOM                                                |
+| **UTF-16**     | 4字节（含BOM）           | 默认添加2字节BOM（`FE FF`），实际字符占2字节（总长=2+2n，n为字符数） |
+| **UTF-32**     | 4字节                    | 固定4字节编码                                                |
+| **ISO-8859-1** | 1字节                    | 不支持中文，中文字符被替换为`0x3F`（`?`）                    |
+| **ASCII**      | 1字节                    | 不支持中文，中文字符被替换为`0x3F`（`?`）                    |
+
+
+
+
+
+### (2) 对象流 ObjectInputStream
+
+> Serializable和serialVersionUID缺一不可
+
+    public class Person implements Serializable {
+    private  static final long serialVersionUID = 42324234232L;
+
+```java
+package com.ityj.advance.io;
+
+import com.ityj.advance.io.entity.Person;
+import org.junit.jupiter.api.Test;
+
+import java.io.*;
+
+public class ObjectStream {
+
+    @Test
+    public void writeObject() {
+        Person person = new Person();
+        person.setAge(33);
+        person.setName("颗颗");
+        try (ObjectOutputStream oos =  new ObjectOutputStream(new FileOutputStream("person.data"))) {
+            oos.writeObject(person);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("complete....");
+    }
+
+    @Test
+    public void readObject() {
+        try (ObjectInputStream ois =  new ObjectInputStream(new FileInputStream("person.data"))) {
+            Object o = ois.readObject();
+            if (o instanceof Person) {
+                Person p = (Person) o;
+                System.out.println("p = " + p);
+            }
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("complete....");
+    }
+
+}
+```
+
+```java
+package com.ityj.advance.io.entity;
+
+import lombok.Data;
+import lombok.ToString;
+
+import java.io.Serializable;
+
+@ToString
+@Data
+// 1. 必须实现implements Serializable， 否则写出时报错NotSerializableException
+// 2. 必须指定唯一序列号serialVersionUID， 否则修改Person.java文件后，再次读取数据是会报错   java.io.InvalidClassException:
+// 3. 当前类的所有属性必须都是可序列化的
+// static和transient是不会被持久化的
+
+public class Person implements Serializable {
+
+    private  static final long serialVersionUID = 42324234232L;
+
+    private String name;
+    private int age;
+    private int sss;
+    
+    // private Account account;// Account必须也是Serializable
+}
+```
+
+
+
+## 6. 网络编程
+
+### (1) TCP
+
+```java
+package com.ityj.advance.inet;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class TCPTest {
+
+
+    @Test
+    public void client() throws IOException {
+        Socket socket = new Socket("192.168.110.236", 8088);
+        OutputStream outputStream = socket.getOutputStream();
+        outputStream.write("TCPTest.client.......".getBytes());
+        outputStream.close();
+        socket.close();
+        System.out.println("client end...");
+    }
+
+    @Test
+    public void server() throws IOException {
+        ServerSocket serverSocket = new ServerSocket(8088);
+        Socket socket = serverSocket.accept();
+        InputStream inputStream = socket.getInputStream();
+        byte[] buff = new byte[8];
+        int len;
+        System.out.println("收到数据：" + socket.getInetAddress());
+        while ((len = inputStream.read(buff)) != -1) {
+            System.out.print(new String(buff, 0, len));
+        }
+        System.out.println("server end...");
+        socket.close();
+        serverSocket.close();
+    }
+
+}
+```
+
+
+
+### (2) UDP
+
+```java
+package com.ityj.advance.inet;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.*;
+
+public class UDPTest {
+
+
+    @Test
+    public void sender() throws IOException {
+        DatagramSocket datagramSocket = new DatagramSocket();
+        String str = "UDP报文。。。";
+        DatagramPacket datagramPacket = new DatagramPacket(str.getBytes(), 0, str.getBytes().length,
+                InetAddress.getByName("127.0.0.1"), 8099);
+
+        datagramSocket.send(datagramPacket);
+        datagramSocket.close();
+        System.out.println("sender end...");
+    }
+
+    @Test
+    public void receiver() throws IOException {
+        DatagramSocket datagramSocket = new DatagramSocket(8099);
+
+        byte[] buffer = new byte[55];  // 可能读不完，或者读的过多
+        DatagramPacket datagramPacket = new DatagramPacket(buffer, 0, buffer.length);
+        datagramSocket.receive(datagramPacket);
+
+        System.out.println("buffer = " + new String(buffer));
+
+        datagramSocket.close();
+        System.out.println("receiver end...");
+    }
+
+}
+```
+
+
+
+### (3) URLConnection
+
+```java
+@Test
+    public void http() throws IOException, URISyntaxException {
+        URL url = new URL("http://localhost:8888/ping");
+        URI uri = url.toURI();
+        Object content = url.getContent();
+        int port = url.getPort();
+        System.out.println("port = " + port);
+    }
+
+    @Test
+    public void httpConncet() throws IOException, URISyntaxException {
+        URL url = new URL("http://localhost:8888/ping");
+        URLConnection urlConnection = url.openConnection();
+        urlConnection.connect();
+
+        InputStream inputStream = urlConnection.getInputStream();
+        byte[] buff = new byte[8];
+        int len;
+        while ((len = inputStream.read(buff)) != -1) {
+            System.out.println(new String(buff, 0, len));
+        }
+        inputStream.close();
+        System.out.println("complete...........");
+    }
+```
+
+
+
+### (4) HttpClient JDK11
+
+```java
+@Test
+// since JDK11
+public void httpClient() throws IOException, URISyntaxException, InterruptedException {
+    URL url = new URL("http://localhost:8888/ping");
+
+    HttpClient httpClient = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest. newBuilder()
+            .uri(URI.create("http://localhost:8888/ping"))
+            .header("Content-Type", "text/plain; charset=UTF-8")
+            .build();
+    HttpResponse.BodyHandler<String> stringBodyHandler = HttpResponse.BodyHandlers.ofString();
+    HttpResponse<String> res = httpClient.send(request, stringBodyHandler);
+    String body = res.body();
+    System.out.println("body = " + body);
+
+    System.out.println("complete...........");
+}
+```
+
+
+
+## 7. 反射
+
+### (1) 基本概念
+
+![image-20250710142350940](https://gitee.com/yj1109/cloud-image/raw/master/img/20250710142351691.png)
+
+![image-20250710142441026](https://gitee.com/yj1109/cloud-image/raw/master/img/20250710142441591.png)
+
+![image-20250710144755938](https://gitee.com/yj1109/cloud-image/raw/master/img/20250710144756454.png)
+
+
+
+
+
+### (2) 基本信息获取
+
+```java
+package com.ityj.advance.reflect;
+
+import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
+public class MethodTest {
+
+    @Test
+    public void testReflect () throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+        // Class的实例对应着加载到内存中的一个运行时类
+        Class clazz = Person.class;
+        Class clazz2 = new Person().getClass();
+        Class clazz3 = Class.forName("com.ityj.advance.reflect.entity.Person");
+        Class clazz4 = MethodTest.class.getClassLoader().loadClass("com.ityj.advance.reflect.entity.Person");
+        System.out.println(clazz == clazz2);  // true
+        System.out.println(clazz3 == clazz4); // true
+        System.out.println(clazz == clazz3);  // true
+
+
+        Object object = clazz.newInstance();
+        Method method = clazz.getDeclaredMethod("eat", String.class);
+        method.setAccessible(true);
+        Object retValue = method.invoke(object, "香蕉");
+        System.out.println("retValue = " + retValue);
+
+        Method method1 = clazz.getDeclaredMethod("setName", String.class);
+        method1.setAccessible(true);
+        method1.invoke(object, "Jack");
+        System.out.println("object.getClass() = " + object.getClass());
+        System.out.println("object = " + object);
+
+        Method method2 = clazz.getDeclaredMethod("getName");
+        Object name = method2.invoke(object);
+        System.out.println("name = " + name);
+
+        Method[] methods = clazz.getMethods();  // 返回Person以及其父类 Object的所有public方法
+        System.out.println("Arrays.toString(methods) = " + Arrays.toString(methods));
+
+        Method[] declaredMethods = clazz.getDeclaredMethods();  // 只返回java.lang.String com.ityj.advance.reflect.entity.Person里的所有方法（包括private）
+        System.out.println("Arrays.toString(declaredMethods) = " + Arrays.toString(declaredMethods));
+
+    }
+}
+
+class Person {
+
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    private void eat(String food) {
+        System.out.println("吃的是：" + food);
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                '}';
+    }
+}
+```
+
+
+
+### (3) ClassLoader
+
+```java
+@Test
+public void classLoaderTest() {
+    ClassLoader classLoader = HelloController.class.getClassLoader();
+    System.out.println("classLoader = " + classLoader);  // jdk.internal.loader.ClassLoaders$AppClassLoader@1f89ab83
+
+    ClassLoader classLoader2 = classLoader.getParent();
+    System.out.println("classLoader2 = " + classLoader2);  // jdk.internal.loader.ClassLoaders$PlatformClassLoader@1810399e
+
+
+    // 表示方式：JVM 规范规定，由启动类加载器加载的类，其 Class.getClassLoader() 方法必须返回 null。
+    // 这是一种约定，用于标识这些类的“根”来源。
+    ClassLoader classLoader3 = String.class.getClassLoader();
+    System.out.println("classLoader3 = " + classLoader3); // null
+}
+```
+
+
+
+### (4) 反射应用 - 动态代理
+
+```java
+package com.ityj.advance.reflect;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+public class DynamicProxyTest {
+    public static void main(String[] args) {
+        Man man = new Man();
+        Human proxy = (Human) ProxyFactory.newInstance(man);
+        String retValue = proxy.eat("土豆");
+        System.out.println("retValue = " + retValue);
+
+    }
+}
+
+
+interface Human {
+    String eat(String food);
+}
+
+class Man implements Human {
+    @Override
+    public String eat(String food) {
+        System.out.println("Man 正在吃" + food);
+        return food;
+    }
+}
+
+class ProxyFactory {
+    public static Object newInstance(Object obj) {
+        //     public static Object newProxyInstance(ClassLoader loader,
+        //                                          Class<?>[] interfaces,
+        //                                          InvocationHandler h) {
+        Object object = Proxy.newProxyInstance(obj.getClass().getClassLoader(), obj.getClass().getInterfaces(), new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                System.out.println(System.currentTimeMillis());
+                Object retValue = method.invoke(obj, args);
+                System.out.println(System.currentTimeMillis());
+                return retValue;
+            }
+        });
+        return object;
+    }
+}
+```
