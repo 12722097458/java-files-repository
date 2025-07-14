@@ -1664,3 +1664,407 @@ public void testDruid() throws Exception {
     System.out.println("connection = " + connection);
 }
 ```
+
+
+
+# 五、Servlet
+
+
+
+## 1. http介绍
+
+![image-20250714144418922](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714144419212.png)
+
+![77825017097d6ce4821305a91b0c6d8](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714151137048.jpg)
+
+![eae0f1512af5308ca39591947f282d0](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714151155294.jpg)
+
+
+
+
+
+## 2. xml实现servlet配置
+
+![c834dd5c53fe6ff0bd99bea9f1febf4](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714151550254.jpg)
+
+### (1) 基本配置
+
+#### 1.1 xml
+
+```xml
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+
+  <context-param>
+    <param-name>unicode</param-name>
+    <param-value>UTF-8</param-value>
+  </context-param>
+
+  <servlet>
+    <servlet-name>configServlet</servlet-name>
+    <servlet-class>com.ityj.servlet.ConfigServlet</servlet-class>
+    <init-param>
+      <param-name>key1</param-name>
+      <param-value>v1</param-value>
+    </init-param>
+    <load-on-startup>-1</load-on-startup> <!--  -1表示懒加载。可以配置任意正整数，数字越小优先级越高。推荐6以上(tomcat默认配置了一些)，重复也可以  -->
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>configServlet</servlet-name>
+    <url-pattern>/configServlet</url-pattern>
+  </servlet-mapping>
+</web-app>
+```
+
+#### 1.2 Servlet
+
+```java
+public class ConfigServlet extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("into service()...");
+        ServletConfig servletConfig = getServletConfig();
+        String value = servletConfig.getInitParameter("key1");
+        System.out.println("key1:" + value);
+
+        ServletContext servletContext = getServletContext();
+        String unicode = servletContext.getInitParameter("unicode");
+        System.out.println("ServletContext - unicode:" + unicode);
+
+
+        resp.setContentType("text/html;charset=utf-8");
+        resp.getWriter().write("success!");
+    }
+}
+```
+
+![87951b626475e4539442ce3bd33c33f](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714151420755.jpg)
+
+
+
+
+
+
+
+### (2) 配置说明
+
+#### 1.1 load-on-startup
+
+> 配置当前servlet是否懒加载。 默认-1表示懒加载  正整数表示加载顺序。越小越早加载。可以重复（内部会自己调整）
+
+```xml
+<servlet>
+  <load-on-startup>-1</load-on-startup>
+</servlet>
+```
+
+#### 1.2 init-param
+
+> ServletConfig 作用于当前Servlet... 
+
+```xml
+<servlet>
+    <init-param>
+      <param-name>key1</param-name>
+      <param-value>v1</param-value>
+    </init-param>
+  </servlet>
+```
+
+获取方式：
+
+```java
+ServletConfig servletConfig = getServletConfig();
+String value = servletConfig.getInitParameter("key1");
+System.out.println("key1:" + value);
+```
+
+
+
+#### 1.3 context-param
+
+
+
+> ServletContext 作用域为整个应用，即application.  所有Servlet共享
+
+```xml
+<web-app>
+  <context-param>
+    <param-name>unicode</param-name>
+    <param-value>UTF-8</param-value>
+  </context-param>
+</web-app>
+```
+
+```java
+ServletContext servletContext = getServletContext();
+String unicode = servletContext.getInitParameter("unicode");
+System.out.println("ServletContext - unicode:" + unicode);
+```
+
+
+
+## 3. 注解实现servlet
+
+http://localhost:8080/web_mvc/helloServlet
+
+**/helloServlet**   斜线/不能省略
+
+```java
+@WebServlet(urlPatterns = "/helloServlet", loadOnStartup = -1,
+initParams = {@WebInitParam(name = "k", value = "v"), @WebInitParam(name = "k2", value = "v2")})
+public class HelloServlet extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("into HelloServlet.service()...");
+
+        ServletConfig servletConfig = this.getServletConfig();
+        String k2 = servletConfig.getInitParameter("k2");
+        System.out.println("k2 = " + k2);
+        resp.setContentType("text/html;charset=utf-8");
+        resp.getWriter().write("success!");
+    }
+}
+```
+
+
+
+## 4. Servlet生命周期
+
+![image-20250714150945601](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714150945890.png)
+
+
+
+### (1) loadOnStartup = -1
+
+```shell
+ConfigServlet constructor
+ConfigServlet init
+into LifeCycleServlet.service()...
+into LifeCycleServlet.service()...
+into LifeCycleServlet.service()...
+into LifeCycleServlet.service()...
+D:\2025\java\software\apache-tomcat-10.1.43\bin\catalina.bat stop
+Using CATALINA_BASE:   "C:\Users\yinjun\AppData\Local\JetBrains\IntelliJIdea2025.1\tomcat\2b531dc6-e63e-414a-afbe-847e746b9862"
+Using CATALINA_HOME:   "D:\2025\java\software\apache-tomcat-10.1.43"
+Using CATALINA_TMPDIR: "D:\2025\java\software\apache-tomcat-10.1.43\temp"
+Using JRE_HOME:        "C:\Program Files\Java\jdk-11"
+Using CLASSPATH:       "D:\2025\java\software\apache-tomcat-10.1.43\bin\bootstrap.jar;D:\2025\java\software\apache-tomcat-10.1.43\bin\tomcat-juli.jar"
+Using CATALINA_OPTS:   ""
+14-Jul-2025 15:05:57.969 信息 [main] org.apache.catalina.core.StandardServer.await 通过关闭端口接收到有效的关闭命令。正在停止服务器实例。
+14-Jul-2025 15:05:57.969 信息 [main] org.apache.coyote.AbstractProtocol.pause 暂停ProtocolHandler["http-nio-8080"]
+14-Jul-2025 15:05:58.309 信息 [main] org.apache.catalina.core.StandardService.stopInternal 正在停止服务[Catalina]
+ConfigServlet destroy
+```
+
+### (2) loadOnStartup = 10
+
+```shell
+Connected to server
+[2025-07-14 03:07:28,396] Artifact web-mvc:war exploded: Artifact is being deployed, please wait…
+14-Jul-2025 15:07:29.000 警告 [RMI TCP Connection(2)-127.0.0.1] org.apache.catalina.util.SessionIdGeneratorBase.createSecureRandom 使用[SHA1PRNG]创建会话ID生成的SecureRandom实例花费了[215]毫秒。
+ConfigServlet constructor
+ConfigServlet init
+[2025-07-14 03:07:29,026] Artifact web-mvc:war exploded: Artifact is deployed successfully
+[2025-07-14 03:07:29,026] Artifact web-mvc:war exploded: Deploy took 631 milliseconds
+
+
+into LifeCycleServlet.service()...
+into LifeCycleServlet.service()...
+into LifeCycleServlet.service()...
+D:\2025\java\software\apache-tomcat-10.1.43\bin\catalina.bat stop
+Using CATALINA_BASE:   "C:\Users\yinjun\AppData\Local\JetBrains\IntelliJIdea2025.1\tomcat\2b531dc6-e63e-414a-afbe-847e746b9862"
+Using CATALINA_HOME:   "D:\2025\java\software\apache-tomcat-10.1.43"
+Using CATALINA_TMPDIR: "D:\2025\java\software\apache-tomcat-10.1.43\temp"
+Using JRE_HOME:        "C:\Program Files\Java\jdk-11"
+Using CLASSPATH:       "D:\2025\java\software\apache-tomcat-10.1.43\bin\bootstrap.jar;D:\2025\java\software\apache-tomcat-10.1.43\bin\tomcat-juli.jar"
+Using CATALINA_OPTS:   ""
+14-Jul-2025 15:08:23.431 信息 [main] org.apache.catalina.core.StandardServer.await 通过关闭端口接收到有效的关闭命令。正在停止服务器实例。
+14-Jul-2025 15:08:23.431 信息 [main] org.apache.coyote.AbstractProtocol.pause 暂停ProtocolHandler["http-nio-8080"]
+14-Jul-2025 15:08:23.770 信息 [main] org.apache.catalina.core.StandardService.stopInternal 正在停止服务[Catalina]
+ConfigServlet destroy
+```
+
+
+
+
+
+## 5. ServletConfig和ServletContext
+
+![3262bba062649ca8f40c473e48ad91e](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714151438725.jpg)
+
+
+
+## 6. HttpServletRequest
+
+```java
+private void testHttpServletRequest(HttpServletRequest req) {
+    // 请求行  GET /web_mvc/lifeCycleServlet HTTP/1.1
+    System.out.println(req.getMethod());
+    System.out.println(req.getContextPath());
+    System.out.println(req.getProtocol());
+    // 请求头  k:v
+    System.out.println(req.getHeader("Connection"));
+    // 请求体
+    String k = req.getParameter("k");
+    System.out.println("k = " + k);
+}
+```
+
+## 7. HttpServletResponse
+
+```java
+private void testHttpServletResponse(HttpServletResponse resp) throws IOException {
+    // 响应行  HTTP/1.1 200
+    resp.setStatus(200);
+    // 响应头
+    resp.setContentType("text/html");
+    resp.setCharacterEncoding("UTF-8");
+    resp.setHeader("Connection", "keep-alive");  // Connection: keep-alive, keep-alive
+    // 响应体
+    PrintWriter writer = resp.getWriter();
+    writer.write("<b>complete</b>");
+}
+```
+
+![image-20250714140646342](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714140646632.png)
+
+## 8. 请求转发
+
+```
+*   1. 请求转发是通过HttpServletRequest实现的
+*   2. 是服务器内部行为，对客户端是屏蔽的
+*   3. 客户端只产生了一个请求， 服务端只产生了一对request和response.
+*   4. 客户端请求栏地址是不变的
+*   5. 参数可以传递
+*   6. 目标资源可以是servlet动态资源，也可以是html等静态资源
+*   7. 目标资源可以是WEB-INF下的受保护的资源，该方式也是获取WEB-INF资源的唯一途径
+*   8. 目标资源不可以是外部资源
+
+// response  HTTP/1.1 200
+```
+
+![image-20250714154952867](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714154953164.png)
+
+
+
+```java
+@WebServlet(urlPatterns = "/servletA")
+public class ServletA extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("into ServletA.service()...");
+
+        req.getRequestDispatcher("servletB").forward(req, resp);
+        //req.getRequestDispatcher("index.jsp").forward(req, resp);
+        //req.getRequestDispatcher("WEB-INF/css/a.css").forward(req, resp); 可以访问
+        // req.getRequestDispatcher("www.baidu.com").forward(req, resp); // 消息 请求的资源[/web_mvc/www.baidu.com]不可用
+
+
+
+    }
+}
+```
+
+```java
+@WebServlet(urlPatterns = "/servletB")
+public class ServletB extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("into ServletB.service()...");
+
+        String k = req.getParameter("k");
+        System.out.println("k from input parameter: " + k);
+        resp.setContentType("text/html;charset=utf-8");
+        resp.getWriter().write("ServletB success!");
+    }
+}
+```
+
+## 9.响应重定向
+
+![image-20250714160635777](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714160636077.png)
+
+
+
+```
+*   1. 请求转发是通过HttpServletResponse实现的
+*   2. 是在服务器提示下，客户端行为
+*   3. 客户端产生了多个请求  >=2，同时也会有多对req, resp
+*   4. 客户端请求栏地址是变化的
+*   5. 参数不可以传递
+*   6. 目标资源可以是servlet动态资源，也可以是html等静态资源(视图资源)
+*   7. 不可以是WEB-INF下的受保护的资源
+*   8. 目标资源可以是外部资源
+```
+
+```java
+@WebServlet(urlPatterns = "/servlet1")
+public class Servlet1 extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("into Servlet1.service()...");
+
+        // sendRedirect 两个作用 1.status code 302  2.  Location: servlet2
+        resp.sendRedirect("servlet2");
+        //resp.sendRedirect("index.jsp");
+        //resp.sendRedirect("WEB-INF/css/a.css"); // 不能访问。 相当于想通过浏览器直接访问WEB-INF  拒绝
+        //resp.sendRedirect("https://www.baidu.com"); // 可用
+
+    }
+}
+```
+
+```java
+@WebServlet(urlPatterns = "/servlet2")
+public class Servlet2 extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("into Servlet2.service()...");
+
+        String k = req.getParameter("k");
+        System.out.println("k from input parameter: " + k);
+
+    }
+}
+```
+
+![image-20250714162016373](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714162016656.png)
+
+![image-20250714162029637](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714162029921.png)
+
+
+
+
+
+## 10. 乱码
+
+![image-20250714164817025](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714164817344.png)
+
+### （1）GET
+
+![image-20250714164303703](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714164304029.png)
+
+
+
+### （2）POST
+
+![image-20250714164526147](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714164526460.png)
+
+
+
+
+
+### （3）响应乱码
+
+![image-20250714165451482](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714165451783.png)
