@@ -2047,7 +2047,7 @@ public class Servlet2 extends HttpServlet {
 
 
 
-## 10. 乱码
+## 10. 乱码(todo)
 
 ![image-20250714164817025](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714164817344.png)
 
@@ -2068,3 +2068,235 @@ public class Servlet2 extends HttpServlet {
 ### （3）响应乱码
 
 ![image-20250714165451482](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714165451783.png)
+
+```java
+package com.ityj.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+
+// todo
+@WebServlet("/garbled")
+public class GarbledTextServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("doGet");
+/*
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=utf-8");
+        resp.setCharacterEncoding("utf-8");*/
+
+        System.out.println(req.getParameter("name"));
+        resp.getWriter().write(req.getParameter("name"));
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("doPost");
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=utf-8");
+        resp.setCharacterEncoding("utf-8");
+
+        System.out.println(req.getParameter("name"));
+        resp.getWriter().write(req.getParameter("name"));
+    }
+}
+```
+
+
+
+## 11. 路径问题
+
+### （1）前端路径问题
+
+#### 1.1 相对路径
+
+![image-20250715150635464](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715150636145.png)
+
+
+
+#### 1.2 绝对路径
+
+斜杠/开头，需要加上contextName
+
+![image-20250715150845818](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715150846395.png)
+
+
+
+![image-20250715151036095](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715151108758.png)
+
+
+
+### （2）后端路径
+
+![1752563607457](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715151340289.png)
+
+
+
+
+
+## 12. 会话管理-Cookie
+
+![image-20250715154147858](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715154148321.png)
+
+```java
+System.out.println("into CookieServlet1.service()...");
+Cookie cookie =  new Cookie("k1", "v1");
+cookie.setMaxAge(3 * 60); // second
+Cookie cookie2 =  new Cookie("k2", "v2");
+resp.addCookie(cookie);
+resp.addCookie(cookie2);
+```
+
+
+
+## 13.  会话管理-Session
+
+![image-20250715155741648](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715160522729.png)
+
+
+
+![image-20250715155816116](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715155816733.png)
+
+```java
+@WebServlet(urlPatterns = "/session1")
+public class SessionServlet1 extends HttpServlet {
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("into SessionServlet1.service()...");
+
+        // 会判断JSESSIONID作为key的Cookie是否存在， 不存在则创建
+            // 存在会判断当前会话的JSESSIONID是否存在， 不存在则创建
+        HttpSession session = req.getSession();
+        System.out.println(session.getId() + "-------------" + session.isNew());
+        Object user = session.getAttribute("user");
+        if (user == null) {
+            System.out.println("user is null");
+            session.setAttribute("user", "Jack");
+        } else {
+            System.out.println("user is " + user);
+        }
+    }
+}
+```
+
+## 14. 三大域
+
+请求域（HttpServletRequest）： 一次请求。请求转发也是一次
+
+会话域（HttpSession）： 一个会话，可以是多个请求
+
+应用域（ServletContext）: 本应用内，可以是多个会话
+
+![image-20250715161009209](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715161225986.png)
+
+
+
+![image-20250715160920180](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715161420541.png)
+
+
+
+
+
+## 15. Filter
+
+![image-20250715162641914](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715162642211.png)
+
+```java
+import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
+
+import java.io.IOException;
+
+@WebFilter(urlPatterns = {"/helloServlet", "*.html"})
+public class MyFilter implements Filter {
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        System.out.println("before MyFilter.doFilter...");
+        filterChain.doFilter(servletRequest,servletResponse);
+        System.out.println("end MyFilter.doFilter...");
+    }
+}
+```
+
+
+
+
+
+### Filter生命周期
+
+> 项目启动即初始化，项目关闭销毁。
+
+> 初始化在Servlet之前
+
+
+
+LifeCycleFilter constructor...
+LifeCycleFilter init = ApplicationFilterConfig[name=com.ityj.filter.LifeCycleFilter, filterClass=com.ityj.filter.LifeCycleFilter]
+ConfigServlet constructor
+ConfigServlet init
+
+before LifeCycleFilter.doFilter...
+before MyFilter.doFilter...
+into HelloServlet.service()...
+k2 = v2
+end MyFilter.doFilter...
+end LifeCycleFilter.doFilter...
+
+ConfigServlet destroy
+LifeCycleFilter destroy...
+
+
+
+
+
+## 16. Listener
+
+![image-20250715163417835](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715163418107.png)
+
+```
+package com.ityj.listener;
+
+import jakarta.servlet.ServletContextAttributeEvent;
+import jakarta.servlet.ServletContextAttributeListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
+
+@WebListener("/helloServlet")
+public class MyContextListener implements ServletContextListener, ServletContextAttributeListener {
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        System.out.println("MyContextListener contextInitialized");
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        System.out.println("MyContextListener contextDestroyed");
+    }
+
+    @Override
+    public void attributeAdded(ServletContextAttributeEvent scae) {
+        System.out.println("MyContextListener attributeAdded  " + scae.getName() + "  " + scae.getValue());
+    }
+
+    @Override
+    public void attributeRemoved(ServletContextAttributeEvent scae) {
+        ServletContextAttributeListener.super.attributeRemoved(scae);
+    }
+
+    @Override
+    public void attributeReplaced(ServletContextAttributeEvent scae) {
+        ServletContextAttributeListener.super.attributeReplaced(scae);
+    }
+
+
+}
+```
