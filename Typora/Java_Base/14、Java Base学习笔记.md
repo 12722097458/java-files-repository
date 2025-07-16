@@ -1669,7 +1669,7 @@ public void testDruid() throws Exception {
 
 # 五、Servlet
 
-
+> https://www.bilibili.com/video/BV1UN411x7xe/?spm_id_from=333.1391.0.0&p=1&vd_source=b23569b676ce26126febad3c290b16e8
 
 ## 1. http介绍
 
@@ -2299,4 +2299,470 @@ public class MyContextListener implements ServletContextListener, ServletContext
 
 
 }
+```
+
+
+
+
+
+# 六、Spring
+
+> https://www.bilibili.com/video/BV1kR4y1b7Qc?spm_id_from=333.788.videopod.episodes&vd_source=b23569b676ce26126febad3c290b16e8&p=2
+
+## 1. Spring简述
+
+![image-20250716110803587](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716110804092.png)
+
+![image-20250716110938235](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716110938601.png)
+
+
+
+
+
+## 2. 整合log4j2
+
+pom
+
+```xml
+<!-- 使用slf4j 作为日志门面 -->
+<dependency>
+  <groupId>org.slf4j</groupId>
+  <artifactId>slf4j-api</artifactId>
+  <version>1.7.26</version>
+</dependency>
+<!-- 使用 log4j2 的适配器进行绑定 -->
+<dependency>
+  <groupId>org.apache.logging.log4j</groupId>
+  <artifactId>log4j-slf4j-impl</artifactId>
+  <version>2.9.1</version>
+</dependency>
+
+<!-- log4j2 日志门面 -->
+<dependency>
+  <groupId>org.apache.logging.log4j</groupId>
+  <artifactId>log4j-api</artifactId>
+  <version>2.11.1</version>
+</dependency>
+<!-- log4j2 日志实面 -->
+<dependency>
+  <groupId>org.apache.logging.log4j</groupId>
+  <artifactId>log4j-core</artifactId>
+  <version>2.11.1</version>
+</dependency>
+```
+
+
+
+log4j2.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration status="warn" monitorInterval="5">
+    <properties>
+        <property name="LOG_HOME">logs</property>
+    </properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] [%-5level] %c{36}:%L --- %m%n" />
+        </Console>
+
+        <File name="file" fileName="${LOG_HOME}/myfile.log">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %l %c{36} - %m%n" />
+        </File>
+
+        <RandomAccessFile name="accessFile" fileName="${LOG_HOME}/myAcclog.log">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %l %c{36} - %m%n" />
+        </RandomAccessFile>
+
+        <RollingFile name="rollingFile" fileName="${LOG_HOME}/myrollog.log"
+                     filePattern="E:/logs/$${date:yyyy-MM-dd}/myrollog-%d{yyyy-MM-dd-HH-mm}-%i.log">
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY" />
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%-5level] %l %c{36} - %msg%n" />
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB" />
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="file" />
+        </Root>
+    </Loggers>
+</configuration>
+```
+
+## 3. IoC
+
+### （1）概念介绍
+
+![image-20250716112508256](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716112508922.png)
+
+![image-20250716112750931](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716112751447.png)
+
+
+
+### （2）DI
+
+![image-20250716112922867](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716112923244.png)
+
+
+
+### （3）简单实现Ioc
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="user" class="com.ityj.spring.entity.User"></bean>
+
+</beans>
+```
+
+```java
+public class User {
+}
+```
+
+```java
+@Test
+public void testBean() {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+    User user = context.getBean("user", User.class);
+    System.out.println("user = " + user);
+}
+```
+
+## 4. 基于xml管理的bean
+
+### （1）bean创建方式
+
+```java
+@Test
+    public void testBean() {
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+
+        // 1 根据名字
+        Object user1 = context.getBean("user");
+        // 2 根据类型
+        // org.springframework.beans.factory.NoUniqueBeanDefinitionException: No qualifying bean of type 'com.ityj.spring.entity.User' available: expected single matching bean but found 2: user,user2
+        //  <bean id="user" class="com.ityj.spring.entity.User"></bean>
+        //    <bean id="user2" class="com.ityj.spring.entity.User"></bean>
+//        User user2 = context.getBean(User.class);
+        // 3 名字 + 类型
+        User user3 = context.getBean("user", User.class);
+        log.info("user1 = {}", user1);
+        log.info("user3 = {}", user3);
+    }
+```
+
+
+
+### （2）依赖注入 - setter
+
+```java
+public class User {
+
+    private String name;
+    private Integer age;
+}
+```
+
+```xml
+<bean id="user" class="com.ityj.spring.entity.User">
+    <property name="name" value="Jack"/>
+    <property name="age" value="23"/>
+</bean>
+```
+
+
+
+### （3）依赖注入 - constructor
+
+```java
+public class User {
+
+    private String name;
+    private Integer age;
+
+    public User() {
+    }
+
+    public User(String name, Integer age) {
+        this.name = name;
+        this.age = age;
+    }
+```
+
+```xml
+<!--构造器注入-->
+<bean id="user2" class="com.ityj.spring.entity.User" >
+    <constructor-arg name="name" value="Merry"/>
+    <constructor-arg name="age" value="34"/>
+</bean>
+```
+
+
+
+### （4）特殊值处理 - String
+
+```xml
+<!--属性特殊值处理-->
+<bean id="user3" class="com.ityj.spring.entity.User" >
+    <constructor-arg name="name" value="&lt;&gt;"/>
+    <constructor-arg name="age" value="34"/>
+</bean>
+
+<!--属性特殊值处理2-->
+<bean id="user4" class="com.ityj.spring.entity.User">
+    <property name="name">
+        <value><![CDATA[ a <> b ]]></value>
+    </property>
+    <property name="age" value="23"/>
+</bean>
+```
+
+```java
+@Test
+public void testDi_special_character() {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+    User user = context.getBean("user3", User.class);
+    log.info("user = {}", user);  //  user = User{name='<>', age=34}
+
+    User user4 = context.getBean("user4", User.class);
+    log.info("user4 = {}", user4);  //  user4 = User{name=' a <> b ', age=23}
+}
+```
+
+
+
+### （5）为对象类型赋值
+
+```java
+public class Account {
+}
+```
+
+```java
+public class User {
+
+    private String name;
+    private Integer age;
+    private Account account;
+```
+
+```xml
+<!--注入对象-->
+<bean id="account" class="com.ityj.spring.entity.Account"/>
+<bean id="user5" class="com.ityj.spring.entity.User">
+    <property name="name" value="Lucy"/>
+    <property name="age" value="23"/>
+    <property name="account" ref="account"/>
+</bean>
+```
+
+### （6）赋值arr/list/map
+
+```java
+public class Account {
+    private String[] arr;
+    private List<Integer> list;
+    private Map<String, Integer> map;
+```
+
+```xml
+ <bean id="account2" class="com.ityj.spring.entity.Account">
+        <property name="arr">
+            <array>
+                <value>a</value>
+                <value>b</value>
+                <value>c</value>
+            </array>
+        </property>
+
+        <property name="list">
+            <list>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+            </list>
+        </property>
+
+        <property name="map">
+            <map>
+                <entry key="k1" value="1"/>
+                <entry value="2" key="k2"/>
+            </map>
+        </property>
+    </bean>
+```
+
+
+
+### （7）引入外部属性文件
+
+#### 1.1 为当前配置文件引入外部的配置文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+```
+
+
+
+#### 1.2 用${}引入对应配置
+
+```xml
+<bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+    <property name="driverClassName" value="${jdbc.driverClassName}"/>
+    <property name="url" value="${jdbc.url}"/>
+    <property name="username" value="${jdbc.username}"/>
+    <property name="password" value="${jdbc.password}"/>
+    <property name="initialSize" value="${jdbc.initialSize}"/>
+</bean>
+```
+
+
+
+### （8）自动注入(autowire="byName")
+
+```xml
+<bean id="account" class="com.ityj.spring.entity.Account">
+    <property name="arr">
+        <array>
+            <value>a</value>
+            <value>b</value>
+            <value>c</value>
+        </array>
+    </property>
+</bean>
+```
+
+```xml
+<!--自动装配注入对象-->
+<bean id="user_auto" class="com.ityj.spring.entity.User" autowire="byName">
+    <property name="name" value="Lucy"/>
+    <property name="age" value="23"/>
+</bean>
+```
+
+```java
+@Test
+public void testDi_auto() {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("beans.xml");
+    User user = context.getBean("user_auto", User.class);
+    System.out.println("user = " + user);  // user = User{name='Lucy', age=23, account=Account{arr=[a, b, c], list=null, map=null}}
+}
+```
+
+## 5. bean的生命周期
+
+![1752640751223](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716123916743.png)
+
+```java
+package com.ityj.spring.entity;
+
+public class LifeCycleBean {
+
+    private String name;
+
+    public LifeCycleBean() {
+        System.out.println("1    LifeCycleBean 无参构造");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        System.out.println("2    LifeCycleBean.setName " + name);
+        this.name = name;
+    }
+
+    private void init() {
+        System.out.println("4   LifeCycleBean.init() method");
+    }
+
+    private void destroy() {
+        System.out.println("7   LifeCycleBean.destroy() method");
+    }
+
+}
+```
+
+```java
+package com.ityj.spring.processor;
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Configuration;
+
+public class MyBeanPostProcessor implements BeanPostProcessor {
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        System.out.println("3   before  BeanPostProcessor.postProcessBeforeInitialization() method");
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        System.out.println("5   after  BeanPostProcessor.postProcessAfterInitialization() method");
+        return bean;
+    }
+
+
+}
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="lifeCycleBean" class="com.ityj.spring.entity.LifeCycleBean" init-method="init" destroy-method="destroy" lazy-init="default">
+        <property name="name" value="LifeCycle"/>
+    </bean>
+
+    <bean id="myBeanPostProcessor" class="com.ityj.spring.processor.MyBeanPostProcessor"/>
+</beans>
+```
+
+```java
+public void beanLifeCycle() throws SQLException {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("bean-lifecycle.xml");
+    LifeCycleBean entity = context.getBean("lifeCycleBean", LifeCycleBean.class);
+    System.out.println("6 bean实例创建完成。。entity = " + entity);
+    // 测试bean生命周期
+    context.close();
+}
+
+
+12:40:35.177 [main] [DEBUG] org.springframework.beans.factory.support.DefaultListableBeanFactory:225 --- Creating shared instance of singleton bean 'lifeCycleBean'
+1    LifeCycleBean 无参构造
+2    LifeCycleBean.setName LifeCycle
+3   before  BeanPostProcessor.postProcessBeforeInitialization() method
+4   LifeCycleBean.init() method
+5   after  BeanPostProcessor.postProcessAfterInitialization() method
+6 bean实例创建完成。。entity = com.ityj.spring.entity.LifeCycleBean@fff25f1
+12:40:35.203 [main] [DEBUG] org.springframework.context.support.ClassPathXmlApplicationContext:1049 --- Closing org.springframework.context.support.ClassPathXmlApplicationContext@5e8ac0e1, started on Wed Jul 16 12:40:34 CST 2025
+7   LifeCycleBean.destroy() method
 ```
