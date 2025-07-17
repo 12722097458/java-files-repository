@@ -3030,7 +3030,7 @@ public void testFullAnnotation() {
 
 
 
-#### 1.4 切面(Aspect)
+#### 1.4 切面 (Aspect)
 
 > LogAspect 类就是一个切面
 
@@ -3214,7 +3214,7 @@ public class LogAspect {
 
 
 
-#### 1.4 test
+#### 1.4 test  （xml的执行顺序不太一致，和顺序有关）
 
 ```java
 @Test
@@ -3251,3 +3251,95 @@ java.lang.ArithmeticException: / by zero
 
 @Around环绕通知 catch 异常...
 @Around环绕通知 后...
+
+
+
+
+
+### （5）xml实现AOP
+
+```java
+package com.ityj.spring.aop.xml;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
+import org.springframework.stereotype.Component;
+
+@Component
+public class LogXmlAspect {
+
+    public void before(JoinPoint joinPoint) {
+        System.out.println("@Before前置通知...");
+    }
+
+    public void afterReturning(JoinPoint joinPoint, Object res) {
+        System.out.println("@AfterReturning 后置通知... " + res);
+    }
+
+    public void afterThrowing(JoinPoint joinPoint, Throwable ex) {
+        System.out.println("@AfterThrowing 异常通知..." + ex);
+    }
+
+    public void after(JoinPoint joinPoint) {
+        System.out.println("@After后置通知...");
+    }
+
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        Object proceed = null;
+        try {
+            System.out.println("@Around环绕通知 前...");
+            proceed = joinPoint.proceed();
+            System.out.println("@Around环绕通知 afterReturning...");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("@Around环绕通知 catch 异常...");
+        } finally {
+            System.out.println("@Around环绕通知 后...");
+        }
+        return proceed;
+    }
+
+    public void pointcut(){}
+
+}
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--开启注解扫描，扫描com.ityj.spring以及其子包下的注解-->
+    <context:component-scan base-package="com.ityj.spring.aop"/>
+
+    <aop:config >
+        <aop:pointcut id="pt" expression="execution(public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(..))"/>
+        <aop:aspect ref="logXmlAspect">
+            <aop:before method="before" pointcut-ref="pt"></aop:before>
+            <aop:after method="after" pointcut-ref="pt"></aop:after>
+            <aop:after-returning method="afterReturning" pointcut-ref="pt" returning="res"></aop:after-returning>
+            <aop:after-throwing method="afterThrowing" pointcut-ref="pt" throwing="ex"></aop:after-throwing>
+            <aop:around method="around" pointcut-ref="pt"></aop:around>
+        </aop:aspect>
+
+
+    </aop:config>
+
+</beans>
+```
+
+@Before前置通知...
+@Around环绕通知 前...
+CalculatorImpl.add  -- 进入目标方法
+@Around环绕通知 afterReturning...
+@Around环绕通知 后...
+@AfterReturning 后置通知... 3
+@After后置通知...
