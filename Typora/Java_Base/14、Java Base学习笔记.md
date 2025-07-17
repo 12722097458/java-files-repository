@@ -3461,3 +3461,151 @@ public class TestJdbc {
 
 }
 ```
+
+
+
+## （2） tx实现
+
+#### 1.1 xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+       https://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--开启注解扫描，扫描com.ityj.spring以及其子包下的注解-->
+    <context:component-scan base-package="com.ityj.spring.tx"/>
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.initialSize}"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="druidDataSource"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="druidDataSource"></property>
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManager"></tx:annotation-driven>
+
+</beans>
+```
+
+
+
+#### 1.2 测试tx和传播行为
+
+![image-20250717155023581](https://gitee.com/yj1109/cloud-image/raw/master/img/20250717155023849.png)
+
+```java
+package com.ityj.spring.tx.service.impl;
+
+import com.ityj.spring.tx.dao.StudentDao;
+import com.ityj.spring.tx.entity.Student;
+import com.ityj.spring.tx.service.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class Service2 {
+
+    @Autowired
+    private StudentService studentService;
+
+    @Transactional
+    public int batchAdd(List<Student> list) {
+        for (int i = 0; i < list.size(); i++) {
+            studentService.addAndUpdate(list.get(i));
+        }
+        return 100;
+    }
+}
+
+```
+
+```java
+package com.ityj.spring.tx.service.impl;
+
+import com.ityj.spring.tx.dao.StudentDao;
+import com.ityj.spring.tx.entity.Student;
+import com.ityj.spring.tx.service.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class StudentServiceImpl implements StudentService {
+
+    @Autowired
+    private StudentDao studentDao;
+
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Override
+    public int addAndUpdate(Student student) {
+        studentDao.add(student);
+
+        if ("second".equals(student.getName())) {
+            int a = 1 / 0;
+        }
+
+        int update = studentDao.update(student);
+        return update;
+    }
+}
+```
+
+
+
+#### 1.3 测试
+
+```java
+package com.ityj.spring.tx.controller;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+@SpringJUnitConfig(locations = "classpath:bean-tx.xml")
+public class StudentControllerTest {
+
+    @Autowired
+    private StudentController studentController;
+
+
+    @Test
+    public void testTx() {
+        studentController.addAndUpdate();
+    }
+
+
+    // Propagation.REQUIRES_NEW 会新建一个事务， 单词成功就成功
+    //
+    @Test
+    public void testPro() {
+        studentController.batchAdd();
+    }
+
+
+}
+```
