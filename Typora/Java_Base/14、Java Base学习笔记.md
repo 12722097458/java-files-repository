@@ -3343,3 +3343,121 @@ CalculatorImpl.add  -- 进入目标方法
 @Around环绕通知 后...
 @AfterReturning 后置通知... 3
 @After后置通知...
+
+
+
+
+
+## 9. tx事务
+
+### （1）Spring JdbcTemplate
+
+#### 1.1 pom
+
+```xml
+<dependency>
+  <groupId>org.springframework.data</groupId>
+  <artifactId>spring-data-jdbc</artifactId>
+  <version>2.1.3</version>
+</dependency>
+```
+
+
+
+#### 1.2 配置数据源
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--开启注解扫描，扫描com.ityj.spring以及其子包下的注解-->
+    <context:component-scan base-package="com.ityj.spring.jdbc"/>
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+
+    <bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.initialSize}"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="druidDataSource"/>
+    </bean>
+
+
+</beans>
+```
+
+#### 1.3  测试
+
+```java
+import com.ityj.spring.jdbc.entity.Student;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+
+import java.util.List;
+
+
+@SpringJUnitConfig(locations = "classpath:bean-jdbc.xml")
+public class TestJdbc {
+
+    private static final Logger log = LoggerFactory.getLogger(TestJdbc.class);
+
+    @Autowired
+    @Qualifier("jdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
+
+    @Test
+    public void testJdbcTemplate() {
+        log.info(jdbcTemplate.toString());
+    }
+
+    @Test
+    public void insert() {
+        String sql = "insert into student (name, age, gender) values (?, ?, ?)";
+        int insert = jdbcTemplate.update(sql, "SpringTemplate", "33", "男");
+        System.out.println("insert = " + insert);
+    }
+
+    @Test
+    public void update() {
+        String sql = "update student set name = ? where id = ?";
+        int update = jdbcTemplate.update(sql, "麦克", "5");
+        System.out.println("update = " + update);
+    }
+
+    @Test
+    public void delete() {
+        String sql = "delete from student  where id = ?";
+        int delete = jdbcTemplate.update(sql, "5");
+        System.out.println("delete = " + delete);
+    }
+
+    @Test
+    public void query() {
+        String sql = "select name, age, gender from student where id < ?";
+
+        List<Student> students = jdbcTemplate.query(sql,  new BeanPropertyRowMapper<>(Student.class), 12);
+        System.out.println("students = " + students);
+
+    }
+
+
+}
+```
