@@ -2766,3 +2766,488 @@ public void beanLifeCycle() throws SQLException {
 12:40:35.203 [main] [DEBUG] org.springframework.context.support.ClassPathXmlApplicationContext:1049 --- Closing org.springframework.context.support.ClassPathXmlApplicationContext@5e8ac0e1, started on Wed Jul 16 12:40:34 CST 2025
 7   LifeCycleBean.destroy() method
 ```
+
+
+
+## 6. 基于注解管理的bean
+
+### （1）基本介绍
+
+![image-20250716132143597](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716132143842.png)
+
+
+
+### （2）注解使用
+
+#### 1.1 开启注解扫描
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--开启注解扫描，扫描com.ityj.spring以及其子包下的注解-->
+    <context:component-scan base-package="com.ityj.spring"/>
+
+</beans>
+```
+
+
+
+#### 1.2 添加注解
+
+```java
+package com.ityj.spring.annotation.bean;
+
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
+
+@Component //默认id是类名首字母小写  <bean id="student" class="com.ityj.spring.annotation.bean.Student"/>
+/*@Repository
+@Service
+@Controlle*/
+public class Student {
+}
+```
+
+![image-20250716133452864](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716133453140.png)
+
+#### 1.3 测试
+
+```java
+@Test
+public void beanCreate() {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("bean-annotation.xml");
+    Student student = context.getBean("student", Student.class);
+    System.out.println("student = " + student);
+}
+```
+
+### （3）@Autowire注入属性
+
+
+
+```java
+package com.ityj.spring.annotation.controller;
+
+import com.ityj.spring.annotation.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class UserController {
+
+    // 1.成员变量
+    /*@Autowired  byType
+    private UserService userService;*/
+
+    /*// 2. set方法
+    private UserService userService;
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }*/
+
+    // 3. 构造方法上
+    /*private UserService userService;
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }*/
+
+    // 4. 构造方法的形参上
+    /*private UserService userService;
+    public UserController(@Autowired UserService userService) {
+        this.userService = userService;
+    }*/
+
+    // 5. 当前方法只有一个只含一个变量的构造方法， 可以省略@Autowired
+    /*private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }*/
+
+    // 6 Autowired + Qualifier
+    @Autowired
+    @Qualifier("userServiceImpl")
+    private UserService userService;
+
+    public void add() {
+        System.out.println("UserController.add()...");
+        userService.add();
+    }
+
+
+}
+```
+
+
+
+默认是按照类型注入  - byType。 如果有多个实现，那么需要制定具体name. 否则会报错。
+
+```java
+// Could not autowire. There is more than one bean of 'UserDao' type.
+    *   Beans:
+userMongoDbDaoImpl   (UserMongoDbDaoImpl.java)
+userMysqlDaoImpl   (UserMysqlDaoImpl.java)
+    * */
+    @Autowired
+    @Qualifier("userMongoDbDaoImpl")
+    private UserDao userDao;
+```
+
+### （4）@Resource注入属性
+
+```
+@Resource(name = "resourceUserMysqlDaoImpl")
+private UserDao userDao;
+
+1. 先根据name "resourceUserMysqlDaoImpl"找bean
+2. 再根据name "userDao"找bean
+3. 最后根据type UserDao.class找bean
+```
+
+```java
+package com.ityj.spring.resource.service.impl;
+
+import com.ityj.spring.resource.dao.UserDao;
+import com.ityj.spring.resource.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+
+@Service("resourceUserServiceImpl")
+public class UserServiceImpl implements UserService {
+
+    // y.NoUniqueBeanDefinitionException: No qualifying bean of type 'com.ityj.spring.resource.dao.UserDao' available: expected single matching bean but found 2: resourceUserMongoDbDaoImpl,resourceUserMysqlDaoImpl
+    /*@Resource   // @Resource的name没有配置， 所以1. 先根据"userDao"去找bean， 没有找到  2. 再根据UserDao类型找  --》 找到两个。。所以报错
+    private UserDao userDao;*/
+
+    // 正确方式1
+    @Resource
+    private UserDao resourceUserMysqlDaoImpl;
+
+    // 正确方式 2
+    @Resource(name = "resourceUserMysqlDaoImpl")
+    private UserDao userDao;
+
+    @Override
+    public void add() {
+        System.out.println("resourceUserServiceImpl.add()...");
+        System.out.println(userDao == resourceUserMysqlDaoImpl);
+        userDao.add();
+    }
+}
+```
+
+
+
+## 7. 全注解开发
+
+### （1）添加配置类
+
+> @Configuration
+>
+> @ComponentScan
+
+```java
+package com.ityj.spring.annotation.config;
+
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ComponentScan(basePackages = "com.ityj.spring")  // 组件扫描 <context:component-scan base-package="com.ityj.spring"/>
+public class MyConfiguration {
+
+}
+```
+
+### （2）测试
+
+```java
+@Test
+public void testFullAnnotation() {
+    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(MyConfiguration.class);
+    UserController userController = context.getBean("userController", UserController.class);
+    userController.add();
+}
+```
+
+
+
+
+
+## 8. AOP
+
+### （1）AOP介绍
+
+![image-20250716155535329](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716155535603.png)
+
+![image-20250716165315653](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716165315832.png)
+
+
+
+
+
+#### 1.0 横切关注点
+
+![image-20250716164943186](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716164943367.png)
+
+
+
+#### 1.1 连接点（JoinPoint）
+
+> 具体的方法。。。UserService.add()
+
+![image-20250716165216696](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716165216897.png)
+
+
+
+#### 1.2 切入点（PointCut）
+
+> 切入点表达式来表示被增强的方法
+
+![image-20250716165240967](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716165241128.png)
+
+
+
+#### 1.3 通知 （Advice）
+
+> Before advice. after advice ... 
+
+![image-20250716165003590](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716165003793.png)
+
+
+
+#### 1.4 切面(Aspect)
+
+> LogAspect 类就是一个切面
+
+![image-20250716165052026](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716165052195.png)
+
+
+
+#### 1.5 目标
+
+被代理的目标对象
+
+#### 1.6 代理
+
+向目标对象应用通知之后创建的代理对象
+
+### （2）jdk动态代理和cglib动态代理
+
+![image-20250716160403351](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716160403641.png)
+
+CGLIB通过ASM生成目标类的子类，并重写非final方法并委托给MethodIntercepor，结合FastClass优化调用性能。
+
+适用于代理无接口的类，如Spring非接口Bean，且对执行性能要求较高的场景
+
+局限：无法代理final类或方法，且代理类过程占用较多内存
+
+```java
+package com.ityj.spring.aop.cglib;
+
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
+import java.lang.reflect.Method;
+
+public class CGLIBProxy {
+    public static void main(String[] args) {
+        // 导出生成的代理字节码文件
+        //System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY, "outclass/");
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(AccountService.class);  // 设置目标类为父类
+        enhancer.setCallback(new CglibInterceptor()); // 设置拦截器
+        AccountService proxy = (AccountService) enhancer.create();  // 创建代理实例
+        proxy.add();
+    }
+}
+
+
+// 普通方法(非接口)
+class AccountService {
+    public void add() {
+        System.out.println("AccountService.add");
+    }
+}
+
+class CglibInterceptor implements MethodInterceptor {
+    @Override
+    public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        System.out.println("CglibInterceptor.intercept  前置增强");
+        Object res = methodProxy.invokeSuper(o, args);
+        System.out.println("CglibInterceptor.intercept  后置增强");
+        return res;
+    }
+}
+```
+
+
+
+### （3）切入点配置规则
+
+![image-20250716164518768](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716164518929.png)
+
+
+
+### （4）注解实现AOP
+
+#### 1.1  目标类
+
+```java
+package com.ityj.spring.aop.service.impl;
+
+import com.ityj.spring.aop.service.Calculator;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CalculatorImpl implements Calculator {
+    @Override
+    public int add(int a, int b) {
+        System.out.println("CalculatorImpl.add  -- 进入目标方法");
+        //int aa = 1 / 0;
+        return a + b;
+    }
+
+    @Override
+    public int minus(int a, int b) {
+        System.out.println("CalculatorImpl.minus");
+        return a - b;
+    }
+}
+```
+
+
+
+#### 1.2 Aspect切面
+
+```java
+package com.ityj.spring.aop.anno;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
+import org.springframework.stereotype.Component;
+
+@Component
+@Aspect
+public class LogAspect {
+
+    @Before(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
+    public void before(JoinPoint joinPoint) {
+        System.out.println("@Before前置通知...");
+    }
+
+    @AfterReturning(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))", returning = "res")
+    public void afterReturning(JoinPoint joinPoint, Object res) {
+        System.out.println("@AfterReturning 后置通知... " + res);
+    }
+
+    @AfterThrowing(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))", throwing = "ex")
+    public void afterThrowing(JoinPoint joinPoint, Throwable ex) {
+        System.out.println("@AfterThrowing 异常通知..." + ex);
+    }
+
+    @After(value = "pointcut()")
+    public void after(JoinPoint joinPoint) {
+        System.out.println("@After后置通知...");
+    }
+
+    @Around(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        Object proceed = null;
+        try {
+            System.out.println("@Around环绕通知 前...");
+            proceed = joinPoint.proceed();
+            System.out.println("@Around环绕通知 afterReturning...");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("@Around环绕通知 catch 异常...");
+        } finally {
+            System.out.println("@Around环绕通知 后...");
+        }
+        return proceed;
+    }
+
+    @Pointcut("execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(..))")
+    public void pointcut(){}
+
+}
+```
+
+
+
+#### 1.3 xml
+
+```java
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--开启注解扫描，扫描com.ityj.spring以及其子包下的注解-->
+    <context:component-scan base-package="com.ityj.spring.aop"/>
+    <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+</beans>
+```
+
+
+
+#### 1.4 test
+
+```java
+@Test
+public void testBefore() {
+    ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("bean-aop.xml");
+    Calculator calculator = context.getBean("calculatorImpl", Calculator.class);
+    int add = calculator.add(1, 2);
+    System.out.println("add = " + add);
+}
+```
+
+
+
+##### 1.4.1 正常
+
+@Around环绕通知 前...
+@Before前置通知...
+CalculatorImpl.add  -- 进入目标方法
+@AfterReturning 后置通知... 3
+@After后置通知...
+@Around环绕通知 afterReturning...
+@Around环绕通知 后...
+
+
+
+##### 1.4.2 异常
+
+@Around环绕通知 前...
+@Before前置通知...
+CalculatorImpl.add   -- 进入目标方法
+@AfterThrowing 异常通知...java.lang.ArithmeticException: / by zero
+@After后置通知...
+java.lang.ArithmeticException: / by zero
+
+@Around环绕通知 catch 异常...
+@Around环绕通知 后...
