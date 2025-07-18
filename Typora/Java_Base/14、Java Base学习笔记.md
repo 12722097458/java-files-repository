@@ -1835,7 +1835,7 @@ public class HelloServlet extends HttpServlet {
 
 
 
-## 4. Servlet生命周期
+## 4. Servlet生命周期（默认懒加载  ）
 
 ![image-20250714150945601](https://gitee.com/yj1109/cloud-image/raw/master/img/20250714150945890.png)
 
@@ -3680,3 +3680,144 @@ public void testFullAnnotation() {
 # 七、SpringMVC
 
 > https://www.bilibili.com/video/BV1Ry4y1574R/?spm_id_from=333.788.comment.all.click&vd_source=b23569b676ce26126febad3c290b16e8
+
+
+
+## 1. 初始化简单Spring MVC项目
+
+> Tomcat10  + JDK17 + Spring6 + Thymeleaf
+
+https://blog.csdn.net/weixin_44588243/article/details/149440724?sharetype=blogdetail&sharerId=149440724&sharerefer=PC&sharesource=weixin_44588243&spm=1011.2480.3001.8118
+
+
+
+## 2. @RequestMapping的使用
+
+```java
+package com.ityj.springmvc.controller;
+
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+@Controller
+public class HelloController {
+
+    // method is GET, and must contains parameter name=Jack
+    @RequestMapping(value = "/hello", method = RequestMethod.GET, params = {"name=Jack"})
+    public String hello() {
+        System.out.println("hello");
+        return "hello";
+    }
+
+    // ? 代表任意一个字符  特殊字符不行 ? / :都不行
+//    @GetMapping(value = "/a?a")
+    // * 代表0个或多个
+//    @GetMapping(value = "/a*a")
+    // **  表示任意的一层或多层目录  只能放在最后
+    @GetMapping(value = "/asd/**")
+    public String ant() {
+        System.out.println("ant");
+        return "hello";
+    }
+}
+```
+
+
+
+## 3. 支持路径占位符
+
+```java
+@GetMapping(value = "/hello/{id}/{name}")
+public String pathVariable(@PathVariable(value = "id") String id, @PathVariable("name") String name) {
+    log.info("你好：id={}, name={}", id, name);
+    return "hello";
+}
+```
+
+
+
+
+
+## 4. SpringMVC请求参数获取
+
+### （1）原生的Servlet
+
+```java
+// 原始Servlet获取参数
+    @GetMapping(value = "/testServlet")
+    public String testServlet(HttpServletRequest  request) {
+        String username = request.getParameter("username");
+        System.out.println("username:"+username);
+        return "hello";
+    }
+```
+
+```html
+<a th:href="@{/param/testServlet?username='Jack'}">测试ServletApi获取参数</a>
+```
+
+### (2) 通过控制器的形参获取参数 @RequestParam
+
+![image-20250718133603731](https://gitee.com/yj1109/cloud-image/raw/master/img/20250718133603971.png)
+
+```java
+@GetMapping(value = "/testParam")
+public String testParam(@RequestParam(value = "username", defaultValue = "default", required = true) String username, @RequestParam("hobby") List<String> hobby) {
+    System.out.println("username = " + username);
+    System.out.println("hobby = " + hobby);
+    return "hello";
+}
+```
+
+```html
+<br/>
+<form th:action="@{/param/testParam}" th:method="get">
+    name: <input type="text" name="username">
+    hobby:<input type="checkbox" name = "hobby" value="1">唱
+    <input type="checkbox" name = "hobby" value="2">跳
+    <input type="submit" value="提交">
+</form>
+```
+
+### （3）@RequestHeader("Host") String host
+
+### （4）@CookieValue(value = "JSESSIONID") String jsessionId
+
+### （5）通过POJO自动映射
+
+```java
+@GetMapping(value = "/testParam")
+public String testParam(@RequestParam(value = "username", defaultValue = "default", required = true) String username,
+                        @RequestParam("hobby") List<String> hobby,
+                        @RequestHeader("Host") String host,
+                        @CookieValue(value = "JSESSIONID") String jsessionId,
+                        User user) {
+    System.out.println("username = " + username);
+    System.out.println("hobby = " + hobby);
+    System.out.println("host = " + host);
+    System.out.println("jsessionId = " + jsessionId);
+    System.out.println("user = " + user);
+    return "hello";
+}
+```
+
+## 5. 字符过滤器解决中文乱码
+
+```xml
+<filter>
+  <filter-name>characterEncodingFilter</filter-name>
+  <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+  <init-param>
+    <param-name>encoding</param-name>
+    <param-value>UTF-8</param-value>
+  </init-param>
+</filter>
+<filter-mapping>
+  <filter-name>characterEncodingFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
