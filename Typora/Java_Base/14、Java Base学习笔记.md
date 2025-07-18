@@ -3821,3 +3821,143 @@ public String testParam(@RequestParam(value = "username", defaultValue = "defaul
 </filter-mapping>
 ```
 
+
+
+
+
+## 6. SpringMVC 处理作用域
+
+### （1）request 请求域
+
+#### 1.1 原生Servlet API  向域对象共享数据
+
+```java
+package com.ityj.springmvc.controller;
+
+
+import com.ityj.springmvc.entity.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Slf4j
+@Controller
+@RequestMapping("/scope")
+public class ScopeController {
+
+    // 原始Servlet获取参数
+    @GetMapping(value = "/requestApi")
+    public String testServlet(HttpServletRequest  request) {
+        request.setAttribute("money", "333");
+        return "hello";
+    }
+
+}
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello</title>
+</head>
+<body>
+Hello
+
+money...<b th:text="${money}"></b>
+</body>
+</html>
+```
+
+
+
+#### 1.2 ModelAndView向域对象共享数据
+
+```java
+@GetMapping(value = "/testModelAndView")
+public ModelAndView testModelAndView() {
+    ModelAndView mv = new ModelAndView();
+    mv.setViewName("hello");
+    mv.addObject("money_mv", "888");
+
+    return mv;
+}
+```
+
+
+
+#### 1.3 Model向域对象共享数据
+
+```java
+@GetMapping(value = "/testModel")
+public String testModel(Model model) {
+   model.addAttribute("money_model", "009");
+
+    return "hello";
+}
+```
+
+
+
+#### 1.4 Map向域对象共享数据
+
+```java
+  @GetMapping(value = "/testModel")
+    public String testModel(Model model) {
+        System.out.println(model.getClass().getName());  // org.springframework.validation.support.BindingAwareModelMap
+       model.addAttribute("money_model", "009");
+        return "hello";
+    }
+
+```
+
+#### 1.5 ModelMap向域对象共享数据
+
+```java
+@GetMapping(value = "/testModelMap")
+    public String testModelMap(ModelMap modelMap) {
+        System.out.println(modelMap.getClass().getName());  // org.springframework.validation.support.BindingAwareModelMap
+        modelMap.addAttribute("money_modelMap", "1234");
+        return "hello";
+    }
+```
+
+
+
+## （2）Session域
+
+```java
+@GetMapping(value = "/testSessionScope")
+public String testSessionScope(HttpSession  session) {
+    session.setAttribute("sessionScope", "sessionScope");
+    return "hello";
+}
+```
+
+```html
+msg from sessionScope...<b th:text="${session.sessionScope}"></b>  <br/>
+```
+
+
+
+## （3）ServletContext上下对象（域对象）
+
+```java
+@GetMapping(value = "/testServletContextScope")
+public String testServletContextScope(HttpSession  session) {
+    ServletContext app = session.getServletContext();
+    app.setAttribute("testServletContextScope", "testServletContextScope");
+    return "hello";
+}
+```
+
+```html
+msg from ServletContextScope...<b th:text="${application.testServletContextScope}"></b>  <br/>
+```
+
+> Thymeleaf：自动解析 ${application.key} 为 ServletContext 中的属性。 
