@@ -3929,7 +3929,7 @@ public String testModel(Model model) {
 
 
 
-## （2）Session域
+### （2）Session域
 
 ```java
 @GetMapping(value = "/testSessionScope")
@@ -3945,7 +3945,7 @@ msg from sessionScope...<b th:text="${session.sessionScope}"></b>  <br/>
 
 
 
-## （3）ServletContext上下对象（域对象）
+### （3）ServletContext上下对象（域对象）
 
 ```java
 @GetMapping(value = "/testServletContextScope")
@@ -3961,3 +3961,44 @@ msg from ServletContextScope...<b th:text="${application.testServletContextScope
 ```
 
 > Thymeleaf：自动解析 ${application.key} 为 ServletContext 中的属性。 
+
+
+
+## 7. 视图View
+
+### （1）ThymeleafViewResolver
+
+```java
+@RequestMapping(value = "/thymeleaf")
+public String thymeleaf() {
+    System.out.println("thymeleaf");
+    return "hello";   // ThymeleafViewResolver
+}
+```
+
+
+
+### （2）InternalResourceView
+
+```java
+// 请求转发
+@RequestMapping(value = "/testForward")
+public String testForward() {
+    System.out.println("testForward");
+    return "forward:/view/thymeleaf";   // InternalResourceView
+}
+```
+
+
+
+### （3）RedirectView
+
+```java
+@RequestMapping(value = "/testRedirect")
+public String testRedirect() {
+    System.out.println("testRedirect");
+    return "redirect:/view/testForward";   // RedirectView
+}
+```
+
+![image-20250718164605603](https://gitee.com/yj1109/cloud-image/raw/master/img/20250718164605895.png)
