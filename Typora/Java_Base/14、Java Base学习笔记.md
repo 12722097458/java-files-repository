@@ -4089,6 +4089,26 @@ public class RestFulController {
 
 ![image-20250722100206309](https://gitee.com/yj1109/cloud-image/raw/master/img/20250722100206762.png)
 
+### （3）开启静态资源访问
+
+DispatcherServlet都会去找对应的Handler,默认不支持静态资源访问。
+
+访问`http://localhost:8080/spring_mvc/pages/hello.js`会404
+
+通过配置可以解决
+
+```xml
+<!--开启静态资源的访问  - defaultServlet-->
+<mvc:default-servlet-handler/>
+```
+
+```log
+10:08:14.281 [http-nio-8080-exec-3] [DEBUG] org.springframework.web.servlet.DispatcherServlet:119 --- GET "/spring_mvc/pages/hello.js", parameters={}
+10:08:14.298 [http-nio-8080-exec-3] [DEBUG] org.springframework.web.servlet.handler.SimpleUrlHandlerMapping:527 --- Mapped to org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler@6614f201
+10:08:14.361 [http-nio-8080-exec-3] [DEBUG] org.springframework.web.servlet.DispatcherServlet:1128 --- Completed 200 OK
+
+```
+
 
 
 
