@@ -4319,9 +4319,55 @@ mappedHandler.triggerAfterCompletion(request, response, (Exception)null);
 
 
 
-## 11. 异常处理
+## 11. 异常处理ExceptionHandler
+
+```java
+package com.ityj.springmvc.controller;
 
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+@Slf4j
+@ControllerAdvice
+public class ExceptionHandleController {
+
+    @ExceptionHandler({NullPointerException.class})
+    public String fileNotFound(Model model, Exception e) {
+        System.out.println("fileNotFound");
+        model.addAttribute("errMsg", e);
+        return "error";
+    }
+
+
+}
+```
+
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error page</title>
+</head>
+<body>
+
+Error : <b th:text="${errMsg}"></b>  <br/>
+
+</body>
+</html>
+```
+
+```java
+@GetMapping("/err")
+public String errorTest() {
+    String string = null;
+    int res = string.length();
+    return "index";
+}
+```
 
 # 八、MyBatis
 
