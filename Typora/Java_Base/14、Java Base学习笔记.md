@@ -4369,6 +4369,21 @@ public String errorTest() {
 }
 ```
 
+
+
+## 12. MVC 完全配置化
+
+```java
+AbstractAnnotationConfigDispatcherServletInitializer
+```
+
+
+
 # 八、MyBatis
 
 > https://www.bilibili.com/video/BV1VP4y1c7j7/?spm_id_from=333.788.comment.all.click&vd_source=b23569b676ce26126febad3c290b16e8
+
+## 1. 导入配置，初始化项目
+
+
+
