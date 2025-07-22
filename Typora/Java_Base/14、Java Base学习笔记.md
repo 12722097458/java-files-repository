@@ -4002,3 +4002,99 @@ public String testRedirect() {
 ```
 
 ![image-20250718164605603](https://gitee.com/yj1109/cloud-image/raw/master/img/20250718164605895.png)
+
+
+
+
+
+## 8. RestFul
+
+### （1）基本代码
+
+```java
+package com.ityj.springmvc.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+@Controller
+public class RestFulController {
+
+    @GetMapping("/user/{id}")
+    public String query(@PathVariable("id") String id) {
+        System.out.println("query id is: " + id);
+        return "success";
+    }
+
+    @PostMapping("/user")
+    public String add(@RequestParam("id") String id, @RequestParam("username") String username) {
+        System.out.println("add id is: " + id + ". name is : " + username);
+        return "success";
+    }
+
+    @PutMapping("/user")
+    public String update(@RequestParam("id") String id, @RequestParam("newName") String newName) {
+        System.out.println("update id is: " + id + ". newName is : " + newName);
+        return "success";
+    }
+
+    @DeleteMapping("/user/{id}")
+    public String delete(@PathVariable("id") String id) {
+        System.out.println("delete id is: " + id);
+        return "success";
+    }
+
+
+
+}
+
+```
+
+![image-20250722093135477](https://gitee.com/yj1109/cloud-image/raw/master/img/20250722093135990.png)
+
+
+
+### （2）HiddenHttpMethodFilter允许前端发送PUT/DELETE请求
+
+#### 1.1 配置filter
+
+```xml
+<filter>
+  <filter-name>hiddenHttpMethodFilter</filter-name>
+  <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+</filter>
+
+
+<filter-mapping>
+  <filter-name>hiddenHttpMethodFilter</filter-name>
+  <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+#### 1.2 前端配置
+
+* 以post方式提交.  method = post
+
+* 添加一个隐藏的parameter :   _method=PUT/DELETE
+
+```html
+提交PUT请求：
+<form th:action="@{/user}" th:method="post">
+    <input type="hidden" name="_method" value="PUT">
+    id: <input type="text" name="id"/> <br/>
+    newName: <input type="text" name="newName"/> <br/>
+    <input type="submit">
+</form>
+```
+
+![image-20250722100206309](https://gitee.com/yj1109/cloud-image/raw/master/img/20250722100206762.png)
+
+
+
+
+
+
+
+# 八、MyBatis
+
+> https://www.bilibili.com/video/BV1VP4y1c7j7/?spm_id_from=333.788.comment.all.click&vd_source=b23569b676ce26126febad3c290b16e8
