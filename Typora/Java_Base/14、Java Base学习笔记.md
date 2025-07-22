@@ -4217,6 +4217,112 @@ public String testUpload(@RequestPart("fileUpload") MultipartFile fileUpload) th
 </form>
 ```
 
+
+
+## 10. 拦截器 implements HandlerInterceptor
+
+```java
+package com.ityj.springmvc.interceptors;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+@Component
+public class FirstInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("FirstInterceptor.preHandle");
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("FirstInterceptor.postHandle");
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("FirstInterceptor.afterCompletion");
+        }
+}
+```
+
+```xml
+<mvc:interceptors>
+    <mvc:interceptor>
+        <mvc:mapping path="/**"/>
+        <ref bean="firstInterceptor"/>
+    </mvc:interceptor>
+    <mvc:interceptor>
+        <mvc:mapping path="/**"/>
+        <ref bean="secondInterceptor"/>
+    </mvc:interceptor>
+</mvc:interceptors>
+```
+
+
+
+#### 执行顺序：
+
+源码：
+
+```java
+if (!mappedHandler.applyPreHandle(processedRequest, response)) {  
+    return;
+}
+
+	// mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+
+mappedHandler.applyPostHandle(processedRequest, response, mv);
+
+mappedHandler.triggerAfterCompletion(request, response, (Exception)null);
+```
+
+> 正常： 
+>
+> a b c三个拦截器
+>
+> a-pre
+>
+> b-pre
+>
+> c-pre
+>
+> c-post
+>
+> b-post
+>
+> a-post
+>
+> c-after
+>
+> b-after
+>
+> a-after
+
+
+
+> a b c 三个拦截器，假如c的preHandle返回回了false
+>
+> a-pre
+>
+> b-pre
+>
+> c-pre
+>
+> b-after
+>
+> a-after
+
+
+
+## 11. 异常处理
+
+
+
 # 八、MyBatis
 
 > https://www.bilibili.com/video/BV1VP4y1c7j7/?spm_id_from=333.788.comment.all.click&vd_source=b23569b676ce26126febad3c290b16e8
