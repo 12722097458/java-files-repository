@@ -4111,9 +4111,111 @@ DispatcherServlet都会去找对应的Handler,默认不支持静态资源访问�
 
 
 
+## 9. HttpMessageConverter
+
+### （1）@RequestBody
+
+```java
+@PostMapping("/testRequestBody")
+public String testRequestBody(@RequestBody String requestBody) {
+    System.out.println("requestBody = " + requestBody);  // requestBody = id=123&newName=ssdf
+    return "success";
+}
+```
+
+### （2）RequestEntity<T>
+
+```java
+@GetMapping("/testRequestEntity")
+public String testRequestBody(RequestEntity<String> requestEntity) {
+    System.out.println("requestEntity = " + requestEntity);  // requestEntity = <GET http://localhost:8080/spring_mvc/testRequestEntity,[host:"localhost:8080", connection:"keep-alive", sec-ch-ua:""Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"", sec-ch-ua-mobile:"?0", sec-ch-ua-platform:""Windows"", upgrade-insecure-requests:"1", user-agent:"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36", accept:"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7", sec-fetch-site:"none", sec-fetch-mode:"navigate", sec-fetch-user:"?1", sec-fetch-dest:"document", accept-encoding:"gzip, deflate, br, zstd", accept-language:"zh-CN,zh;q=0.9"]>
+    return "success";
+}
+```
+
+### （3）@ResponseBody 返回json数据
+
+```java
+// HTTP状态 406 - 不可接收  需要引入jackson包来进行对象json转换
+@GetMapping("/testResponseBody")
+@ResponseBody
+public User testResponseBody() {
+    System.out.println("testResponseBody...");
+    User user = new User();
+    user.setUsername("Jack");
+    user.setHobby(List.of("A", "B"));
+    return user;
+}
+```
+
+```xml
+<dependency>
+  <groupId>com.fasterxml.jackson.core</groupId>
+  <artifactId>jackson-databind</artifactId>
+  <version>2.19.0</version>
+</dependency>
+```
+
+#### @RestController
+
+```java
+@Controller
+@ResponseBody
+public @interface RestController {}
+```
 
 
 
+### （4）ResponseEntity<T> 文件上传下载
+
+#### 1.1 文件下载
+
+> new ResponseEntity<>(fileInputStream.readAllBytes(), httpHeaders, HttpStatus.OK);
+>
+> ​    httpHeaders.add("Content-Disposition", "attachment;filename=http.png");  // 固定格式
+
+```java
+@GetMapping("/testDownload")
+public ResponseEntity<byte[]> testDownload(HttpServletRequest request) throws IOException {
+    System.out.println("testDownload...");
+    ServletContext servletContext = request.getServletContext();
+    String path = servletContext.getRealPath("/imgs/http.png");
+    System.out.println("path = " + path);
+    FileInputStream fileInputStream = new FileInputStream(path);
+
+    MultiValueMap<String, String> httpHeaders = new HttpHeaders();
+    httpHeaders.add("Content-Disposition", "attachment;filename=http.png");
+    ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(fileInputStream.readAllBytes(), httpHeaders, HttpStatus.OK);
+    fileInputStream.close();
+    return responseEntity;
+}
+```
+
+
+
+#### 1.2 文件上传 (TODO)
+
+```java
+// 需要配置一个文件解析器StandardServletMultipartResolver(spring6)，否则空指针  
+@PostMapping("/testUpload")
+public String testUpload(@RequestPart("fileUpload") MultipartFile fileUpload) throws IOException {
+    String originalFilename = fileUpload.getOriginalFilename();
+    fileUpload.transferTo(new File(originalFilename));
+    return "success";
+}
+```
+
+```xml
+<bean id="multipartResolver"  class="org.springframework.web.multipart.support.StandardServletMultipartResolver"/>
+```
+
+```html
+测试 文件上传：
+<form th:action="@{/testUpload}" method="post" enctype="multipart/form-data">
+    请选择文件: <input type="file" name="fileUpload"/> <br/>
+    <input type="submit" value="上传">
+</form>
+```
 
 # 八、MyBatis
 
