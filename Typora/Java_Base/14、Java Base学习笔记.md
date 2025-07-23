@@ -4387,3 +4387,213 @@ AbstractAnnotationConfigDispatcherServletInitializer
 
 
 
+#### （1）pom
+
+```xml
+<dependency>
+  <groupId>org.projectlombok</groupId>
+  <artifactId>lombok</artifactId>
+  <version>1.18.38</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+<dependency>
+  <groupId>mysql</groupId>
+  <artifactId>mysql-connector-java</artifactId>
+  <version>8.0.22</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+<dependency>
+  <groupId>com.alibaba</groupId>
+  <artifactId>druid</artifactId>
+  <version>1.2.8</version>
+</dependency>
+
+<dependency>
+  <groupId>org.mybatis</groupId>
+  <artifactId>mybatis</artifactId>
+  <version>3.5.2</version>
+</dependency>
+
+<dependency>
+  <groupId>org.springframework</groupId>
+  <artifactId>spring-webmvc</artifactId>
+  <version>6.0.2</version>
+</dependency>
+```
+
+
+
+#### （2） [mybatis-config.xml](..\..\..\..\..\workspace-latest\java-base-learning-20250625\mybatis\src\main\resources\mybatis-config.xml) 
+
+```peoperties
+jdbc.driverClassName=com.mysql.cj.jdbc.Driver
+jdbc.url=jdbc:mysql://192.168.137.110/mydb?serverTimezone=EST
+jdbc.username=root
+jdbc.password=root
+jdbc.initialSize=5
+```
+
+```java
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!--1. 引入外部的配置-->
+    <properties resource="jdbc.properties">
+        <!--自定义属性，优先级低于db.properties-->
+    </properties>
+
+
+    <!--5、映射实体类对象-->
+    <typeAliases>
+        <!--默认映射com.ityj.entity目录下的所有实体类。-->
+        <!--mybatis的xml中对应的配置文件大小写都可以。没有限制-->
+        <package name="com.ityj.mybatis.entity"/>
+    </typeAliases>
+
+    <!--2. 配置数据库资源-->
+    <environments default="dev">
+        <environment id="dev">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driverClassName}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--3. 映射mapper-->
+    <mappers>
+        <!--使用mapper接口类路径-->
+        <!--注意：
+                1. 此种方法要求mapper接口名称和mapper映射文件名称相同，且放在同一个目录中。
+                2. 而如果放入mapper.xml 如果放入java接口同目录下，编译时又不会进行编译，需要手动在pom.xml文件中配置相关的路径指定编译。否则会报错
+                3. xml和接口名称要保持一致，否则会报错
+                org.apache.ibatis.binding.BindingException: Invalid bound statement (not found): com.ityj.mybatis.mapper.AccountMapper.getAccountById
+        -->
+        <package name="com.ityj.mybatis.mapper"/>
+    </mappers>
+
+</configuration>
+```
+
+#### (3) entity/mapper/mapper.xml
+
+```java
+package com.ityj.mybatis.entity;
+
+import lombok.Data;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Date;
+
+@Slf4j
+@Data
+@ToString
+public class Student {
+    private String name;
+    private int age;
+    private String gender;
+    private Date birthday;
+    private double height;
+}
+```
+
+```java
+package com.ityj.mybatis.mapper;
+
+import com.ityj.mybatis.entity.Student;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public interface StudentMapper {
+
+    int insert(Student student);
+    List<Student> queryAllStudent();
+}
+```
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ityj.mybatis.mapper.StudentMapper">
+
+    <insert id="insert">
+        insert into student (name, age, gender, birthday) values (#{name}, #{age}, #{gender}, #{birthday})
+    </insert>
+
+    <select id="queryAllStudent" resultType="com.ityj.mybatis.entity.Student">
+        select * from student
+    </select>
+
+</mapper>
+```
+
+#### （4）test
+
+```java
+package com.ityj.mybatis.mapper;
+
+
+import com.ityj.mybatis.entity.Student;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.junit.Test;
+import org.springframework.util.ResourceUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Date;
+import java.util.List;
+
+public class StudentMapperTest {
+
+    @Test
+    public void insert() throws Exception {
+        Student student = new Student();
+        student.setAge(33);
+        student.setHeight(182);
+        student.setName("Jack2");
+        student.setGender("男");
+        student.setBirthday(new Date(System.currentTimeMillis()));
+
+        File file = ResourceUtils.getFile("classpath:mybatis-config.xml");
+        FileInputStream fileInputStream = new FileInputStream(file);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(fileInputStream);
+        SqlSession sqlSession = sqlSessionFactory.openSession(true); // true表示自动提交
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        int insert = studentMapper.insert(student);
+        System.out.println("insert = " + insert);
+    }
+
+    @Test
+    public void queryAllStudent() throws Exception {
+        File file = ResourceUtils.getFile("classpath:mybatis-config.xml");
+        FileInputStream fileInputStream = new FileInputStream(file);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(fileInputStream);
+        SqlSession sqlSession = sqlSessionFactory.openSession(true);
+        StudentMapper studentMapper = sqlSession.getMapper(StudentMapper.class);
+        List<Student> students = studentMapper.queryAllStudent();
+        System.out.println("students = " + students);
+
+        List<Student> students2 = studentMapper.queryAllStudent();
+        System.out.println("students2 = " + students2);
+    }
+
+
+}
+```
