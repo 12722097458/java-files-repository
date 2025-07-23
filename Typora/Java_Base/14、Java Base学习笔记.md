@@ -4597,3 +4597,339 @@ public class StudentMapperTest {
 
 }
 ```
+
+
+
+## 2. 基本功能
+
+### （1）typeAliases
+
+> 映射对应的实体类，可以在对应的mapper.xml中省略全类名
+
+```xml
+<typeAliases>
+    <!--默认映射com.ityj.entity目录下的所有实体类。-->
+    <!--mybatis的xml中对应的配置文件大小写都可以。没有限制-->
+    <package name="com.ityj.mybatis.entity"/>
+</typeAliases>
+```
+
+```xml
+
+    <select id="queryAllStudent" resultType="STudent">  /*忽略大小写*/
+        select * from student
+    </select>
+```
+
+
+
+mybatis默认有很多映射
+
+> https://mybatis.org/mybatis-3/configuration.html#typeHandlers
+
+![image-20250723095333084](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723095333555.png)
+
+
+
+
+
+### （2）xml获取参数
+
+#### 1.1 ${}  字符串拼接
+
+字符串拼接， 需要手动加''  不推荐，会有sql注入问题。 可以传入table name
+
+#### 1.2 #{}  占位符
+
+相当于处理preparestatement的?，能解决sql注入问题
+
+#### 1.3 #{name}/${name}占位符里的值是怎么取的
+
+```java
+List<Student> queryByName(String name, int age);
+```
+
+```xml
+<select id="queryByName" resultType="student">
+	select * from student where name = #{name} and age = #{age}
+</select>
+```
+
+error:
+
+**Cause: org.apache.ibatis.binding.BindingException: Parameter 'name' not found. Available parameters are [arg1, arg0, param1, param2]**
+
+默认参数是两套： arg[index]   param[i + 1] 存在map中。
+
+源码：org.apache.ibatis.binding.MapperMethod#execute
+
+可以在interface中，指定map的名字， **@Param**解决
+
+```java
+List<Student> queryByName(@Param("name") String name, @Param("age") int age);
+```
+
+![image-20250723101328075](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723101328546.png)
+
+
+
+## 3. sql查询
+
+### （1） 模糊查询
+
+```xml
+<select id="queryLikeName" resultType="student">
+    select * from student where name like "%"#{name}"%"
+</select>
+
+10:16:45.792 [main] [DEBUG] com.ityj.mybatis.mapper.StudentMapper.queryLikeName:143 --- ==>  Preparing: select * from student where name like "%"?"%" 
+10:16:45.849 [main] [DEBUG] com.ityj.mybatis.mapper.StudentMapper.queryLikeName:143 --- ==> Parameters: Jack(String)
+```
+
+### （2）表名要用${}传递
+
+### （3） 解决字段名和属性名不一致
+
+#### 1.1 别名
+
+#### 1.2 下划线映射为驼峰规则
+
+```xml
+<settings>
+    <setting name="mapUnderscoreToCamelCase" value="true"/>
+</settings>
+```
+
+#### 1.3 resultMap
+
+```xml
+<select id="queryLikeName" resultMap="studentNameMap">
+    select * from student where name like "%"#{name}"%"
+</select>
+
+
+<resultMap id="studentNameMap" type="student">
+    <!--id 主键映射-->
+    <id property="id" column="id"></id>
+    <!--result 普通字段-->
+    <result property="name" column="name"></result>
+</resultMap>
+```
+
+
+
+## 4. 动态sql
+
+### （1）if
+
+### （2） foreach
+
+### （3）choose, when, otherwise
+
+> https://mybatis.org/mybatis-3/dynamic-sql.html
+
+```xml
+<select id="queryByIDList" resultType="student">
+    select * from student
+    <if test="ids != null">
+        <where>
+            <foreach item="id" collection="ids"
+                     open="ID in (" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+    </if>
+</select>
+```
+
+
+
+## 5. mybatis缓存
+
+### （1）一级缓存
+
+#### 1.1 概念
+
+> 默认开启， SqlSession级别。
+
+
+
+#### 1.2 失效
+
+* 不同SqlSession
+
+* 同一个sqlSession中出现增删改
+
+* 查询不同条件
+
+* clearCache()
+
+* ```
+  flushCache="true"
+  ```
+
+
+
+#### 1.3 问题
+
+（1）如果外部删除了一条数据，一级缓存不失效。导致查到的还是之前的数据。
+
+
+
+
+
+### （2）二级缓存
+
+![image-20250723105456191](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723105456916.png)
+
+
+
+# 九、SSM
+
+> https://www.bilibili.com/video/BV14WtLeDEit/?spm_id_from=333.1391.0.0&p=34
+
+## 1. 容器
+
+### （1）IOC 和DI
+
+![image-20250723125629833](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723125630129.png)
+
+### （2）组件的注册
+
+![image-20250723124527559](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723124527820.png)
+
+### （3）bean生命周期
+
+> Student无参构造。。。
+> set方法执行了。。。
+> postProcessBeforeInitialization...student
+> @PostConstruct
+> InitializingBean.afterPropertiesSet...
+> Student @Bean initMethod。。。
+> postProcessAfterInitialization...student
+>
+> @PreDestroy
+> DisposableBean...destroy
+> Student @Bean destroyMethod。。。
+
+
+
+![image-20250723124212966](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723124213280.png)
+
+@AutoWirede的实现原理是
+
+![image-20250723124239867](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723124240120.png)
+
+### （4）getBean()
+
+
+
+![image-20250723143036789](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723143037117.png)
+
+![image-20250723143011595](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723143011929.png)
+
+
+
+
+
+
+
+## 2. AOP
+
+>  Aspect Oriented Programing
+
+![image-20250723134436076](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723134436378.png)
+
+
+
+![image-20250723142106954](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723142107256.png)
+
+### （1）jdk动态代理
+
+```java
+public static Object getProxyInstance(Object obj) {
+    return Proxy.newProxyInstance(obj.getClass().getClassLoader(), obj.getClass().getInterfaces(), new InvocationHandler() {
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            System.out.println("DynamicProxy.before..." + method.getName());
+            Object invoke = method.invoke(obj, args);
+            System.out.println("DynamicProxy.after..." + method.getName());
+            return invoke;
+        }
+    });
+}
+```
+
+### （2）AOP
+
+```java
+package com.ityj.ssm.aspect;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
+import org.junit.jupiter.api.Order;
+import org.springframework.stereotype.Component;
+
+@Order(1)
+@Component
+@Aspect
+public class MyLogAspect {
+
+    @Pointcut("execution(public * com.ityj.ssm.controller.HelloController.*(..))")
+    private void pt() {
+    }
+
+    @Before(value = "pt()")
+    public void before(JoinPoint joinPoint) {
+        System.out.println("MyLogAspect.before...");
+    }
+
+    @After(value = "pt()")
+    public void after(JoinPoint joinPoint) {
+        System.out.println("MyLogAspect.after...");
+    }
+
+    @AfterReturning(value = "pt()", returning = "res")
+    public Object afterReturning(JoinPoint joinPoint, Object res) {
+        System.out.println("MyLogAspect.afterReturning...");
+        return res;
+    }
+
+    @AfterThrowing(value = "pt()", throwing = "ex")
+    public void afterThrowing(JoinPoint joinPoint, Throwable ex) {
+        System.out.println("MyLogAspect.afterThrowing..." + ex);
+    }
+
+    @Around(value = "pt()")
+    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        Object proceed = null;
+        try {
+            System.out.println("@Around环绕通知 前...");
+            proceed = joinPoint.proceed();
+            System.out.println("@Around环绕通知 afterReturning...");
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("@Around环绕通知 catch 异常...");
+        } finally {
+            System.out.println("@Around环绕通知 后...");
+        }
+        return proceed;
+    }
+}
+```
+
+### （3）多切面的执行顺序
+
+![image-20250723135221522](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723135221843.png)
+
+
+
+环绕通知一定要throw exception，不要吃掉。
+
+![image-20250723142440686](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723142441000.png)
+
+
+
+## 3. 事务
