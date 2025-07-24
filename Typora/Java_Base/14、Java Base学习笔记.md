@@ -2261,7 +2261,7 @@ LifeCycleFilter destroy...
 
 ![image-20250715163417835](https://gitee.com/yj1109/cloud-image/raw/master/img/20250715163418107.png)
 
-```
+```java
 package com.ityj.listener;
 
 import jakarta.servlet.ServletContextAttributeEvent;
@@ -4123,6 +4123,10 @@ public String testRequestBody(@RequestBody String requestBody) {
 }
 ```
 
+![2742a5c1ba450a19f8ba5b6a746fbdc](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724150135066.jpg)
+
+
+
 ### （2）RequestEntity<T>
 
 ```java
@@ -4371,7 +4375,19 @@ public String errorTest() {
 
 
 
-## 12. MVC 完全配置化
+## 12. CORS跨域问题
+
+![5104c459217bab7c6870cb81bfd3d9e](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724150251154.jpg)
+
+
+
+## 13. DispatcherServlet处理流程
+
+> https://www.bilibili.com/video/BV14WtLeDEit?spm_id_from=333.788.videopod.episodes&vd_source=b23569b676ce26126febad3c290b16e8&p=133
+
+![image-20250724153457429](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724153458173.png)
+
+![](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724153945571.png)## 13. MVC 完全配置化
 
 ```java
 AbstractAnnotationConfigDispatcherServletInitializer
@@ -4483,7 +4499,7 @@ jdbc.initialSize=5
 </configuration>
 ```
 
-#### (3) entity/mapper/mapper.xml
+####  (3) entity/mapper/mapper.xml
 
 ```java
 package com.ityj.mybatis.entity;
@@ -4746,11 +4762,15 @@ List<Student> queryByName(@Param("name") String name, @Param("age") int age);
 
 ## 5. mybatis缓存
 
+![image-20250724163002772](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724163003449.png)![image-20250724163055986](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724163056615.png)
+
+![image-20250724163150730](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724163151304.png)
+
 ### （1）一级缓存
 
 #### 1.1 概念
 
-> 默认开启， SqlSession级别。
+> 默认开启， SqlSession级别。（事务级别）
 
 
 
@@ -4780,9 +4800,11 @@ List<Student> queryByName(@Param("name") String name, @Param("age") int age);
 
 ### （2）二级缓存
 
+> 
+
 ![image-20250723105456191](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723105456916.png)
 
-
+![image-20250724163445512](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724163446568.png)
 
 # 九、SSM
 
@@ -4830,7 +4852,42 @@ List<Student> queryByName(@Param("name") String name, @Param("age") int age);
 
 
 
+### （5）IOC容器初始化过程
 
+> https://www.bilibili.com/video/BV14WtLeDEit?spm_id_from=333.788.videopod.episodes&vd_source=b23569b676ce26126febad3c290b16e8&p=83
+
+> 
+
+
+
+```java
+入口：
+org.springframework.context.support.AbstractApplicationContext#refresh
+    
+初始化自己定义的bean
+org.springframework.context.support.AbstractApplicationContext#finishBeanFactoryInitialization
+    1. org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingletons
+    	2. org.springframework.beans.factory.support.DefaultListableBeanFactory#preInstantiateSingleton
+    		3. org.springframework.beans.factory.support.AbstractBeanFactory#doGetBean
+    			4. org.springframework.beans.factory.support.DefaultSingletonBeanRegistry#getSingleton(java.lang.String, org.springframework.beans.factory.ObjectFactory<?>)
+    			org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#createBean(java.lang.String, org.springframework.beans.factory.support.RootBeanDefinition, java.lang.Object[])
+    
+    
+    
+    org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory#initializeBean(java.lang.String, java.lang.Object, org.springframework.beans.factory.support.RootBeanDefinition)
+    
+    
+    -- 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+			invokeInitMethods(beanName, wrappedBean, mbd);
+			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+
+```
+
+
+
+
+
+![](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724114504959.png)
 
 
 
@@ -4933,3 +4990,97 @@ public class MyLogAspect {
 
 
 ## 3. 事务
+
+```
+@EnableTransactionManagement // 开启事务管理
+@Transactional
+```
+
+### （1）@Transactional
+
+#### 1.1  transactionManager
+
+**控制提交和回滚**
+
+> 默认org.springframework.jdbc.support.JdbcTransactionManager@5b3518e1
+
+
+
+#### 1.2 TransactionInterceptor
+
+**控制何时提交回滚**
+
+> org.springframework.transaction.interceptor.TransactionAspectSupport#invokeWithinTransaction
+
+
+
+#### 1.3 隔离级别
+
+
+
+![image-20250723160031702](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723160032104.png)
+
+
+
+#### 1.4 传播行为
+
+![image-20250723161152796](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723161153168.png)
+
+![image-20250723162325739](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723162326068.png)
+
+![image-20250723162447079](https://gitee.com/yj1109/cloud-image/raw/master/img/20250723162501697.png)
+
+
+
+**总结关键点：**
+
+| 场景                                        | 方法 B 的 `@Transactional` 是否生效 | 方法 A 和 B 是否在同一物理事务 | 默认传播行为 (`REQUIRED`) 下是否一起回滚 | `REQUIRES_NEW` 下是否一起回滚                   |
+| :------------------------------------------ | :---------------------------------- | :----------------------------- | :--------------------------------------- | :---------------------------------------------- |
+| **A 内部 `this.B()` (自调用)**              | **❌ 失效**                          | **✅ 是** (都在 A 的事务中)     | **✅ 是** (同一事务必然同回滚)            | **不适用** (B 的注解失效，传播行为设置无效)     |
+| **A 调用另一个 Bean 的 B (`serviceB.B()`)** | **✅ 生效**                          | **✅ 是** (B 加入 A 的事务)     | **✅ 是** (同一事务必然同回滚)            | **❌ 不一定** (B 在独立事务，A/B 可单独回滚提交) |
+
+**核心结论：**
+
+- **自调用导致内部 `@Transactional` 失效：** 同一个类内部方法调用事务方法，事务注解失效，被调方法运行在调用方的事务（如果存在）或非事务环境中。**这种情况下两个方法都在一个物理事务里，必然一起成功或一起回滚，但这不是内部方法注解生效的结果，而是自调用的副作用。**
+- **跨 Bean 调用传播行为生效：** 通过代理正确调用另一个 Bean 的事务方法时，传播行为生效。默认的 `REQUIRED` 会让它们加入同一个事务，一起回滚。使用 `REQUIRES_NEW` 则创建独立事务，回滚互不影响（除非异常传播）。
+
+**强烈建议：**
+
+- **避免在同一个类内部进行事务方法的自调用。** 将需要事务的方法拆分到不同的 Service 层 Bean 中是清晰且符合 Spring 代理机制的最佳实践。
+- 理解不同传播行为的语义至关重要，尤其是在跨 Bean 调用时。
+
+
+
+## 4. Knife4j
+
+> https://doc.xiaominfo.com/docs/quick-start
+
+```xml
+<dependency>
+    <groupId>com.github.xiaoymin</groupId>
+    <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+    <version>4.4.0</version>
+</dependency>
+
+```
+
+```yml
+# springdoc-openapi项目配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.ityj.ssm.controller
+# knife4j的增强配置，不需要增强可以不配
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+```
+
