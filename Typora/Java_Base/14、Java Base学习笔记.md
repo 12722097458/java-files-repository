@@ -3464,7 +3464,7 @@ public class TestJdbc {
 
 
 
-## （2） tx实现
+### （2） tx实现
 
 #### 1.1 xml
 
@@ -3675,9 +3675,21 @@ public void testFullAnnotation() {
 
 
 
+### （4）tx实现原理
+
+![image-20250725101926463](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725101927480.png)
+
+![image-20250725102839205](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725102840027.png)
+
+![image-20250725103109576](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725103110754.png)
+
+> **AOP动态代理，通过TransactionInterceptor实现事务增强**
+
+![image-20250725104919704](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725104920394.png)
 
 
-# 七、SpringMVC
+
+#  七、SpringMVC
 
 > https://www.bilibili.com/video/BV1Ry4y1574R/?spm_id_from=333.788.comment.all.click&vd_source=b23569b676ce26126febad3c290b16e8
 
@@ -4402,6 +4414,10 @@ AbstractAnnotationConfigDispatcherServletInitializer
 ## 1. 导入配置，初始化项目
 
 
+
+> org.apache.ibatis.executor.SimpleExecutor#doQuery
+>
+> org.apache.ibatis.executor.statement.PreparedStatementHandler#query
 
 #### （1）pom
 
