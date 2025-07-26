@@ -5193,6 +5193,39 @@ void testRedis() {
 
 
 
+
+
+## 2. Web开发
+
+### （1）引入starter
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+### （2）自动配置了WebMvcAutoConfiguration
+
+![image-20250726141149278](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726141149535.png)
+
+### （3）静态资源
+
+> org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#addResourceHandlers
+
+![image-20250726152627243](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726152627495.png)
+
+（4）欢迎页
+
+> org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration.EnableWebMvcConfiguration#welcomePageHandlerMapping
+
+
+
+（5）
+
+
+
 ## 2. 日志
 
 ![578a4d73e65784c59879757a1e7f001](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725153803835.jpg)
