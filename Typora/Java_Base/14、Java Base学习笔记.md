@@ -5328,6 +5328,76 @@ public class MyWebMvcConfigurer {
 
 ![image-20250726163432562](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726163432824.png)
 
+### （7）内容协商
+
+> 服务器可以根据不同的请求参数（header or parameter）返回不同类型的数据(xml/json)
+
+#### 1.  根据请求头的Accept值
+
+code:
+
+```java
+@GetMapping("/student")
+public Student testContentNegotiation(@RequestHeader("Accept") String accept) {
+    System.out.println("testContentNegotiation .... accept : " + accept);
+    Student student = new Student();
+    student.setAge(33);
+    student.setHeight(182);
+    student.setName("Jack2");
+    student.setGender("男");
+    student.setBirthday(new Date(System.currentTimeMillis()));
+    return student;
+}
+```
+
+
+
+springboot默认导入了jackson-json包，想要返回xml类型数据，需要导入下面的pom以及在实体类加一个注解
+
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
+</dependency>
+```
+
+```java
+@JacksonXmlRootElement
+```
+
+
+
+测试：
+
+![image-20250726171811842](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726171812132.png)
+
+![image-20250726171832637](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726171832944.png)
+
+
+
+#### 2. 根据请求uri加一个参数
+
+需要做以下配置
+
+```yml
+spring:
+  mvc:
+    contentnegotiation:
+      favor-parameter: true
+```
+
+
+
+测试：
+
+![image-20250726172110521](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726172110816.png)
+
+![image-20250726172127488](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726172127770.png)
+
+
+
+
+
 ## 2. 日志
 
 ![578a4d73e65784c59879757a1e7f001](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725153803835.jpg)
