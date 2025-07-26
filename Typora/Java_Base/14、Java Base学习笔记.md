@@ -5106,13 +5106,92 @@ knife4j:
 
 # 十、SpringBoot
 
+> https://www.bilibili.com/video/BV1Es4y1q7Bf?spm_id_from=333.788.player.switch&vd_source=b23569b676ce26126febad3c290b16e8&p=25
+
+
+
 ## 1. 自动配置
 
 > https://www.bilibili.com/video/BV14WtLeDEit?spm_id_from=333.788.videopod.episodes&vd_source=b23569b676ce26126febad3c290b16e8&p=177
 
+### （1）概念理解
+
 ![image-20250725153248008](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725153248479.png)
 
 ![image-20250725153304352](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725153304720.png)
+
+
+
+### （2）最佳实践 - redis
+
+#### 1. 引入starter
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+#### 2. 启动了自动配置RedisAutoConfiguration
+
+```java
+@EnableConfigurationProperties(RedisProperties.class)
+@Import({ LettuceConnectionConfiguration.class, JedisConnectionConfiguration.class })
+public class RedisAutoConfiguration {
+    ...
+        
+    @Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnSingleCandidate(RedisConnectionFactory.class)
+	public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		return new StringRedisTemplate(redisConnectionFactory);
+	}
+    ...
+}
+
+
+@ConfigurationProperties("spring.data.redis")
+public class RedisProperties {}
+```
+
+* @EnableConfigurationProperties(RedisProperties.class)  -- 绑定了配置类RedisProperties并将RedisProperties放入容器
+* @Import 导入了另外两个配置类
+* 自动加载了stringRedisTemplate
+
+#### 3. 用stringRedisTemplate进行测试
+
+##### 1.1 配置redis host
+
+```yml
+spring:
+  data:
+    redis:
+      host: 192.168.137.110
+      port: 6379
+```
+
+##### 1.2 测试
+
+```java
+@Autowired
+private StringRedisTemplate stringRedisTemplate;
+
+@Test
+void testRedis() {
+    ValueOperations<String, String> stringStringValueOperations = stringRedisTemplate.opsForValue();
+    stringStringValueOperations.set("testKey", "Jack");
+
+
+    String res = stringStringValueOperations.get("testKey");
+
+    log.info("complete: " + res);
+}
+```
+
+![image-20250726135915177](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726135915451.png)
+
+
 
 ## 2. 日志
 
