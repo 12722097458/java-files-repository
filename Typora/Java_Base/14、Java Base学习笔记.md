@@ -5214,17 +5214,119 @@ void testRedis() {
 
 > org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration.WebMvcAutoConfigurationAdapter#addResourceHandlers
 
+```java
+private static final String[] CLASSPATH_RESOURCE_LOCATIONS = { "classpath:/META-INF/resources/",
+       "classpath:/resources/", "classpath:/static/", "classpath:/public/" };
+```
+
 ![image-20250726152627243](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726152627495.png)
 
-（4）欢迎页
+### （4）欢迎页
 
 > org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration.EnableWebMvcConfiguration#welcomePageHandlerMapping
 
+访问首页，默认去静态资源目录下找index.html
+
+> curl http://localhost:8080/
 
 
-（5）
+
+### （5）favicon 图标
+
+是浏览器的行为， 每次浏览器发请求都会带一个/favicon.ico请求， 所以在静态目录下放一个对应的静态文件即可。
+
+![image-20250726154302155](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726154302466.png)
 
 
+
+### （6）自定义静态资源规则
+
+#### 1.配置文件
+
+```
+通过  http://localhost:8080/pages/hello.html   找到静态文件 static/index.html 
+```
+
+```yml
+spring:
+  mvc:
+    static-path-pattern: /pages/**
+```
+
+#### 2. 代码配置类
+
+实现WebMvcConfigurer，添加功能
+
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        WebMvcConfigurer.super.addResourceHandlers(registry); // 保留原有配置
+        registry.addResourceHandler("/pages/**")
+                .addResourceLocations("classpath:/static/")
+                .setCachePeriod(12);
+    }
+}
+```
+
+* 添加了一个新的静态映射， 访问/pages/**会从classpath:/static/找文件
+* 保留原有的静态映射
+* 不能添加注解@EnableWebMvc， 会导致原有的所有springboot对MVC失效
+
+```java
+package com.ityj.springboot.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+//@EnableWebMvc  会关闭mvc的所有自动配置。
+// @EnableWebMvc  -> DelegatingWebMvcConfiguration -> 实例化了WebMvcConfigurationSupport。
+// @ConditionalOnMissingBean(WebMvcConfigurationSupport.class)
+//public class WebMvcAutoConfiguration {}  需要没有WebMvcConfigurationSupport才开始实例化。。
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        WebMvcConfigurer.super.addResourceHandlers(registry); // 保留原有配置
+        registry.addResourceHandler("/pages/**")
+                .addResourceLocations("classpath:/static/")
+                .setCachePeriod(12);
+    }
+}
+```
+
+
+
+#### 3. 添加一个bean: WebMvcConfigurer
+
+```java
+@Configuration
+public class MyWebMvcConfigurer {
+
+    // org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfiguration.setConfigurers
+    // public void setConfigurers(List<WebMvcConfigurer> configurers) {} 会把所有的WebMvcConfigurer bean都注入
+    @Bean
+    public WebMvcConfigurer webMvcConfigurer () {
+        WebMvcConfigurer webMvcConfigurer = new WebMvcConfigurer() {
+            @Override
+            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+                registry.addResourceHandler("/pages/**")
+                        .addResourceLocations("classpath:/static/")
+                        .setCachePeriod(12);
+            }
+        };
+        return webMvcConfigurer;
+    };
+
+}
+```
+
+![image-20250726163432562](https://gitee.com/yj1109/cloud-image/raw/master/img/20250726163432824.png)
 
 ## 2. 日志
 
