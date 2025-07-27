@@ -5396,6 +5396,125 @@ spring:
 
 
 
+### （8）内容协商原理 - HttpMessageConverter
+
+##### 1.1 @ResponseBody
+
+> ```java
+> ha.handle()
+>     org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#invokeHandlerMethod
+>     	org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite#handleReturnValue
+>     		org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor#handleReturnValue
+>     			MappingJackson2HttpMessageConverter
+> ```
+
+![ffdd16a864743b204cf70bc4316136a](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727174829859.jpg)
+
+![image-20250727174849297](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727174849770.png)
+
+![image-20250727175108895](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727175109208.png)
+
+![image-20250727175132333](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727175132605.png)
+
+### （9）自定义内容协商返回
+
+#### 1.1 添加依赖支持yaml格式
+
+```yaml
+<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-yaml</artifactId>
+</dependency>
+```
+
+![image-20250727181716783](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727181717126.png)
+
+![image-20250727181918253](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727181918585.png)
+
+
+
+#### 1.2 自定义yml格式
+
+##### 1.1.1 添加配置
+
+```yml
+spring:
+  mvc:
+    contentnegotiation:
+      media-types:
+        yml: application/yml
+```
+
+
+
+##### 1.1.2 添加 MyYmlHttpMessageConverter
+
+```java
+public class MyYmlHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
+
+    private static final MediaType APPLICATION_YML = new MediaType("application", "yml");
+
+    private ObjectMapper objectMapper;
+
+    public MyYmlHttpMessageConverter() {
+       // 告诉springboot 当前的MessageConverter支持哪个MediaType
+       super(APPLICATION_YML);
+       YAMLFactory yamlFactory = new YAMLFactory().disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+       this.objectMapper = new ObjectMapper(yamlFactory);
+    }
+
+    @Override
+    public boolean supports(Class<?> clazz) {
+       return true;
+    }
+
+    @Override  // 处理@RequestBody
+    protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+       return null;
+    }
+
+    @Override// 处理@ResponseBody
+    protected void writeInternal(Object o, HttpOutputMessage outputMessage) throws IOException, HttpMessageNotWritableException {
+       this.objectMapper.writeValue(outputMessage.getBody(), o);
+    }
+
+
+}
+```
+
+
+
+##### 1.2.3 加入spring配置
+
+```java
+@Bean
+public WebMvcConfigurer webMvcConfigurer () {
+    WebMvcConfigurer webMvcConfigurer = new WebMvcConfigurer() {
+
+        
+         @Override
+        public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+
+           converters.add(new MyYmlHttpMessageConverter());
+
+
+        }
+
+    };
+    return webMvcConfigurer;
+};
+```
+
+![image-20250727181000053](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727181000406.png)
+
+
+
+##### 1.2.4 test
+
+![image-20250727182408323](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727182408636.png)
+
+
+
 
 
 ## 2. 日志
@@ -5480,4 +5599,24 @@ spring:
 ## 5. 重点
 
 ![245b74c98535a9c3de5e3f50f607e8a](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725154215976.jpg)
+
+
+
+
+
+![image-20250727150309042](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150309362.png)
+
+
+
+![image-20250727150101763](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150102071.png)
+
+![image-20250727150342625](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150342895.png)
+
+
+
+
+
+
+
+![image-20250727165111583](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727165111873.png)
 
