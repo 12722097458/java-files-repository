@@ -5517,7 +5517,37 @@ public WebMvcConfigurer webMvcConfigurer () {
 
 
 
-## 2. 日志
+### （10）异常处理
+
+![image-20250730144001580](https://gitee.com/yj1109/cloud-image/raw/master/img/20250730144001992.png)
+
+
+
+
+
+跳转到默认html白页对应代码
+
+![image-20250727150309042](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150309362.png)
+
+
+
+![image-20250727150101763](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150102071.png)
+
+![image-20250727205959743](https://gitee.com/yj1109/cloud-image/raw/master/img/20250730144149528.png)
+
+
+
+![image-20250727165111583](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727165111873.png)
+
+
+
+![image-20250727210744349](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727210923725.png)
+
+
+
+
+
+## 3. 日志
 
 ![578a4d73e65784c59879757a1e7f001](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725153803835.jpg)
 
@@ -5582,13 +5612,13 @@ public WebMvcConfigurer webMvcConfigurer () {
 
 
 
-## 3. SpringBoot启动流程
+## 4. SpringBoot启动流程
 
 ![1378575362e2b7a155ec3da512fa677](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725154228690.jpeg)
 
 
 
-## 4. 自定义starter
+## 5. 自定义starter
 
 > https://github.com/12722097458/java-base-learning-20250625/commit/30629627db2304a45f3d9b6f19a50c14320b6655
 
@@ -5596,27 +5626,148 @@ public WebMvcConfigurer webMvcConfigurer () {
 
 ​	![image-20250725162354780](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725162355405.png)
 
-## 5. 重点
+
+
+## 6. SpringBoot 整合Mybatis
+
+### （1） 最佳实战
+
+> MybatisAutoConfiguration
+
+#### 1.1 引入pom
+
+注意版本兼容问题
+
+```xml
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>3.0.5</version>
+</dependency>
+```
+
+
+
+#### 1.2 改pom
+
+```yml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.137.110/mydb?serverTimezone=EST
+    username: root
+    password: root
+    type: com.alibaba.druid.pool.DruidDataSource
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml   # 配置mapper.xml的位置
+  configuration:
+    map-underscore-to-camel-case: true
+```
+
+
+
+#### 1.3 配置mapper接口的扫描
+
+这样项目启动会自动扫描这个包，并创建bean. 不需要在每一个mapper标注@Mapper注解了
+
+```java
+@MapperScan(basePackages = "com.ityj.springboot.mapper") // 导入包下的所有mapper
+```
+
+
+
+#### 1.4 code
+
+```java
+package com.ityj.springboot.mapper;
+
+import com.ityj.springboot.entity.Student;
+import org.apache.ibatis.annotations.Param;
+
+
+import java.util.List;
+
+public interface StudentMapper {
+
+    List<Student> queryByName(@Param("name") String name);
+
+}
+```
+
+
+
+#### 1.5 xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ityj.springboot.mapper.StudentMapper">
+
+    <select id="queryByName" resultType="com.ityj.springboot.entity.Student">
+        select * from student where name = #{name}
+    </select>
+
+</mapper>
+```
+
+
+
+#### 1.6 test
+
+```java
+package com.ityj.springboot.mapper;
+
+import com.ityj.springboot.entity.Student;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+@SpringBootTest
+class StudentMapperTest {
+
+    @Autowired
+    private StudentMapper studentMapper;
+
+    @Test
+    public void testQuery() {
+        List<Student> students = studentMapper.queryByName("Jack");
+        System.out.println("students = " + students);
+    }
+
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 11. 重点
 
 ![245b74c98535a9c3de5e3f50f607e8a](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725154215976.jpg)
 
 
 
-
-
-![image-20250727150309042](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150309362.png)
-
-
-
-![image-20250727150101763](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150102071.png)
-
-![image-20250727150342625](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727150342895.png)
-
-
-
-
-
-
-
-![image-20250727165111583](https://gitee.com/yj1109/cloud-image/raw/master/img/20250727165111873.png)
 
