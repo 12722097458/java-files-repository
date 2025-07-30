@@ -188,7 +188,7 @@ systemctl start docker
 #7 查看安装的版本（是否成功安装） 
 docker version
 
-#8 测试（首次执行会先从远程仓库中下载对应的hello-world镜像）
+#8 测试（首次执行会先从远程仓库中下载对应的hello-world镜像 - 失败可以后续换源后重试）
 docker run hello-world
 
 docker images  # 查看下载的镜像
@@ -218,13 +218,17 @@ https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors
 
 2、按照示例配置即可
 
+针对Docker客户端版本大于 1.10.0 的用户
+
+您可以通过修改daemon配置文件/etc/docker/daemon.json来使用加速器
+
 ```shell
-sudo mkdir -p /etc/docker
-sudo tee /etc/docker/daemon.json <<-'EOF'
+[root@localhost bin]# cat /etc/docker/daemon.json
 {
-  "registry-mirrors": ["https://od44lrrt.mirror.aliyuncs.com"]
+  "registry-mirrors": ["https://od44lrrt.mirror.aliyuncs.com","https://docker.1ms.run", "https://docker.1panel.live/" ]
 }
-EOF
+
+
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 ```
@@ -589,6 +593,12 @@ docker run -d --name consul-dev -p 8500:8500 consul:latest
 ```
 
 [集群部署](https://www.cnblogs.com/-wenli/p/13867979.html)
+
+
+
+## 7、安装kafka
+
+> https://hub.docker.com/r/apache/kafka
 
 
 

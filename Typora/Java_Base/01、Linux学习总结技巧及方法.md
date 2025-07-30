@@ -924,6 +924,79 @@ vhost    configure    write    read
 
 
 
+### 7、zookeeper
+
+```shell
+[root@localhost tools]# pwd
+/app/tools
+
+
+# 解压
+tar -zxvf apache-zookeeper-3.8.4-bin.tar.gz
+
+
+# 改配置
+# 创建一个目录来存放data
+cd /app/tools/apache-zookeeper-3.8.4-bin
+mkdir zkDir
+
+cd /app/tools/apache-zookeeper-3.8.4-bin/conf
+cp zoo_sample.cfg zoo.cfg
+vi zoo.cfg
+--- 修改这个配置 dataDir=/app/tools/apache-zookeeper-3.8.4-bin/zkDir
+```
+
+
+
+可以配置环境变量,在profile最下方添加以下配置:
+
+```bash
+vi /etc/profile
+#zookeeper
+export ZOOKEEPER_HOME=/app/tools/apache-zookeeper-3.8.4-bin
+export PATH=$PATH:${ZOOKEEPER_HOME}/bin
+```
+
+编辑完成后执行以下命令使配置生效:
+
+```bash
+source /etc/profile
+```
+
+
+
+## 8、kafka
+
+```shell
+1. 解压
+[root@localhost tools]# tar -zxvf kafka_2.12-3.9.1.tgz 
+
+2. 改配置
+
+vi /app/tools/kafka_2.12-3.9.1/config/server.properties
+
+log.dirs=/app/tools/kafka_2.12-3.9.1/kafka-logs
+#远程连接
+#去掉31行的注释，listeners=PLAINTEXT://:9092
+#去掉36行的注释，把advertised.listeners值改为PLAINTEXT://host.name:9092（host.name是你的IP地址）
+
+
+
+listeners=PLAINTEXT://:9092
+# Listener name, hostname and port the broker will advertise to clients.
+# If not set, it uses the value for "listeners".
+advertised.listeners=PLAINTEXT://192.168.137.110:9092
+
+```
+
+启动
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server.properties
+
+
+
+
+
 # 四、软件启动
 
 ## 0. 登录Linux
@@ -958,7 +1031,10 @@ cd /usr/local/tools/redis/bin
 
 后台启动方式
 首先把配置文件中的redis.config 中对应属性设置为： daemonize yes
-./redis-server /app/tools/redis-3.0.7/redis.conf
+/usr/local/tools/redis/bin/redis-server /usr/local/tools/redis/bin/redis.conf
+
+ps -ef | grep redis 检查是否启动成功
+
 #启动客户端
 ./redis-cli
 ```
@@ -981,7 +1057,65 @@ systemctl stop rabbitmq-server
 http://192.168.137.110:15672/#/
 ```
 
-## 7.Windows下的nginx
+## 7. zookeeper 启动
+
+启动server
+
+```shell
+/app/tools/apache-zookeeper-3.8.4-bin/bin/zkServer.sh start
+/app/tools/apache-zookeeper-3.8.4-bin/bin/zkServer.sh status
+```
+
+
+
+关闭server
+
+```shell
+/app/tools/apache-zookeeper-3.8.4-bin/bin/zkServer.sh stop
+```
+
+
+
+启动zkCli.sh客户端
+
+```shell
+/app/tools/apache-zookeeper-3.8.4-bin/bin/zkCli.sh
+
+ls /
+
+create /test1：创建test1节点
+```
+
+
+
+## 8. Kafka启动
+
+```shell
+/app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server.properties &
+```
+
+
+
+创建topic并查看
+
+```shell
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic test-topic
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic test-topic
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --from-beginning
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 \
+  --describe --group haha
+
+```
+
+
+
+
+
+## 8.Windows下的nginx
 
 ```shell
 cd D:\Java\tools-windows\nginx-1.12.0
@@ -989,7 +1123,7 @@ cd D:\Java\tools-windows\nginx-1.12.0
 或者双击启动即可
 ```
 
-## 8.登录Nacos
+## 9.登录Nacos
 
 ```shell
 解压nacos-server-1.1.4.zip
