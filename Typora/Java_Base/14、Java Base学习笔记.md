@@ -5746,23 +5746,73 @@ class StudentMapperTest {
 
 
 
+## 7. 远程调用(RPC)
+
+![image-20250730150434593](https://gitee.com/yj1109/cloud-image/raw/master/img/20250730150434973.png)
+
+
+
+![78b99c89fb107d560b683957c1891fe](https://gitee.com/yj1109/cloud-image/raw/master/img/20250730154213669.png)
 
 
 
 
 
+### （1）WebClient
+
+```pom
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-webflux</artifactId>
+</dependency>
+```
+
+```java
+public Mono<String> recentWeather(String city) {
+
+    WebClient webClient = WebClient.create();
+    Map<String, String> map = new HashMap<>();
+    map.put("area", city);
+    Mono<String> mono = webClient.get()
+            .uri("https://ali-weather.showapi.com/hour24?area={area}", map)
+            .header("Authorization", "APPCODE c402f4f54f874e25bf75094c2e332c56")
+            .acceptCharset(Charset.defaultCharset())
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(String.class);
+    return mono;
+}
+```
 
 
 
+### （2）Http Interface
 
+```java
+public interface WeatherInterface {
 
+    @GetExchange(url = "/hour24")
+    Mono<String> getWeather(@RequestParam("area") String city,
+                            @RequestHeader("Authorization") String auth);
 
+}
+```
 
+```java
+public Mono<String> getWeather(String city) {
 
-
-
-
-
+    WebClient webClient = WebClient.builder().baseUrl("https://ali-weather.showapi.com")
+            .codecs(new Consumer<ClientCodecConfigurer>() {
+                @Override
+                public void accept(ClientCodecConfigurer clientCodecConfigurer) {
+                    clientCodecConfigurer.defaultCodecs().maxInMemorySize(256 * 1024 * 1024);
+                }
+            }).build();
+    HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory.builderFor(WebClientAdapter.create(webClient)).build();
+    WeatherInterface weatherInterface = httpServiceProxyFactory.createClient(WeatherInterface.class);
+    return weatherInterface.getWeather(city, "APPCODE c402f4f54f874e25bf75094c2e332c56");
+}
+```
 
 ## 11. 重点
 
