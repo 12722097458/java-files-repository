@@ -1410,3 +1410,8 @@ yum install -y net-tools              # 安装后可以用ifconfig查看ip信息
 
 ![image-20220515090313074](https://alinyun-images-repository.oss-cn-shanghai.aliyuncs.com/images/20220731203844.png)
 
+
+
+
+
+》 https://share.note.youdao.com/ynoteshare/index.html?id=f660146b44802a83379368ad3dece3f2&type=note&_time=1753864129732

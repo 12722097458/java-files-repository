@@ -5814,6 +5814,103 @@ public Mono<String> getWeather(String city) {
 }
 ```
 
+
+
+## 8. Kafka
+
+![image-20250730154818811](https://gitee.com/yj1109/cloud-image/raw/master/img/20250730154819300.png)
+
+（1）Linux安装Zookeeper和kafka
+
+> https://github.com/12722097458/java-files-repository/commit/9c3ae129fc440d17fbba1e73765263f8ec41a344
+
+
+
+（2）SpringBoot整合Kafka
+
+> https://github.com/12722097458/java-base-learning-20250625/commit/30ad1964cdf8aecacbab1bd8064ad1036fa8712c
+
+#### 1. pom
+
+```xml
+ <dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka</artifactId>
+</dependency>
+```
+
+#### 2. 配置
+
+```yml
+  kafka:
+    bootstrap-servers: 192.168.137.110:9092
+```
+
+
+
+#### 3. @EnableKafka
+
+#### 4. producer test
+
+```java
+@SpringBootTest
+public class KafkaTest {
+
+    @Autowired
+    private KafkaTemplate kafkaTemplate;
+
+    @Test
+    public void testOneRecord() {
+        CompletableFuture future = kafkaTemplate.send("test-topic", 1,"key", "vvv"  + System.currentTimeMillis());
+
+        future.join();
+        System.out.println("send complete!");
+    }
+
+    @Test
+    public void testProducer() {
+        CompletableFuture[] futures = new CompletableFuture[10000];
+        for (int i = 0; i < 10000; i++) {
+            futures[i] = kafkaTemplate.send("test-topic", "kkk" + i, "vvv"  + i);
+        }
+        CompletableFuture.allOf(futures).join();
+        System.out.println("send complete!");
+    }
+
+}
+```
+
+
+
+#### 5. Consumer 监听@KafkaListener
+
+**同一个group的消费者是竞争关系， 一条数据只能被一个人消费**
+
+```java
+
+@Slf4j
+@Component
+public class KafkaComponent {
+
+    @KafkaListener(id = "receive1", groupId = "haha", topics = {"test-topic"})
+    public void receive(ConsumerRecord consumerRecord) {
+        Object key = consumerRecord.key();
+        Object value = consumerRecord.value();
+        log.info("receive  key :{}, value: {}", key, value);
+    }
+
+    @KafkaListener(id = "receive2", groupId = "haha", topics = {"test-topic"})
+    public void receive2(ConsumerRecord consumerRecord) {
+        Object key = consumerRecord.key();
+        Object value = consumerRecord.value();
+        log.info("receive2 key :{}, value: {}", key, value);
+    }
+
+}
+```
+
+
+
 ## 11. 重点
 
 ![245b74c98535a9c3de5e3f50f607e8a](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725154215976.jpg)
