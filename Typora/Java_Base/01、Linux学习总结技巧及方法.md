@@ -337,6 +337,14 @@ enabled=0
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
 ```
 
+
+
+#### （1）yum makecache报错 repodata/repomd.xml: [Errno 14] HTTP Error 404 - Not Found
+
+* >  需要重新安装yum源https://blog.csdn.net/weixin_44588243/article/details/149940980?spm=1011.2124.3001.6209
+
+
+
 ## 2、重启防火墙
 
 ```shell
@@ -965,7 +973,7 @@ source /etc/profile
 
 
 
-## 8、kafka
+### 8、kafka
 
 ```shell
 1. 解压
@@ -994,6 +1002,46 @@ advertised.listeners=PLAINTEXT://192.168.137.110:9092
 /app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server.properties
 
 
+
+### 9、consul
+
+1. linux
+
+```shell
+# 下载最新版Consul
+wget https://releases.hashicorp.com/consul/1.15.3/consul_1.15.3_linux_amd64.zip
+
+# 解压文件
+unzip consul_1.15.3_linux_amd64.zip   -- yum install unzip
+
+# 移动可执行文件到系统路径
+ cp consul /usr/local/bin/    
+
+# 验证安装
+consul --version
+
+启动开发模式
+consul agent -dev -ui -client=0.0.0.0
+
+
+访问Web界面
+
+浏览器访问：http://192.168.137.110:8500
+```
+
+
+
+
+
+2. windows
+
+   https://developer.hashicorp.com/consul/install
+
+   ![image-20250801101255853](https://gitee.com/yj1109/cloud-image/raw/master/img/20250801101256087.png)
+
+启动： `consul agent -dev` 
+
+测试: ``**[http://localhost:8500](http://localhost:8500/)**
 
 
 
@@ -1111,11 +1159,20 @@ create /test1：创建test1节点
 
 ```
 
+## 9、consul
+
+```shell
+consul agent -dev -ui -client=0.0.0.0
+
+
+访问Web界面
+
+浏览器访问：http://192.168.137.110:8500
+```
 
 
 
-
-## 8.Windows下的nginx
+## 21、Windows启动nginx
 
 ```shell
 cd D:\Java\tools-windows\nginx-1.12.0
@@ -1123,19 +1180,71 @@ cd D:\Java\tools-windows\nginx-1.12.0
 或者双击启动即可
 ```
 
-## 9.登录Nacos
+## 22、Windows启动Consul
+
+```java
+需要指定data-dir， 否则重启后数据丢失
+
+D:\2025\java\software\SpringCloud\consul_1.17.1_windows_386
+启动：
+file:///D:/2025/java/software/SpringCloud/consul_1.17.1_windows_386/consul_start.bat
+@echo.服务启动......
+@echo off
+@sc create Consul binpath= "D:\2025\java\software\SpringCloud\consul_1.17.1_windows_386\consul.exe agent -server -ui -bind=127.0.0.1 -client=0.0.0.0 -bootstrap-expect  1  -data-dir D:\2025\java\software\SpringCloud\consul_1.17.1_windows_386\mydata   "
+@net start Consul
+@sc config Consul start= AUTO
+@echo.Consul start is OK......success
+@pause
+访问： http://localhost:8500/
+```
+
+
+
+## 23、Windows启动Zipkin
 
 ```shell
-解压nacos-server-1.1.4.zip
+Zipkin:
+D:\2025\java\software\SpringCloud\zipkin-server-3.0.0-rc0-exec
+启动：java -jar zipkin-server-3.0.0-rc0-exec.jar
+访问：http://localhost:9411/
+```
+
+
+
+## 24.Windows启动Nacos
+
+```shell
+解压nacos-server-xxx.zip
 Windows 通过startup.cmd进行启动。默认端口号8848
 Linux通过startup.sh 启动。
 
 windows:
-D:\Java\tools-windows\nacos-server-1.1.4\nacos\bin
+D:\2025\java\software\SpringCloud\nacos-server2.2.3\bin
+启动：startup.cmd -m standalone
+访问：http://localhost:8848/nacos/   nacos/nacos
+```
 
-http://localhost:8848/nacos
-nacos/nacos
 
+
+## 25、Windows启动Sentinel
+
+```shell
+Sentinel:
+启动：D:\2025\java\software\SpringCloud\sentinel-dashboard-1.8.6>java -jar sentinel-dashboard-1.8.6.jar
+访问：http://localhost:8080/#/dashboard       sentinel/sentinel
+后台默认端口8719
+```
+
+
+
+## 26、Windows启动Seata
+
+> 需要吧数据源配置到application.yml中
+
+```shell
+seata:
+启动： D:\2025\java\software\SpringCloud\seata-server-2.0.0\bin\seata-server.bat
+访问： http://localhost:7091/#/transaction/list  seata/seata
 ```
 
 
