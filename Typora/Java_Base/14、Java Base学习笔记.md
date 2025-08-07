@@ -1090,6 +1090,16 @@ public class Person implements Serializable {
 
 ## 6. 网络编程
 
+**一句话总结关键区别：**
+
+> **TCP 可靠但慢，像打电话；UDP 快但不可靠，像发短信。**
+
+**面试回答建议：**
+“TCP 和 UDP 是传输层的两大协议。核心区别在于：
+
+1. **TCP 是面向连接的、可靠的协议**，通过确认、重传等机制保证数据完整有序，但速度较慢，适合文件传输、网页浏览等场景。
+2. **UDP 是无连接的、不可靠的协议**，不保证数据到达或顺序，但开销小、速度快，适合视频直播、实时游戏等对延迟敏感的应用。”
+
 ### (1) TCP
 
 ```java
@@ -1429,6 +1439,10 @@ public void testConnection() throws ClassNotFoundException, SQLException {
 
 
 ## 2. PreparedStatement
+
+PreparedStatement 通过**分离 SQL 结构与参数数据**、**自动转义特殊字符**、**预编译锁定执行计划**三重机制，确保用户输入始终被当作数据处理而非可执行代码，从而从根本上杜绝 SQL 注入漏洞。
+
+
 
 ```java
 package com.ityj.jdbc;
@@ -1787,8 +1801,6 @@ System.out.println("key1:" + value);
 
 
 #### 1.3 context-param
-
-
 
 > ServletContext 作用域为整个应用，即application.  所有Servlet共享
 
@@ -2238,20 +2250,20 @@ public class MyFilter implements Filter {
 
 
 
-LifeCycleFilter constructor...
-LifeCycleFilter init = ApplicationFilterConfig[name=com.ityj.filter.LifeCycleFilter, filterClass=com.ityj.filter.LifeCycleFilter]
+**LifeCycleFilter constructor...**
+**LifeCycleFilter init = ApplicationFilterConfig[name=com.ityj.filter.LifeCycleFilter, filterClass=com.ityj.filter.LifeCycleFilter]**
 ConfigServlet constructor
 ConfigServlet init
 
-before LifeCycleFilter.doFilter...
+**before LifeCycleFilter.doFilter...**
 before MyFilter.doFilter...
 into HelloServlet.service()...
 k2 = v2
 end MyFilter.doFilter...
-end LifeCycleFilter.doFilter...
+**end LifeCycleFilter.doFilter...**
 
 ConfigServlet destroy
-LifeCycleFilter destroy...
+**LifeCycleFilter destroy...**
 
 
 
@@ -2306,6 +2318,8 @@ public class MyContextListener implements ServletContextListener, ServletContext
 
 
 # 六、Spring
+
+> 基础性综合性开发框架
 
 > https://www.bilibili.com/video/BV1kR4y1b7Qc?spm_id_from=333.788.videopod.episodes&vd_source=b23569b676ce26126febad3c290b16e8&p=2
 
@@ -2640,7 +2654,7 @@ public class Account {
 
 
 
-### （8）自动注入(autowire="byName")
+### （8）自动注入(autowire 设置 byName")
 
 ```xml
 <bean id="account" class="com.ityj.spring.entity.Account">
@@ -2672,6 +2686,26 @@ public void testDi_auto() {
 ```
 
 ## 5. bean的生命周期
+
+> ### 1. **实例化（Instantiation）**
+>
+> Spring 容器通过构造函数或工厂方法创建 Bean 的实例
+>
+> ### 2. **属性赋值（Population）**
+>
+> **依赖注入**：容器为 Bean 的属性赋值（通过 Setter、构造函数或字段注入）
+>
+> Autowired: AutowiredAnnotationBeanPostProcessor
+>
+> ### 3. **初始化（Initialization）**
+>
+> servlet的init()方法
+>
+> BeanPostProcessor.postProcessBeforeInitialization()  前后两个方法
+>
+> ### 4. **销毁（Destruction）**
+>
+> destroy
 
 ![1752640751223](https://gitee.com/yj1109/cloud-image/raw/master/img/20250716123916743.png)
 
@@ -2832,8 +2866,6 @@ public void beanCreate() {
 
 ### （3）@Autowire注入属性
 
-
-
 ```java
 package com.ityj.spring.annotation.controller;
 
@@ -2904,6 +2936,17 @@ userMysqlDaoImpl   (UserMysqlDaoImpl.java)
     private UserDao userDao;
 ```
 
+Autowired 为什么在属性赋值阶段？
+
+1. **逻辑顺序合理**
+   - 先创建对象实例 → 再填充依赖 → 最后初始化。
+2. **解决循环依赖**
+   - 属性赋值阶段允许提前暴露半成品 Bean（三级缓存），从而支持 Setter/字段注入的循环依赖。
+3. **扩展性**
+   - 通过 `BeanPostProcessor`（如 `AutowiredAnnotationBeanPostProcessor`）在属性赋值前后插入自定义逻辑。
+
+
+
 ### （4）@Resource注入属性
 
 ```
@@ -2950,6 +2993,17 @@ public class UserServiceImpl implements UserService {
 }
 ```
 
+### （5）@Autowire 和 @Resource区别
+
+> “`@Autowired` 是 Spring 的，默认按类型找，找不到再按名字；`@Resource` 是 Java 标准的，默认按名字找，找不到再按类型。Autowired 有必选控制，Resource 没有直接的必选属性。”
+
+**加分点（如果时间允许）：**
+
+- 提到 `@Autowired` 需要 `@Qualifier` 配合处理多个同类型 Bean，而 `@Resource` 可以直接用 `name` 属性指定。
+- 说明 `@Resource` 在非 Spring 环境（如 Java EE）中也能用，可移植性稍好（虽然面试主要问 Spring）。
+
+
+
 
 
 ## 7. 全注解开发
@@ -2989,6 +3043,12 @@ public void testFullAnnotation() {
 
 
 ## 8. AOP
+
+通过切入点(pointcut)表达式可以找到连接点(join point，就是需要增强的方法add()...).
+
+通知(Advice)里的代码就是对连接点进行增强。
+
+Aspect就是自己写的代码。比如 MyLogAspect @Aspect
 
 ### （1）AOP介绍
 
@@ -3252,7 +3312,7 @@ java.lang.ArithmeticException: / by zero
 @Around环绕通知 catch 异常...
 @Around环绕通知 后...
 
-
+##### 1.4.3 @After相当于finally里的代码，一定会执行
 
 
 
@@ -3689,7 +3749,30 @@ public void testFullAnnotation() {
 
 
 
+### （5）事务失效的情景
+
+1. **方法非 `public`**：
+   Spring AOP 代理无法为 `private`、`protected` 或包级方法创建事务代理。
+2. **自调用（同一个类内调用）**：
+   类内部方法A直接调用带 `@Transactional` 的方法B，会绕过代理，导致事务失效。（需通过代理对象调用）
+3. **异常类型不正确**：
+   默认只对 `RuntimeException` 和 `Error` 回滚。若抛出**检查型异常（如 `Exception`）** 或**吞掉异常**（`catch` 后不抛出/不手动回滚），事务不会回滚。
+4. **未配置事务管理器**：
+   缺少 `PlatformTransactionManager` Bean（如 `DataSourceTransactionManager`），事务无法启动。
+5. **数据库引擎不支持**：
+   使用的存储引擎（如 MySQL 的 **MyISAM**）不支持事务。
+6. **传播行为设置不当**：
+   例如：`REQUIRES_NEW` 的方法在外部无事务时调用有效，但在外部有事务时挂起外部事务；`NOT_SUPPORTED` 会挂起当前事务。
+7. **`rollbackFor` 未指定检查异常**：
+   如需对自定义检查异常回滚，必须显式配置 `@Transactional(rollbackFor = MyCheckedException.class)`。
+
+> 1）方法不是 `public`；2）类内部自调用；3）抛出或捕获了非 `RuntimeException` 的异常；4）没配事务管理器；5）数据库引擎不支持（如 MyISAM）；6）传播行为配置问题；7）检查异常未指定 `rollbackFor`。”
+
+
+
 #  七、SpringMVC
+
+>  构建 **Web 应用程序**的 **MVC (模型-视图-控制器) 框架**，Spring的一个重要模块
 
 > https://www.bilibili.com/video/BV1Ry4y1574R/?spm_id_from=333.788.comment.all.click&vd_source=b23569b676ce26126febad3c290b16e8
 
@@ -5106,6 +5189,8 @@ knife4j:
 
 # 十、SpringBoot
 
+> 用于**快速创建**、**配置**和**运行**独立的、生产级的基于 Spring 的应用程序的**框架和工具集**
+
 > https://www.bilibili.com/video/BV1Es4y1q7Bf?spm_id_from=333.788.player.switch&vd_source=b23569b676ce26126febad3c290b16e8&p=25
 
 
@@ -5914,7 +5999,6 @@ public class KafkaComponent {
 ## 11. 重点
 
 ![245b74c98535a9c3de5e3f50f607e8a](https://gitee.com/yj1109/cloud-image/raw/master/img/20250725154215976.jpg)
-
 
 
 
