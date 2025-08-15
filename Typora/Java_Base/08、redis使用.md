@@ -217,12 +217,12 @@ MaxIdle=10
 ```
 
 
-
+setnx : set if not exist
 <h2>**各种数据类型操作对比：**<h2>
 
-|                     | 增                                         | 查                                           | 删                         |
-| ------------------- | ------------------------------------------ | -------------------------------------------- | -------------------------- |
-| string：字符串      | set name Jack                              | get name                                     | del name                   |
+|                     | 增                                          | 查                                           | 删                         |
+| ------------------- |--------------------------------------------| -------------------------------------------- | -------------------------- |
+| string：字符串      | set name Jack   // mset k1 v1 k2 v2        | get name                                     | del name                   |
 | hash：散列          | hset myhash name Jack / hset myhash age 16 | hget myhash name  /  hget all myhash查询所有 | hdel myhash name           |
 | list：列表，可重复  | lput mylist a / rput list m                | lrange mylist 0 -1                           | lpop mylist  / rpop mylist |
 | set：集合，不可重复 | sadd myset v                               | smembers myset                               | srem myset v:删除某个元素  |
