@@ -6002,3 +6002,30 @@ public class KafkaComponent {
 
 
 
+# 十一、Spring Cloud
+
+> https://www.bilibili.com/video/BV1gW421P7RD/?spm_id_from=333.1391.0.0
+
+## 1. Consul注册中心
+
+> https://github.com/12722097458/java-base-learning-20250625/commit/3014235ca370944c10fdee86ae412af19beaf54a
+
+## 2. Consul服务配置中心
+
+## 3. Load Balancer负载均衡
+
+## 4. Open Feign 远程调用
+
+## 5. Circuit Breaker - Resilient4j 熔断降级限流
+
+## 6. Circuit Breaker - Bulkhead并发限制
+
+## 7. Micrometer + Zipkin服务链路追踪
+
+## 8. gateway 网关 router/predict/filter
+
+## 9. Alibaba - Nacos
+
+## 10. Alibaba - Sentinel
+
+## 11. Alibaba - Seata 分布式事务管理
