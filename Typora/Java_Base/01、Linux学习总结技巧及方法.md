@@ -860,7 +860,8 @@ RabbitMQ的rpm包：
 https://packagecloud.io/rabbitmq/rabbitmq-server/packages/el/7/rabbitmq-server-3.9.10-1.el7.noarch.rpm
 ```
 
-1、安装erlang环境
+#### 1、安装erlang环境
+
 `Erlang`和`RabbitMQ`版本对照：https://www.rabbitmq.com/which-erlang.html
 
 ```shell
@@ -886,7 +887,7 @@ rpm -Uvh erlang-solutions-1.0-1.noarch.rpm
 >>>>>>> 456f772c758864dcc417da0dfe105cf821852d39
 ```
 
-2、安装rabbitmq
+#### 2、安装rabbitmq
 
 ```shell
 上传已经准备好的RabbitMQ的rpm包
@@ -898,7 +899,7 @@ systemctl status rabbitmq-server
 systemctl restart rabbitmq-server
 ```
 
-3、启动WEB管理插件
+#### 3、启动WEB管理插件
 
 ```shell
 rabbitmq-plugins enable rabbitmq_management
@@ -907,7 +908,7 @@ rabbitmq-plugins enable rabbitmq_management
 http://192.168.137.110:15672
 ```
 
-4、创建管理用户admin
+#### 4、创建管理用户admin
 
 ```shell
 #添加用户(用户admin，密码admin)
@@ -1000,6 +1001,60 @@ advertised.listeners=PLAINTEXT://192.168.137.110:9092
 启动
 
 /app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server.properties
+
+
+
+##### 本地伪分布式安装
+
+```shell
+/app/tools/kafka_2.12-3.9.1/config/server-0.properties
+/app/tools/kafka_2.12-3.9.1/config/server-1.properties
+/app/tools/kafka_2.12-3.9.1/config/server-2.properties
+
+/app/tools/kafka_2.12-3.9.1/kafka-logs-0
+/app/tools/kafka_2.12-3.9.1/kafka-logs-1
+/app/tools/kafka_2.12-3.9.1/kafka-logs-2
+
+
+cd /app/tools/kafka_2.12-3.9.1/
+mkdir kafka-logs-0
+mkdir kafka-logs-1
+mkdir kafka-logs-2
+
+cd /app/tools/kafka_2.12-3.9.1/config
+cp server.properties server-0.properties
+cp server.properties server-1.properties
+cp server.properties server-2.properties
+
+修改一下内容========server-1.properties=============
+broker.id=1
+listeners=PLAINTEXT://:9093  
+advertised.listeners=PLAINTEXT://192.168.137.110:9093
+log.dirs=/app/tools/kafka_2.12-3.9.1/kafka-logs-1
+==========================
+
+
+
+启动服务：
+/app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server-0.properties
+/app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server-1.properties
+/app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server-2.properties
+
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-topics.sh --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --create --topic cloud-topic --partitions 3 --replication-factor 2 
+/app/tools/kafka_2.12-3.9.1/bin/kafka-topics.sh --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --describe --topic cloud-topic
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-console-producer.sh --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --topic cloud-topic
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --topic cloud-topic --from-beginning
+
+/app/tools/kafka_2.12-3.9.1/bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --describe --group haha
+
+```
+
+![image-20250813144205875](https://gitee.com/yj1109/cloud-image/raw/master/img/20250813144206442.png)
+
+
 
 
 
@@ -1158,6 +1213,10 @@ create /test1：创建test1节点
   --describe --group haha
 
 ```
+
+
+
+
 
 ## 9、consul
 
