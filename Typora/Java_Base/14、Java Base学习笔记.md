@@ -6390,3 +6390,199 @@ synchronized的锁是基于对象实现的，在java中，Object类提供了wait
 * 非静态方法 - 锁的是当前类对象
 
 ![image-20250818113035414](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818113035783.png)
+
+
+
+### （2）锁的优化
+
+![image-20250818120342879](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818120343476.png)
+
+
+
+### （3）锁消除
+
+JVM会自动将没必要上锁的锁去掉
+
+**原理**：当JVM（通过逃逸分析）确定某个锁对象**不会逃逸出当前线程**时，会直接移除同步操作。
+
+### （4）锁膨胀
+
+如果在一个for循环里上锁， JVM会自动把锁的范围扩大。
+
+相邻的多个同步块使用同一把锁
+
+### （5）锁升级
+
+无锁： 当前对象没有被作为锁资源
+
+偏向锁：只有一个线程t1，同一个线程重复获取这把锁，就是偏向锁。 直接拿锁走人
+
+​	两个线程进行竞争，t2也过来了
+
+​	1.1 如果t1还拥有锁资源，导致t2拿锁失败。会进行锁升级，偏向锁撤销。 **偏向  --》 轻量级**
+
+​        1.2 如果t1已经结束，偏向锁没有被持有。 那么t2拿到锁，锁会直接将偏向的线程更改为t2， 拿锁走人。
+
+轻量级锁： 会采用自旋锁的方式尝试获取这个锁资源（自适应锁资源）。
+
+​	1.1 成功，拿锁走人
+
+​	1.2 多次失败，达到自旋的阈值。会再次进行升级   **轻量级  --》 重量级**
+
+重量级锁： 传统的synchronized，拿锁成功走人，失败挂起。
+
+
+
+可以从偏向锁降级为无锁。 其他状态不可逆。
+
+
+
+## 5. synchronized的实现原理
+
+### （1）MarkWord
+
+主要是看对象头里的markword存储的信息，markword占用了8字节
+
+- 锁状态管理（偏向/轻量级/重量级锁）
+- 对象哈希码存储
+- 垃圾回收分代年龄记录
+- GC标记
+
+![image-20250818122913232](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818122913589.png)
+
+![image-20250818123050859](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818123051248.png)
+
+无锁：内部正常存储对象的信息，hashcode，分代年龄等。 锁标记位 001
+
+偏向锁：内部没有地方存储hashcode了，大部分空间都存储了偏向哪个线程，存储了线程的标识。锁标记位：101
+
+轻量级锁： 内部直接鵆了Lock Record地址。Lock Record存储了对象的基本信息。 锁标记位： 00
+
+重量级锁： 内部直接存储了ObjectMonitor的地址，ObjectMonitor存储的是对象的信息。 锁标记位 10
+
+
+
+### （2）查看锁MarkWord的变化
+
+#### 1.1 无锁001
+
+```java
+public static void main(String[] args) {
+    Object obj = new Object();
+    System.out.println(ClassLayout.parseInstance(obj).toPrintable());  // 01 00 00 00 (00000001 00000000 00000000 00000000) (1)
+}
+```
+
+![image-20250818124704420](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818124704830.png)
+
+
+
+#### 1.2 匿名偏向锁 101
+
+```shell
+在 JDK 17 中，对象头打印显示无锁状态（001）而非偏向锁（101），原因如下：
+
+1. 偏向锁在 JDK 15+ 中默认禁用
+JDK 15 开始：偏向锁被标记为废弃（deprecated） 并默认关闭（JEP 374）。
+
+JDK 17：延续此策略，偏向锁机制默认不启用。新创建的对象直接进入无锁状态（标记位 001）。
+
+```
+
+> ```
+> 通过参数-XX:+UnlockDiagnosticVMOptions  -XX:+UseBiasedLocking 开启偏向锁
+> ```
+
+![image-20250818125854187](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818125854571.png)
+
+101 表示偏向锁
+
+后面的0表示是一个匿名偏向锁， 没有指向任何线程
+
+
+
+![image-20250818130603958](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818130604611.png)
+
+![image-20250818130747970](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818131228499.png)
+
+
+
+![image-20250818130730518](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818131234153.png)
+
+
+
+#### 1.3 轻量级锁
+
+JDK17默认禁用偏向锁，所以直接是无锁转为轻量级锁
+
+```java
+public static void main(String[] args) throws InterruptedException {
+    Object obj = new Object();
+    System.out.println(ClassLayout.parseInstance(obj).toPrintable());
+    synchronized (obj) {
+        System.out.println(ClassLayout.parseInstance(obj).toPrintable());
+    }
+}
+```
+
+![image-20250818132041748](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818132042185.png)
+
+#### 1.4 重量级锁
+
+![image-20250818135753970](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818135754385.png)
+
+
+
+
+
+```java
+public static void main(String[] args) throws InterruptedException {
+    Object obj = new Object();
+    Thread t1 = new Thread(() -> {
+        synchronized (obj) {
+            System.out.println(Thread.currentThread().getName() + " : " + ClassLayout.parseInstance(obj).toPrintable());
+        }
+    });
+
+    synchronized (obj) {
+        System.out.println(Thread.currentThread().getName() + " : " + ClassLayout.parseInstance(obj).toPrintable());
+        t1.start();
+        Thread.sleep(3000);
+    }
+}
+```
+
+
+
+### （3）ObjectMonitor
+
+> https://hg.openjdk.org/jdk8u/jdk8u/hotspot/file/69087d08d473/src/share/vm/runtime/objectMonitor.hpp
+
+```c++
+  // initialize the monitor, exception the semaphore, all other fields
+  // are simple integers or pointers
+  ObjectMonitor() {
+    _header       = NULL; 
+    _count        = 0;     // 竞争锁的线程个数
+    _waiters      = 0,     // _WaitSet中有多少个线程处于wait()状态
+    _recursions   = 0;     // 锁congruent的次数
+    _object       = NULL;
+    _owner        = NULL;   // 持有锁的线程
+    _WaitSet      = NULL;    // 持有锁的线程执行wait方法后，会扔到这个WaitSet里
+    _WaitSetLock  = 0 ;
+    _Responsible  = NULL ;
+    _succ         = NULL ;
+    _cxq          = NULL ;   // 获取锁资源失败后， 线程需要放在这个单向链表中
+    FreeNext      = NULL ;
+    _EntryList    = NULL ;   // cxq中的等待线程会基于一定机制扔到_EntryList，同时拿锁失败也可能进来这里
+    _SpinFreq     = 0 ;
+    _SpinClock    = 0 ;
+    OwnerIsThread = 0 ;
+    _previous_owner_tid = 0;
+  }
+```
+
+https://hg.openjdk.org/jdk8u/jdk8u/hotspot/file/69087d08d473/src/share/vm/runtime/objectMonitor.cpp
+
+![image-20250818141155613](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818141156010.png)
+
