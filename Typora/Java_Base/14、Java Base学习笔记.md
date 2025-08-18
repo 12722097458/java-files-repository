@@ -6029,3 +6029,364 @@ public class KafkaComponent {
 ## 10. Alibaba - Sentinel
 
 ## 11. Alibaba - Seata 分布式事务管理
+
+
+
+# 十二、Java并发编程
+
+## 1. 并发编程三大特征
+
+### （1）原子性
+
+#### 1.1 描述
+
+原子性是指一个操作（多个指令）是一个整体不可分割。一个线程正在执行这个操作，其他线程想要执行的话，必须等他执行完。
+
+```java
+package com.ityj.interview.advance.concurrent.thread;
+
+// 原子性可以解决并发编程问题
+// count = 168  可以用 cas/ synchronized /  lock 解决
+public class Thread1 {
+
+    static int count = 0;
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread t1 = new Thread(() -> {
+            incr();
+        });
+        Thread t2 = new Thread(() -> {
+            incr();
+        });
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+        System.out.println("count = " + count);
+
+    }
+
+    private static synchronized void incr() {
+        for (int i = 0; i < 100; i++) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            count++;
+        }
+    }
+
+}
+```
+
+#### 1.2 解决
+
+原子性可以解决并发问题。 java中有以下方法
+
+CAS / synchronized / lock
+
+
+
+### （2）可见性
+
+#### 1.1 描述
+
+A线程不可见B线程修改后的数据。（CPU和JVM的数据不是实时更新的）
+
+```java
+package com.ityj.interview.advance.concurrent.thread;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+// 可见性
+public class Thread2 {
+
+    //static volatile boolean flag = false;  //1. 直接volatile
+    static boolean flag = false;
+    static volatile int count = 1;
+
+
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread t1 = new Thread(() -> {
+            check();
+        });
+
+        t1.start();
+        TimeUnit.SECONDS.sleep(1);
+        flag = true;
+        System.out.println("main flag = " + flag);
+
+    }
+
+    private static void check_2() {  // 2. synchronized
+        while (true) {
+            if (flag) {
+                System.out.println("flag is true and exit!" + Thread.currentThread().getName());
+                break;
+            } else {
+                System.out.println(111);  // println 带有锁 synchronized (this)
+            }
+        }
+    }
+
+    static ReentrantLock lock  = new ReentrantLock();
+    private static void check_3() {  // 3. lock 底层也是cas, 改了volatile state; cpu会把当前所有数据刷到JVM， 包括之前的flag
+        while (true) {
+            lock.lock();
+            if (flag) {
+                System.out.println("flag is true and exit!" + Thread.currentThread().getName());
+                break;
+            } else {
+                count++;
+            }
+            lock.unlock();
+        }
+    }
+
+    private static void check() {  // 4. 随便找一个volatile修饰的变量，会同时刷新flag
+        while (true) {
+            if (flag) {
+                System.out.println("flag is true and exit!" + Thread.currentThread().getName());
+                break;
+            } else {
+                count++;
+            }
+        }
+    }
+
+}
+
+```
+
+#### 1.2 解决
+
+JMM用于屏蔽掉硬件和各个操作系统之间内存的差异。
+
+volatile /  synchronized / lock(本质也是cas 改volatile state; )
+
+![image-20250815150634124](https://gitee.com/yj1109/cloud-image/raw/master/img/20250815150635002.png)
+
+### （3）有序性 
+
+#### 1.1 描述
+
+在Java中，.java文件在被编译后会生成多条指令，这些指令需要CPU去执行，CPU执行这些指令时，会在不影响最终结果的前提下对这些指令做一定程度的重排序。
+
+Java做编译时，JVM内部也会有一定的JIT优化。也会做一些指令重排序
+
+
+
+```java
+package com.ityj.interview.advance.concurrent.thread;
+
+// 可见性
+// 正常情况下 x y打印的可能性为 11/01/10 如果出现了00 说明 t1 t2 的两个操作出现了指令重排序
+public class Thread3 {
+
+    static int a,b,x,y;
+
+    public static void main(String[] args) throws InterruptedException {
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            a = 0;
+            b = 0;
+            x = 0;
+            y = 0;
+
+
+            Thread t1 = new Thread(() -> {
+                a = 1;
+                x = b;
+            });
+
+            Thread t2 = new Thread(() -> {
+                b = 1;
+                y = a;
+            });
+            t1.start();
+            t2.start();
+            t1.join();
+            t2.join();
+
+            if (x == 0 && y == 0) {
+                System.out.println("i == " + i + " 时，x == " + x + ", y == " + y);
+            }
+
+        }
+
+        System.out.println("main complete... ");
+
+    }
+
+}
+```
+
+#### 1.2 出现的问题
+
+懒汉式DLC基本模式可能出现指令重排导致第二个线程拿到未赋值的对象。
+
+```java
+class Lazy {
+
+    private Lazy() {}
+
+    private static Lazy INSTANCE = null;
+
+    public static Lazy getInstance() {
+        if (INSTANCE == null) {
+            synchronized (Lazy.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new Lazy();  // 可能出现指令重排。 正常 1开辟空间  2初始化属性  3引用赋值。   如果 132 就会导致对象未初始化 t2判断非空，返回的对象是不完整的
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
+
+}
+```
+
+
+
+#### 1.3 解决
+
+在涉及到的变量上加上volatile
+
+```JAVA
+    private static volatile Lazy INSTANCE = null;
+```
+
+
+
+
+
+## 2. 锁的分类
+
+### （1）悲观锁 & 乐观锁
+
+**悲观锁：** synchronized， ReentrantLock， ReentrantReadWriteLock
+
+悲观锁在拿不到资源后，会将当前线程挂起（BLOCKED/WAITING/TIME_WAITING），挂起的操作是由CPU解决的。涉及到用户态与内核态之间切换，会影响一定的效率。
+
+**乐观锁：** CAS
+
+不涉及线程挂起，但如果长时间未获取到锁。空转会浪费CPU性能。
+
+> 资源竞争不激烈，几次尝试就能成功拿到锁的场景推荐乐观锁。否则悲观锁
+
+### （2）可重入锁 & 不可重入锁
+
+
+
+可重入锁：  synchronized， ReentrantLock， ReentrantReadWriteLock
+
+A() B() 方法都被synchronized修饰（同一把锁）。A内部调用B，A已经拥有锁，这时候再调用B，此时不需要再获取锁。 就是可重入锁。会记录重入次数。
+
+```java
+public static void main(String[] args) {
+    methodA();
+}
+
+public static synchronized void methodA() {
+    System.out.println("AAA");
+    methodB();
+}
+
+
+public static synchronized void methodB() {
+    System.out.println("BBB");
+}
+```
+
+不可重入锁：
+
+线程池的Worker对象是不可重入，不过他不是来实现原子性的。
+
+### （3）公平锁 & 非公平锁
+
+非公平锁：synchronized, ReentrantLock(false)
+
+
+
+公平锁：ReentrantLock(true) 
+
+排队，FIFO
+
+
+
+### （4）互斥锁 & 共享锁
+
+互斥锁：写锁，锁只能被一个线程拥有
+
+synchronized, ReentrantLock
+
+
+
+共享锁：读锁，同一时间点，可以多个线程同时持有当前锁资源。
+
+ReentrantReadWriteLock
+
+
+
+## 3. CAS
+
+### （1）什么是CAS
+
+Compare and Swap， 比较和交换，是一条CPU并发原语。
+
+他在替换内存中某个位置的值时可以保证原子性。先比较oldValue和内存值，如果一致就将内存值改为newValue
+
+Java提供了一个原子类Unsafe,里面提供了CAS的操作方法，这些方法是native修饰的，底层调用C++. 我们看到Unsafe.compareAndSwapInt就到头了。
+
+
+
+### （2）AtomicInteger.compareAndSet()
+
+针对i++这种操作，基于CAS是如何实现原子操作：Atomic类
+
+* AtomicInteger的compareAndSet()用到了Unsafe原子类
+* 他获取到了对应属性在内存中的偏移量（就是对应的value），同时也就获取到了数据的oldValue
+* 然后基于Unsafe魔法类的compareAndSetInt()实现数据原子性的自增或自减
+
+
+
+C++源码
+
+https://hg.openjdk.org/jdk8u/jdk8u/hotspot/file/69087d08d473/src/share/vm/prims/unsafe.cpp
+
+![image-20250818110255086](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818110255529.png)
+
+
+
+https://hg.openjdk.org/jdk8u/jdk8u/hotspot/file/69087d08d473/src/os_cpu/linux_x86/vm/atomic_linux_x86.inline.hpp
+
+![image-20250818110541010](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818110541363.png)
+
+### （3）CAS问题
+
+1. ABA
+2. 空转影响CPU
+3. 只能针对一个属性保证原子性
+
+## 4. synchronized
+
+可以对方法或代码块进行加锁。一般使用小粒度的同步代码快
+
+synchronized的锁是基于对象实现的，在java中，Object类提供了wait, notify等针对锁的操作。java所有的对象都可以作为一把锁。
+
+### （1）类锁和对象锁
+
+同步方法：
+
+* this  -  锁的是当前类对象
+* 类.class
+
+同步代码块：
+
+* 静态方法 - 类.class
+* 非静态方法 - 锁的是当前类对象
+
+![image-20250818113035414](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818113035783.png)
