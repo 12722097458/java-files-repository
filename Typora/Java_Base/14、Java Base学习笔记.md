@@ -6586,3 +6586,131 @@ https://hg.openjdk.org/jdk8u/jdk8u/hotspot/file/69087d08d473/src/share/vm/runtim
 
 ![image-20250818141155613](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818141156010.png)
 
+
+
+## 6. ReentrantLock
+
+### （1）ReentrantLock和synchronized的区别
+
+1.1 synchronized是一个关键字，ReentrantLock是一个对象，需要基于对象操作
+
+1.2 synchronized可以用于方法或代码块。 ReentrantLock需要手动处理开启锁以及关闭锁
+
+1.3 synchronized 拿不到锁只能挂起， lock可以设置超时时间等方式处理
+
+1.4 lock可以支持公平锁
+
+1.5 synchronized是基于对象实现的， lock是基于AQS实现
+
+### （2）AQS
+
+AQS就是java.util.concurrenct包下的一个抽象类AbstractQueuedSynchronizer
+
+主要有三个属性
+
+1. state  -- _recursions ； state为0时，表示当前锁没有被持有。
+
+2. 双向链表(阻塞队列) - _cxq/_EntryList； 锁获取失败时，会将当前线程封装成Node对象，并加入到AQS双向队列的队尾。等待持有锁的线程释放锁资源，当前的线程才有机会拿。（当然需要当前线程移动到最前端）
+
+![image-20250818145831368](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818150340304.png)
+
+3. 一个单向链表 - _WaitSet：定向链表是持有锁的线程执行了await()方法，线程会释放掉锁资源并添加到当前的单向链表中并挂起线程。当被signal()唤醒后，会把线程从单向链表中扔到双向链表中等待获取锁。
+
+![image-20250818150051450](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818150051823.png)
+
+
+
+### （3）ReentrantLock非公平锁加锁流程
+
+```java
+final void lock() {
+    if (!initialTryLock())
+        acquire(1);
+}
+
+
+final boolean initialTryLock() {
+    Thread current = Thread.currentThread();
+    if (compareAndSetState(0, 1)) { // first attempt is unguarded
+        setExclusiveOwnerThread(current);
+        return true;
+    } else if (getExclusiveOwnerThread() == current) {
+        int c = getState() + 1;
+        if (c < 0) // overflow
+            throw new Error("Maximum lock count exceeded");
+        setState(c);
+        return true;
+    } else
+        return false;
+}
+
+protected final boolean tryAcquire(int acquires) {
+    if (getState() == 0 && compareAndSetState(0, acquires)) {
+        setExclusiveOwnerThread(Thread.currentThread());
+        return true;
+    }
+    return false;
+}
+
+java.util.concurrent.locks.AbstractQueuedSynchronizer#acquire(java.util.concurrent.locks.AbstractQueuedSynchronizer.Node, int, boolean, boolean, boolean, long)
+```
+
+
+
+![image-20250818151643914](https://gitee.com/yj1109/cloud-image/raw/master/img/20250818151644342.png)
+
+
+
+
+
+### （4）ReentrantLock公平锁
+
+```java
+static final class FairSync extends Sync {
+    private static final long serialVersionUID = -3000897897090466540L;
+
+    /**
+     * Acquires only if reentrant or queue is empty.
+     */
+    final boolean initialTryLock() {
+        Thread current = Thread.currentThread();
+        int c = getState();
+        if (c == 0) {
+            if (!hasQueuedThreads() && compareAndSetState(0, 1)) {
+                setExclusiveOwnerThread(current);
+                return true;
+            }
+        } else if (getExclusiveOwnerThread() == current) {
+            if (++c < 0) // overflow
+                throw new Error("Maximum lock count exceeded");
+            setState(c);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Acquires only if thread is first waiter or empty
+     */
+    protected final boolean tryAcquire(int acquires) {
+        if (getState() == 0 && !hasQueuedPredecessors() &&
+            compareAndSetState(0, acquires)) {
+            setExclusiveOwnerThread(Thread.currentThread());
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+公平和非公平的不同：
+
+lock方法实现方式不同
+
+* 非公平锁会直接执行CAS尝试获取锁。尝试改state的值(0 -> 1)。失败才走acquire方法
+* 公平锁会判断state的值，如果不是0并且当前持有锁的线程不是自己，直接走acquire()方法
+
+tryAcquire()实现不同：
+
+* 非公平锁，在state为0时直接CAS抢锁
+* 公平锁，state为0是还会判断队列是否有任务
