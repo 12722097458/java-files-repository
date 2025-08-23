@@ -492,7 +492,7 @@ db.emp.find({}, {ename:1, _id:0, job:1})
 
 
 
-### 二、Mongo结合spring进行CRUE操作
+### 二、Mongo结合spring进行CRUD操作
 
 > 1. MongoTemplate
 >2. MongoRepository

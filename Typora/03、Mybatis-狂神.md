@@ -588,7 +588,7 @@ List<Student> getStudentsByTid(@Param(value = "teacherId") int tid);
 
 ​	（4）foreach循环遍历
 
-```xml
+```html
 <select id="getAccountsByCondtion" resultType="map" resultMap="accountMapper">
     select * from account where id > #{id} and name
     <foreach collection="names" open="in ( " item="name" separator="," close=")">
@@ -603,7 +603,6 @@ List<Student> getStudentsByTid(@Param(value = "teacherId") int tid);
         #{name}
     </foreach>
 </select>
-
 #### 5.SQL片段
 
 有些时候，我们可以将一些重复的sql抽取出来，方便后续使用。mybatis可以用<sql>标签来说明

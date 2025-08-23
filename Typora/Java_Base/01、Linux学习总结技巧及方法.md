@@ -1102,17 +1102,17 @@ consul agent -dev -ui -client=0.0.0.0
 
 # 四、软件启动
 
-## 0. 登录Linux
+## 0、登录Linux
 
 192.168.137.110  root/root
 
 需要关闭防火墙
 
-## 1. JDK
+## 1、JDK
 
 jdk已配置好，自启动
 
-## 2. 登录Mysql
+## 2、登录Mysql
 
 已经配置了开机自启
 
@@ -1121,11 +1121,11 @@ mysql -uroot -p
 root
 ```
 
-## 3.  Tomcat
+## 3、Tomcat
 
 按需启动
 
-## 4. 登录Redis
+## 4、登录Redis
 
 ```shell
 #启动服务端
@@ -1142,14 +1142,14 @@ ps -ef | grep redis 检查是否启动成功
 ./redis-cli
 ```
 
-## 5.登录Mongo
+## 5、登录Mongo
 
 ```shell
 cd /app/tools/mongodb/bin
 ./mongod  -f  mongodb.conf   # 启动
 ```
 
-## 6.登录RabbitMq
+## 6、登录RabbitMq
 
 ```shell
 systemctl start rabbitmq-server
@@ -1160,7 +1160,7 @@ systemctl stop rabbitmq-server
 http://192.168.137.110:15672/#/
 ```
 
-## 7. zookeeper 启动
+## 7、zookeeper 启动
 
 启动server
 
@@ -1191,7 +1191,7 @@ create /test1：创建test1节点
 
 
 
-## 8. Kafka启动
+## 8、Kafka启动
 
 ```shell
 /app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server.properties &
@@ -1270,7 +1270,7 @@ D:\2025\java\software\SpringCloud\zipkin-server-3.0.0-rc0-exec
 
 
 
-## 24.Windows启动Nacos
+## 24、Windows启动Nacos
 
 ```shell
 解压nacos-server-xxx.zip
@@ -1530,6 +1530,12 @@ pstree
 netstat -tnlp  查看使用的端口
 
 
+
+## 6、jstack pid线程快照
+
+虚拟机当前所有线程的快照合集，堆栈信息
+
+## 7、jmap -histo pid 查看当前对象的内存分布情况
 
 # 七、Docker
 
