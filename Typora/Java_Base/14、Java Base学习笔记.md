@@ -6627,7 +6627,68 @@ public String myRatelimitFallback(Integer id,Throwable t) {
 
 ## 7. Micrometer + Zipkin服务链路追踪
 
+### （1）准备Zipkin
 
+#### 1.1 下载Zipkin
+
+https://zipkin.io/
+
+#### 1.2 启动Zipkin
+
+java -jar zipkin-server-3.0.0-rc0-exec.jar
+
+#### 1.3 访问UI
+
+http://localhost:9411/zipkin/
+
+### （2）引入Micrometer 
+
+#### 1.1 pom
+
+```xml
+<!--micrometer-tracing指标追踪  1-->
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing</artifactId>
+</dependency>
+<!--micrometer-tracing-bridge-brave适配zipkin的桥接包 2-->
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-brave</artifactId>
+</dependency>
+<!--micrometer-observation 3-->
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-observation</artifactId>
+</dependency>
+<!--feign-micrometer 4-->
+<dependency>
+    <groupId>io.github.openfeign</groupId>
+    <artifactId>feign-micrometer</artifactId>
+</dependency>
+<!--zipkin-reporter-brave 5-->
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>
+</dependency>
+```
+
+#### 1.2 yml
+
+```yml
+# zipkin图形展现地址和采样率设置
+management:
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1.0 #采样率默认为0.1(0.1就是10次只能有一次被记录下来)，值越大收集越及时。
+```
+
+#### 1.3 查看请求完整链路
+
+![image-20250829143001898](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829143003122.png)
 
 
 
