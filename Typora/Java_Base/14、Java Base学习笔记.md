@@ -6692,9 +6692,123 @@ management:
 
 
 
-
-
 ## 8. gateway 网关 router/predict/filter
+
+### （1）Gateway基本概念
+
+![image-20250829143552315](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829143553180.png)
+
+三大核心：
+
+* route: 隐藏端口，隐藏请求路径。  80/pay/list  --> 9752/xxx/pay/list  用9752。。来访问80。。
+* predicate： 请求头、请求参数、请求体是否包含某些值
+* filter：请求，响应过滤处理拦截
+
+**路由转发+断言判断+执行过滤器链**
+
+### （2）创建项目cloud-gateway9527
+
+#### 1.1 pom
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+```
+
+#### 1.2 yml
+
+```yml
+server:
+  port: 9527
+
+spring:
+  application:
+    name: cloud-gateway #以微服务注册进consul或nacos服务列表内
+  cloud:
+    consul: #配置consul地址
+      host: localhost
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+        service-name: ${spring.application.name}
+    gateway:
+      routes:
+        - id: pay_routh1 #pay_routh1                #路由的ID(类似mysql主键ID)，没有固定规则但要求唯一，建议配合服务名
+#          uri: http://localhost:8001                     #匹配后提供服务的路由地址
+          uri: lb://cloud-payment-service               #application  name
+          predicates:
+            - Path=/pay/gateway/get/**              # 断言，路径相匹配的进行路由
+```
+
+http://localhost:9527/pay/gateway/get/1 访问的是http://cloud-payment-service/pay/gateway/get/1 
+
+### （3）Route
+
+#### 1.1 基本路由
+
+```yml
+gateway:
+      routes:
+        - id: pay_routh1
+          uri: lb://cloud-payment-service               #application  name
+          predicates:
+            - Path=/pay/gateway/get/**              # 断言，路径相匹配的进行路由
+```
+
+9527 的 /pay/gateway/get/** 可以直接转发到cloud-payment-service/pay/gateway/get/**
+
+
+
+#### 1.2 paymentservice暴露的请求都通过gateway访问
+
+> 仅限于PayFeignApi类中的方法
+
+```java
+//@FeignClient(value = "cloud-payment-service")
+@FeignClient(value = "cloud-gateway")  // 通过网关来调用payment API
+public interface PayFeignApi {}
+```
+
+```yml
+- id: pay_routh3
+  uri: lb://cloud-payment-service
+  predicates:
+    - Path=/*/**
+```
+
+http://localhost:9527/pay/info 、 http://localhost:9527/pay/ratelimit/3 都能正常访问
+
+
+
+### （4）Predicate
+
+```yml
+predicates:
+  - Path=/pay/gateway/get/**              # 断言，路径相匹配的进行路由
+  - After=2025-08-03T07:28:21.328677+08:00[Asia/Shanghai]   # 在这个日期之后生效  Before/Between 同理
+  - Cookie=myCookie,123   # 需要带着cookie   -- myCookie=123才生效
+```
+
+http://localhost:9527/pay/gateway/get/1  必须需要带着cookie   -- myCookie=123才生效
+
+### （5）filter
+
+```yml
+predicates:
+  - Path=/pay/gateway/get/**              # 断言，路径相匹配的进行路由
+  - After=2025-08-03T07:28:21.328677+08:00[Asia/Shanghai]   # 在这个日期之后生效  Before/Between 同理
+  - Cookie=myCookie,123   # 需要带着cookie   -- myCookie=123才生效
+filters:
+
+    - AddRequestParameter=gender, male
+
+```
+
+请求能够获取到请求参数gender, male
+
+![image-20250829153846938](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829153847528.png)
 
 ## 9. Alibaba - Nacos
 
