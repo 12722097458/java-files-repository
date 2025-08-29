@@ -6426,13 +6426,212 @@ spring:
 
 
 
-
-
 ## 5. Circuit Breaker - Resilient4j 熔断降级限流
+
+> 出故障了“保险丝”跳闸，别把整个家给烧了
+
+简单直接的回答是：**熔断器应该由调用者设置，用来保护自己不被慢的或被压垮的下游服务所拖垮。**
+
+因此，在您的场景中（A -> B -> C）：
+
+- **B 应该针对 C 设置熔断器。**
+- **C 出问题返回很慢时，B 的熔断器会“断路” C。**
+
+### （1）熔断器
+
+#### 1.1 COUNT_BASED
+
+最近的6次请求，异常数量大于50%即3次会打开断路器，进入熔断状态OPEN。5秒后尝试半开断路器HALF_OPEN，如果2个请求都成功就关闭断路器CLOSE，恢复正常。
+
+```yml
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failureRateThreshold: 50 #设置50%的调用失败时打开断路器，超过失败请求百分⽐CircuitBreaker变为OPEN状态。
+        slidingWindowType: COUNT_BASED # 滑动窗口的类型
+        slidingWindowSize: 6 #滑动窗⼝的⼤⼩配置COUNT_BASED表示6个请求，配置TIME_BASED表示6秒
+        minimumNumberOfCalls: 6 #断路器计算失败率或慢调用率之前所需的最小样本(每个滑动窗口周期)。如果minimumNumberOfCalls为10，则必须最少记录10个样本，然后才能计算失败率。如果只记录了9次调用，即使所有9次调用都失败，断路器也不会开启。
+        automaticTransitionFromOpenToHalfOpenEnabled: true # 是否启用自动从开启状态过渡到半开状态，默认值为true。如果启用，CircuitBreaker将自动从开启状态过渡到半开状态，并允许一些请求通过以测试服务是否恢复正常
+        waitDurationInOpenState: 5s #从OPEN到HALF_OPEN状态需要等待的时间
+        permittedNumberOfCallsInHalfOpenState: 2 #半开状态允许的最大请求数，默认值为10。在半开状态下，CircuitBreaker将允许最多permittedNumberOfCallsInHalfOpenState个请求通过，如果其中有任何一个请求失败，CircuitBreaker将重新进入开启状态。
+        recordExceptions:
+          - java.lang.Exception
+    instances:
+      cloud-payment-service:
+        baseConfig: default
+```
+
+```java
+@GetMapping(value = "/feign/pay/circuit/{id}")
+@CircuitBreaker(name = "cloud-payment-service", fallbackMethod = "myCircuitFallback")
+public String myCircuitBreaker(@PathVariable("id") Integer id) {
+    return payFeignApi.myCircuit(id);
+}
+
+//myCircuitFallback就是服务降级后的兜底处理方法
+public String myCircuitFallback(Integer id,Throwable t) {
+    // 这里是容错处理逻辑，返回备用结果
+    return "myCircuitFallback，系统繁忙，请稍后再试-----/(ㄒoㄒ)/~~" + t.getMessage();
+}
+```
+
+http://localhost/feign/pay/circuit/-4，多次失败后会进入熔断状态，在访问正确接口也一样熔断。熔断解除后恢复正常。
+
+#### 1.2 TIME_BASED
+
+2秒内慢查询(超过2s)超过30%进入熔断状态
+
+```yml
+# Resilience4j CircuitBreaker 按照时间：TIME_BASED 的例子
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s #神坑的位置，timelimiter 默认限制远程1s，超于1s就超时异常，配置了降级，就走降级逻辑
+  circuitbreaker:
+    configs:
+      default:
+        failureRateThreshold: 50 #设置50%的调用失败时打开断路器，超过失败请求百分⽐CircuitBreaker变为OPEN状态。
+        slowCallDurationThreshold: 2s #慢调用时间阈值，高于这个阈值的视为慢调用并增加慢调用比例。
+        slowCallRateThreshold: 30 #慢调用百分比峰值，断路器把调用时间⼤于slowCallDurationThreshold，视为慢调用，当慢调用比例高于阈值，断路器打开，并开启服务降级
+        slidingWindowType: TIME_BASED # 滑动窗口的类型
+        slidingWindowSize: 2 #滑动窗口的大小配置，配置TIME_BASED表示2秒
+        minimumNumberOfCalls: 2 #断路器计算失败率或慢调用率之前所需的最小样本(每个滑动窗口周期)。
+        permittedNumberOfCallsInHalfOpenState: 2 #半开状态允许的最大请求数，默认值为10。
+        waitDurationInOpenState: 5s #从OPEN到HALF_OPEN状态需要等待的时间
+        recordExceptions:
+          - java.lang.Exception
+    instances:
+      cloud-payment-service:
+        baseConfig: default
+```
+
+
 
 ## 6. Circuit Breaker - Bulkhead并发限制
 
+舱壁隔离，控制并发数。  Semaphore 或 fixed thread pool
+
+### （1）SEMAPHORE
+
+```java
+resilience4j:
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 2 # 隔离允许并发线程执行的最大数量
+        maxWaitDuration: 1s # 当达到并发调用数量时，新的线程的阻塞时间，我只愿意等待1秒，过时不候进舱壁兜底fallback
+    instances:
+      cloud-payment-service:
+        baseConfig: default
+    timelimiter:
+      configs:
+        default:
+          timeout-duration: 20s
+```
+
+```java
+@GetMapping(value = "/feign/pay/bulkhead/{id}")
+@Bulkhead(name = "cloud-payment-service",
+        fallbackMethod = "myBulkheadFallback",
+        type = Bulkhead.Type.SEMAPHORE)
+public String myBulkhead(@PathVariable("id") Integer id) {
+    return payFeignApi.myBulkhead(id);
+}
+
+public String myBulkheadFallback(Throwable t) {
+    return "myBulkheadFallback，隔板超出最大数量限制，系统繁忙，请稍后再试-----/(ㄒoㄒ)/~~";
+}
+```
+
+
+
+用jmeter并发请求http://localhost/feign/pay/bulkhead/9999
+
+此时http://localhost/feign/pay/bulkhead/1 等待1秒后也被拒绝
+
+![image-20250829133756257](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829133756718.png)
+
+### （2）THREADPOOL
+
+```yml
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s #timelimiter默认限制远程1s，超过报错不好演示效果所以加上10秒
+  thread-pool-bulkhead:
+    configs:
+      default:
+        core-thread-pool-size: 1
+        max-thread-pool-size: 1
+        queue-capacity: 1
+    instances:
+      cloud-payment-service:
+        baseConfig: default
+```
+
+```java
+@GetMapping(value = "/feign/pay/bulkhead_pool/{id}")
+@Bulkhead(name = "cloud-payment-service",fallbackMethod = "myBulkheadPoolFallback",type = Bulkhead.Type.THREADPOOL)
+public CompletableFuture<String> myBulkheadTHREADPOOL(@PathVariable("id") Integer id)
+{
+    System.out.println(Thread.currentThread().getName()+"\t"+"enter the method!!!");
+    try { TimeUnit.SECONDS.sleep(3); } catch (InterruptedException e) { e.printStackTrace(); }
+    System.out.println(Thread.currentThread().getName()+"\t"+"exist the method!!!");
+
+    return CompletableFuture.supplyAsync(() -> payFeignApi.myBulkhead(id) + "\t" + " Bulkhead.Type.THREADPOOL");
+}
+public CompletableFuture<String> myBulkheadPoolFallback(Integer id,Throwable t)
+{
+    return CompletableFuture.supplyAsync(() -> "Bulkhead.Type.THREADPOOL，系统繁忙，请稍后再试-----/(ㄒoㄒ)/~~");
+}
+```
+
+
+
+
+
+## 6. Circuit Breaker - rateLimit 限流
+
+地铁站排队安检就是限流
+
+```yml
+ratelimiter:
+  configs:
+    default:
+      limitForPeriod: 2 #在一次刷新周期内，允许执行的最大请求数
+      limitRefreshPeriod: 1s # 限流器每隔limitRefreshPeriod刷新一次，将允许处理的最大请求数量重置为limitForPeriod
+      timeout-duration: 1 # 线程等待权限的默认等待时间
+  instances:
+    cloud-payment-service:
+      baseConfig: default
+```
+
+```java
+@GetMapping(value = "/feign/pay/ratelimit/{id}")
+@RateLimiter(name = "cloud-payment-service",fallbackMethod = "myRatelimitFallback")
+public String ratelimit(@PathVariable("id") Integer id) {
+    return payFeignApi.myRatelimit(id);
+}
+
+public String myRatelimitFallback(Integer id,Throwable t) {
+    return "你被限流了，禁止访问/(ㄒoㄒ)/~~";
+}
+```
+
+1秒限流2个，多的走fallback  http://localhost/feign/pay/ratelimit/32
+
+
+
 ## 7. Micrometer + Zipkin服务链路追踪
+
+
+
+
+
+
 
 ## 8. gateway 网关 router/predict/filter
 
