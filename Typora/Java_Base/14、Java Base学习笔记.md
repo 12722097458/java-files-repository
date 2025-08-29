@@ -3210,6 +3210,8 @@ public class CalculatorImpl implements Calculator {
 
 #### 1.2 Aspect切面
 
+@After不管有没有异常都会执行
+
 ```java
 package com.ityj.spring.aop.anno;
 
@@ -3222,27 +3224,9 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class LogAspect {
 
-    @Before(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
-    public void before(JoinPoint joinPoint) {
-        System.out.println("@Before前置通知...");
-    }
 
-    @AfterReturning(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))", returning = "res")
-    public void afterReturning(JoinPoint joinPoint, Object res) {
-        System.out.println("@AfterReturning 后置通知... " + res);
-    }
 
-    @AfterThrowing(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))", throwing = "ex")
-    public void afterThrowing(JoinPoint joinPoint, Throwable ex) {
-        System.out.println("@AfterThrowing 异常通知..." + ex);
-    }
-
-    @After(value = "pointcut()")
-    public void after(JoinPoint joinPoint) {
-        System.out.println("@After后置通知...");
-    }
-
-    @Around(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
+    //@Around(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
 
         Object proceed = null;
@@ -3259,10 +3243,35 @@ public class LogAspect {
         return proceed;
     }
 
-    @Pointcut("execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(..))")
-    public void pointcut(){}
+
+    //@Before(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
+    @Before("pt()")   // testcase中不生效的话，自己web测试就行
+    public void before(JoinPoint joinPoint) {
+        System.out.println("@Before前置通知...");
+    }
+
+    @After(value = "pt()")
+    //@After(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
+    public void after(JoinPoint joinPoint) {
+        System.out.println("@After后置通知...");
+    }
+
+
+    @AfterReturning(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))", returning = "res")
+    public void afterReturning(JoinPoint joinPoint, Object res) {
+        System.out.println("@AfterReturning 后置通知... " + res);
+    }
+
+    @AfterThrowing(value = "execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))", throwing = "ex")
+    public void afterThrowing(JoinPoint joinPoint, Throwable ex) {
+        System.out.println("@AfterThrowing 异常通知..." + ex);
+    }
+
+    @Pointcut("execution (public int com.ityj.spring.aop.service.impl.CalculatorImpl.*(int, int))")
+    public void pt(){}
 
 }
+
 ```
 
 
@@ -5619,6 +5628,12 @@ public WebMvcConfigurer webMvcConfigurer () {
 
 ### （10）异常处理
 
+
+
+org.apache.catalina.core.StandardWrapperValve#exception(org.apache.catalina.connector.Request, org.apache.catalina.connector.Response, java.lang.Throwable)
+
+
+
 ![image-20250730144001580](https://gitee.com/yj1109/cloud-image/raw/master/img/20250730144001992.png)
 
 
@@ -6025,11 +6040,393 @@ public class KafkaComponent {
 
 > https://github.com/12722097458/java-base-learning-20250625/commit/3014235ca370944c10fdee86ae412af19beaf54a
 
+### （1）Consul安装
+
+#### 1.1 下载
+
+> https://developer.hashicorp.com/consul/install
+
+![image-20250829100045683](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829100046021.png)
+
+#### 1.2 启动
+
+```shell
+consul.exe agent -server -ui -bind=127.0.0.1 -client=0.0.0.0 -bootstrap-expect  1  -data-dir ./mydata
+```
+
+#### 1.3 访问
+
+> http://localhost:8500
+
+![image-20250829100411480](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829100411796.png)
+
+
+
+### （2）服务注册进Consul
+
+#### 1.1 引入pom
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+</dependency>
+```
+
+#### 1.2 添加yml配置
+
+```yml
+spring:
+  application:
+    name: cloud-consumer-order
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: ${spring.application.name}
+```
+
+#### 1.3 成功注册
+
+![image-20250829102506950](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829102507277.png)
+
+### （3）注册中心优势
+
+#### 1.1 RestTemplate
+
+> 可以通过服务名称直接调用，方便进行负载均衡
+
+```java
+private static final String PAYMENT_BASE_URL = "http://localhost:8001";
+private static final String PAYMENT_BASE_URL = "http://cloud-payment-service"; //服务注册中心上的微服务名称
+```
+
+
+
+#### 1.2 便于管理服务
+
+统一的UI可以查看对应服务的状态
+
+
+
 ## 2. Consul服务配置中心
+
+#### 1.1 引入pom
+
+```xml
+<!--SpringCloud consul config-->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-consul-config</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bootstrap</artifactId>
+</dependency>
+```
+
+
+
+#### 1.2 写yml
+
+```yml
+spring:
+  application:
+    name: cloud-payment-service
+  cloud:
+    consul:
+      config:
+        profile-separator: '-' # default value is ","，we update '-'
+        format: YAML
+        watch:
+          wait-time: 1  # 1秒刷新1次 结合@RefreshScope使用
+# config/cloud-payment-service/data   data是文件，其他的是文件夹。  UI上yml格式不要用Tab进行对其，直接空格 
+# config/cloud-payment-service-dev/data   // 如果spring.profile.active=dev 会读取这个文件
+# config/cloud-payment-service-prod/data
+```
+
+
+
+#### 1.3 consul编辑配置
+
+![image-20250829103248562](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829110209757.png)
+
+
+
+#### 1.4 controller取值
+
+两种写法
+
+##### 1.4.1 @Value("${consulConfig.value}" 作为局部变量
+
+```java
+@Slf4j
+@RestController
+public class PaymentController {
+    @Autowired
+    private PayService payService;
+    @Value("${server.port}")
+    private String serverPort;
+    @GetMapping(value = "/pay/consul/config2")
+    // 作为变量，不需要spring.cloud.consul.config.watch.wait-time， 也不需要@RefreshScope
+    public ResultData<String> listConfig2(@Value("${consulConfig.value}") String consulConfigName2){
+        return ResultData.success("configName from cunsul: " + consulConfigName2 + ", port:" + serverPort);
+    }
+}
+```
+
+
+
+##### 1.4.2 @RefreshScope 写在具体bean上
+
+```java
+@Slf4j
+@RestController
+@RefreshScope  // 刷新consul 配置，写在具体的bean上。  spring.cloud.consul.config.watch.wait-time好像没啥用
+public class PaymentController {
+
+    @Autowired
+    private PayService payService;
+
+
+    @Value("${server.port}")
+    private String serverPort;
+
+
+    @Value("${consulConfig.value}")
+    String consulConfigName;
+    
+    @GetMapping(value = "/pay/consul/config")    // 需要在consul配置中心添加好配置才能启动成功，否则报错
+    public ResultData<String> listConfig(){
+        return ResultData.success("configName from cunsul: " + consulConfigName + ", port:" + serverPort);
+    }
+
+}
+```
+
+#### 1.5 启动
+
+> http://localhost:8001/pay/consul/config  可以实时获取consul配置中心的值
+
+
 
 ## 3. Load Balancer负载均衡
 
+算法有 轮询，随机，地址散列，加权
+
+### （1）使用方式
+
+```java
+@Configuration
+public class MyConfig {
+
+    @Bean
+    @LoadBalanced // 默认轮询RoundRobinLoadBalancer 开启默认的负载均衡  - 本地端    nginx是服务器端
+    public RestTemplate getRestTemplate() {
+        return new RestTemplate();
+    }
+
+}
+```
+
+### （2）切换方式
+
+```java
+//切换负载均衡模式  -  随机
+@Configuration
+@LoadBalancerClient(
+        //下面的value值大小写一定要和consul里面的名字一样，必须一样
+        value = "cloud-payment-service",configuration = RestTemplateConfig.class)
+public class RestTemplateConfig {
+    @Bean
+    @LoadBalanced //使用@LoadBalanced注解赋予RestTemplate负载均衡的能力
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
+    }
+
+    @Bean
+    ReactorLoadBalancer<ServiceInstance> randomLoadBalancer(Environment environment,
+                                                            LoadBalancerClientFactory loadBalancerClientFactory) {
+        String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+
+        return new RandomLoadBalancer(loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
+    }
+}
+```
+
+
+
+### （3）IDEA直接复制项目，修改端口
+
+#### 1.1 复制配置
+
+![image-20250829101414750](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829101415065.png)
+
+
+
+#### 1.2 添加启动参数
+
+![image-20250829101551993](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829101552312.png)
+
+#### 1.3 启动
+
+![image-20250829101634880](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829101635195.png)
+
+
+
 ## 4. Open Feign 远程调用
+
+> 替代RestTemplate，通过接口的方式可以像本地代码一样调用
+
+> 是一个声明式的web服务客户端，只需要创建一个rest接口，并添加注解@FeignClient(value = "cloud-payment-service")
+
+### （1）pom
+
+```java
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+```
+
+
+
+### （2）接口
+
+```java
+@FeignClient(value = "cloud-payment-service")
+public interface PayFeignApi {
+
+    @GetMapping("/pay/getAll")
+    ResultData<List<PayDTO>> queryAll();
+
+    @GetMapping("/pay/get/{id}")
+    ResultData<PayDTO> queryById(@PathVariable("id") Integer id);
+
+    @PostMapping(value = "/pay/add")
+    ResultData<String> addPay(@RequestBody Pay pay);
+
+    @GetMapping(value = "/pay/info")
+    ResultData<String> info();
+}
+```
+
+### （3）特性
+
+#### 1.1  支持负载均衡
+
+天生自带负载均衡 - 默认集成了LoadBanlancer
+
+![image-20250829114606740](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829114607095.png)
+
+
+
+#### 1.2  支持sentinel和fallback
+
+```java
+@FeignClient(value = "nacos-payment-provider", fallback = PayFeignSentinelApiFallBack.class)
+public interface PayFeignSentinelApi {
+    @GetMapping("/pay/nacos/get/{orderNo}")
+    ResultData getPayByOrderNo(@PathVariable("orderNo") String orderNo);
+}
+```
+
+```java
+@Component
+public class PayFeignSentinelApiFallBack implements PayFeignSentinelApi {
+
+    @Override
+    public ResultData getPayByOrderNo(String orderNo) {
+        return ResultData.fail(ReturnCodeEnum.RC500.getCode(),"对方服务宕机或不可用，Openfeign FallBack服务降级o(╥﹏╥)o");
+    }
+
+}
+```
+
+
+
+#### 1.3 支持http请求和相应的压缩
+
+![image-20250829114725640](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829114726001.png)
+
+#### 1.4 超时机制
+
+> https://docs.spring.io/spring-cloud-openfeign/reference/4.1/configprops.html
+
+![image-20250829115646191](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829115646539.png)
+
+```yml
+spring:
+    openfeign:
+      client:
+        config:
+          default:
+            #cloud-payment-service:
+            #连接超时时间，为避免演示出错，讲解完本次内容后设置为20秒
+            connectTimeout: 20000
+            #读取超时时间，为避免演示出错，讲解完本次内容后设置为20秒
+            readTimeout: 20000
+```
+
+
+
+其实payment模块接口在62秒后还是执行成功的。
+
+![image-20250829115054612](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829115054993.png)
+
+#### 1.5 重试机制
+
+默认是关闭的
+
+```java
+@Configuration
+public class FeignConfig {
+
+    @Bean
+    public Retryer getRetryer() {
+//        return Retryer.NEVER_RETRY; //Feign默认配置是不走重试策略的
+
+        //最大请求次数为3(1+2)，初始间隔时间为100ms，重试间最大间隔时间为1s
+        return new Retryer.Default(100,1,3);
+    }
+
+    @Bean
+    public Logger.Level level() {
+        return Logger.Level.FULL;
+    }
+
+}
+```
+
+![image-20250829120311210](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829120311568.png)
+
+#### 1.6 修改默认的Http客户端
+
+默认HttpClient
+
+![image-20250829120201715](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829120202051.png)
+
+修改为Apache HttpClient 5
+
+```yml
+spring:
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
+```
+
+
+
+修改后日志
+
+![image-20250829120648765](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829120649106.png)
+
+
+
+
 
 ## 5. Circuit Breaker - Resilient4j 熔断降级限流
 

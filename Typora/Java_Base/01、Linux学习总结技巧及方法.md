@@ -1034,7 +1034,7 @@ log.dirs=/app/tools/kafka_2.12-3.9.1/kafka-logs-1
 ==========================
 
 
-
+先启动zk: /app/tools/apache-zookeeper-3.8.4-bin/bin/zkServer.sh start
 启动服务：
 /app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server-0.properties
 /app/tools/kafka_2.12-3.9.1/bin/kafka-server-start.sh /app/tools/kafka_2.12-3.9.1/config/server-1.properties

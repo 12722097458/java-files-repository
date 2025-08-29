@@ -224,8 +224,47 @@ https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors
 
 ```shell
 [root@localhost bin]# cat /etc/docker/daemon.json
+
+
+
 {
-  "registry-mirrors": ["https://od44lrrt.mirror.aliyuncs.com","https://docker.1ms.run", "https://docker.1panel.live/" ]
+    "runtimes": {
+        "nvidia": {
+            "args": [],
+            "path": "nvidia-container-runtime"
+        }
+    },
+    "registry-mirrors": [
+        "https://docker.registry.cyou",
+        "https://docker-cf.registry.cyou",
+        "https://dockercf.jsdelivr.fyi",
+        "https://docker.jsdelivr.fyi",
+        "https://dockertest.jsdelivr.fyi",
+        "https://mirror.aliyuncs.com",
+        "https://dockerproxy.com",
+        "https://mirror.baidubce.com",
+        "https://docker.m.daocloud.io",
+        "https://docker.nju.edu.cn",
+        "https://docker.mirrors.sjtug.sjtu.edu.cn",
+        "https://docker.mirrors.ustc.edu.cn",
+        "https://mirror.iscas.ac.cn",
+        "https://docker.rainbond.cc",
+        
+        "https://docker.1panel.live",
+        "https://docker.1ms.run",
+        "https://dytt.online",
+        "https://docker-0.unsee.tech",
+        "https://lispy.org",
+        "https://docker.xiaogenban1993.com",
+        "https://666860.xyz",
+        "https://hub.rat.dev",
+        "https://docker.m.daocloud.io",
+        "https://demo.52013120.xyz",
+        "https://proxy.vvvv.ee",
+        "https://registry.cyou",
+        "https://mirror.ccs.tencentyun.com",
+        "https://od44lrrt.mirror.aliyuncs.com"
+    ]
 }
 
 
