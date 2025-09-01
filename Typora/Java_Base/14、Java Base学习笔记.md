@@ -6593,7 +6593,7 @@ public CompletableFuture<String> myBulkheadPoolFallback(Integer id,Throwable t)
 
 
 
-## 6. Circuit Breaker - rateLimit 限流
+## 7. Circuit Breaker - rateLimit 限流
 
 地铁站排队安检就是限流
 
@@ -6625,7 +6625,7 @@ public String myRatelimitFallback(Integer id,Throwable t) {
 
 
 
-## 7. Micrometer + Zipkin服务链路追踪
+## 8. Micrometer + Zipkin服务链路追踪
 
 ### （1）准备Zipkin
 
@@ -6692,7 +6692,7 @@ management:
 
 
 
-## 8. gateway 网关 router/predict/filter
+## 9. gateway 网关 router/predict/filter
 
 ### （1）Gateway基本概念
 
@@ -6810,11 +6810,403 @@ filters:
 
 ![image-20250829153846938](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829153847528.png)
 
-## 9. Alibaba - Nacos
+## 10. Alibaba - Nacos
 
-## 10. Alibaba - Sentinel
+### （1）Nacos启动
 
-## 11. Alibaba - Seata 分布式事务管理
+#### 1.1 下载
+
+https://nacos.io/download/nacos-server/
+
+#### 1.2 启动
+
+```shell
+startup.cmd -m standalone
+```
+
+#### 1.3 访问
+
+http://localhost:8848/nacos/
+
+![image-20250829162102979](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829162103412.png)
+
+### （2）服务注册进Nacos
+
+
+
+```xml
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+```
+
+```yml
+spring:
+  application:
+    name: nacos-payment-provider
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #配置Nacos地址
+```
+
+
+
+![image-20250829162737177](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829162737701.png)
+
+http://localhost:83/consumer/pay/nacos/3 可正常访问，并实现了负载均衡
+
+
+
+### （3）Nacos配置中心
+
+namespace + group + dataId 
+
+```yml
+server:
+  port: 3377
+
+spring:
+  profiles:
+    active: prod
+
+
+# nacos配置
+spring:
+  application:
+    name: nacos-config-client
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 #Nacos服务注册中心地址
+      config:
+        server-addr: localhost:8848 #Nacos作为配置中心地址
+        file-extension: yml #指定yaml格式的配置
+        namespace: 155f8357-d472-428b-9bb4-0e9bf2039057
+        group: PROD_GROUP
+
+# nacos端配置文件DataId的命名规则是：
+# ${spring.application.name}-${spring.profile.active}.${spring.cloud.nacos.config.file-extension}
+# 本案例的DataID是:nacos-config-client-dev.yaml
+```
+
+```java
+@RestController
+@RefreshScope //在控制器类加入@RefreshScope注解使当前类下的配置支持Nacos的动态刷新功能。
+public class NacosConfigClientController {
+    @Value("${config.info}")
+    private String configInfo;
+
+    @GetMapping("/config/info")
+    public String getConfigInfo() {
+        return configInfo;
+    }
+}
+```
+
+![](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829163556475.png)
+
+http://localhost:3377/config/info  配置可实时更新
+
+
+
+## 11. Alibaba - Sentinel
+
+> 轻量级的流量控制，熔断降级java库
+
+### （1）Sentinel启动
+
+#### 1.1 下载
+
+https://sentinelguard.io/zh-cn/index.html
+
+#### 1.2 启动
+
+```
+java -jar sentinel-dashboard-1.8.6.jar
+```
+
+#### 1.3 访问
+
+> http://localhost:8080/#/dashboard/home , 后台默认端口8719
+
+![image-20250829164742200](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829164742701.png)
+
+
+
+### （2）服务引入Sentinel
+
+#### 1.1 pom
+
+```xml
+<!--SpringCloud ailibaba sentinel-datasource-nacos -->
+<dependency>
+    <groupId>com.alibaba.csp</groupId>
+    <artifactId>sentinel-datasource-nacos</artifactId>
+</dependency>
+<!--SpringCloud alibaba sentinel -->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+</dependency>
+```
+
+
+
+#### 1.2 yml
+
+```yml
+server:
+  port: 8401
+
+spring:
+  application:
+    name: cloudalibaba-sentinel-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848         #Nacos服务注册中心地址
+    sentinel:
+      transport:
+        dashboard: localhost:8080 #配置Sentinel dashboard控制台服务地址
+        port: 8719 #默认8719端口，假如被占用会自动从8719开始依次+1扫描,直至找到未被占用的端口
+      web-context-unify: false # controller层的方法对service层调用不认为是同一个根链路
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            dataId: ${spring.application.name}
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: flow # flow流量控制  degrade熔断降级 param-flow热点数据  authority授权规则
+```
+
+
+
+### （3）流控规则
+
+![image-20250901170554765](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901170555241.png)
+
+#### 1.1 阈值类型
+
+##### 1.1.1 QPS （query per second）
+
+每秒访问次数
+
+##### 1.1.2 并发线程数
+
+每秒并发次数，手动在浏览器刷新不出效果。jmeter压测模拟多用户并发
+
+#### 1.2 流控模式
+
+##### 1.2.1 直接
+
+直接当前资源失败报错。
+
+
+
+##### 1.2.2 关联
+
+大量对B请求会导致testA的限流
+
+![image-20250901172016567](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901172016990.png)
+
+
+
+##### 1.2.3 链路
+
+只针对/testC限流， 而不对/testD限流
+
+```java
+@Service
+public class FlowLimitService {
+    @SentinelResource(value = "common")
+    public void common() {
+        System.out.println("------FlowLimitService come in");
+    }
+}
+
+ /**
+ * 流控-链路演示demo
+ * C和D两个请求都访问flowLimitService.common()方法，阈值到达后对C限流，对D不管
+ */
+@Autowired
+private FlowLimitService flowLimitService;
+
+@GetMapping("/testC")
+public String testC() {
+    flowLimitService.common();
+    return "------testC";
+}
+
+@GetMapping("/testD")
+public String testD() {
+    flowLimitService.common();
+    return "------testD";
+}
+```
+
+![image-20250901172547985](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901172548375.png)
+
+
+
+#### 1.3  流控效果
+
+#####  1.3.1 快速失败
+
+异常报错
+
+##### 1.3.2 Warm Up
+
+```java
+com.alibaba.csp.sentinel.slots.block.flow.controller.WarmUpController
+public WarmUpController(double count, int warmUpPeriodInSec) {
+    construct(count, warmUpPeriodInSec, 3);
+}
+```
+
+冷启动，前5秒只允许10 / 3 个请求，后续恢复到10个请求
+
+![image-20250901173023343](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901173023727.png)
+
+<img src="https://gitee.com/yj1109/cloud-image/raw/master/img/20250901173956943.png" alt="deepseek_mermaid_20250901_9c9a95" style="zoom:25%;" />
+
+##### 1.3.3 排队等待
+
+只允许1秒进来10个请求，其他请求进队列等待，最多等1秒。超时直接拒绝。
+
+![image-20250901175623533](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901175624251.png)
+
+
+
+### （4）熔断规则
+
+#### 1.1 熔断策略
+
+##### 1.1.1 慢调用比例
+
+响应时间比较慢的情况。
+
+```java
+@GetMapping("/testF")
+public String testF() {
+    //暂停几秒钟线程
+    try {
+        TimeUnit.SECONDS.sleep(1);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    System.out.println("----测试:新增熔断规则-慢调用比例 ");
+    return "------testF 新增熔断规则-慢调用比例";
+}
+```
+
+![image-20250901180128322](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901180128684.png)
+
+##### 1.1.2 异常比例
+
+```java
+@GetMapping("/testG")
+public String testG() {
+    int a = 1 / 0;
+    return "------testF 新增熔断规则-异常比例";
+}
+```
+
+![image-20250901180255657](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901180256037.png)
+
+##### 1.1.3 异常数
+
+![image-20250901180409341](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901180409733.png)
+
+### （5）热点规则
+
+
+
+![image-20250901180849572](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901180849999.png)
+
+
+
+对于参数p1=1，只允许1秒1个请求。
+
+对于p1不为空的其他值，只允许1秒3个请求。
+
+不对其他情况的场景限流。
+
+![image-20250901180916576](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901180916953.png)
+
+![image-20250901180640037](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901180640423.png)
+
+### （6）授权规则
+
+加黑/白名单 
+
+```java
+@Component
+public class MyRequestOriginParser implements RequestOriginParser {
+    @Override
+    public String parseOrigin(HttpServletRequest httpServletRequest) {
+        return httpServletRequest.getParameter("serverName");
+    }
+}
+
+@RestController
+@Slf4j
+//Empower授权规则，用来处理请求的来源
+public class EmpowerController {
+    @GetMapping(value = "/empower")
+    public String requestSentinel4() {
+        log.info("测试Sentinel授权规则empower");
+        return "Sentinel授权规则";
+    }
+}
+
+ 
+```
+
+对参数serverName=test拉入黑名单，拒绝访问
+
+![image-20250901181749032](https://gitee.com/yj1109/cloud-image/raw/master/img/20250901181749427.png)
+
+
+
+#### （8）持久化到nacos
+
+![image-20250829165115062](https://gitee.com/yj1109/cloud-image/raw/master/img/20250829165115510.png)
+
+
+
+### （7）@SentinelResource
+
+fallback是报错或流控走的方法。
+
+blockHandler是熔断走的方法
+
+```java
+@GetMapping("/rateLimit/byResourceSentinel")
+@SentinelResource(value = "byResourceSentinelResource",
+        blockHandler = "blockHandlerMethod",
+        fallback = "fallbackMethod")
+public String byResource(@RequestParam(value = "p1", required = false) Integer p1) {
+    if (p1 != null) {
+        int a = 3 / p1;
+    }
+    return "按rest地址限流测试OK - " + p1;
+}
+
+public String blockHandlerMethod(@RequestParam(value = "p1", required = false) Integer p1, BlockException e) {
+    return "blockHandlerMethod()..." + e.getMessage();
+}
+
+public String fallbackMethod(@RequestParam(value = "p1", required = false) Integer p1, Throwable t) {
+    return "fallbackMethod()... " + t.getMessage();
+}
+```
+
+
+
+## 12. Alibaba - Seata 分布式事务管理
 
 
 
@@ -7351,7 +7743,7 @@ public static void main(String[] args) throws InterruptedException {
     _header       = NULL; 
     _count        = 0;     // 竞争锁的线程个数
     _waiters      = 0,     // _WaitSet中有多少个线程处于wait()状态
-    _recursions   = 0;     // 锁congruent的次数
+    _recursions   = 0;     // 锁重入的次数
     _object       = NULL;
     _owner        = NULL;   // 持有锁的线程
     _WaitSet      = NULL;    // 持有锁的线程执行wait方法后，会扔到这个WaitSet里
