@@ -1129,8 +1129,6 @@ root
 
 ```shell
 #启动服务端
-cd /usr/local/tools/redis/bin
-./redis-server
 
 后台启动方式
 首先把配置文件中的redis.config 中对应属性设置为： daemonize yes
@@ -1139,7 +1137,7 @@ cd /usr/local/tools/redis/bin
 ps -ef | grep redis 检查是否启动成功
 
 #启动客户端
-./redis-cli
+/usr/local/tools/redis/bin/redis-cli
 ```
 
 ## 5、登录Mongo

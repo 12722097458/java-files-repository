@@ -7208,6 +7208,218 @@ public String fallbackMethod(@RequestParam(value = "p1", required = false) Integ
 
 ## 12. Alibaba - Seata 分布式事务管理
 
+### （1）Seata定义
+
+![image-20250903094755891](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903094756518.png)
+
+Apache Seata™ (incubating) 是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。
+
+![image-20250903095337788](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903095338327.png)
+
+#### 1.1 Seata原理
+
+Seata对分布式事务的协调和控制就是1 + 3
+
+1是一个全局事务ID
+
+3是TC/TM/RM
+
+![image-20250903095721943](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903095722485.png)
+
+
+
+### （2）Seata软件安装
+
+#### 1.1 下载
+
+https://seata.apache.org/zh-cn/unversioned/download/seata-server/
+
+#### 1.2 启动
+
+```shell
+bin\seata-server.bat
+```
+
+#### 1.3 访问ui
+
+```shell
+http://localhost:7091/#/transaction/list  seata/seata
+```
+
+![image-20250903100408707](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903100409278.png)
+
+
+
+### （3）环境准备
+
+准备对应的微服务模块：下订单-》 减库存 -》 扣余额 -》 改订单状态
+
+![image-20250903100910587](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903100911085.png)
+
+对应表创建undo_log回滚日志表
+
+![image-20250903100725675](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903100726193.png)
+
+
+
+
+
+### （4）测试
+
+#### 1.1 超时报错未回滚
+
+出现了脏数据
+
+![image-20250903104040636](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903104041405.png)
+
+![image-20250903104050429](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903104051046.png)
+
+![image-20250903104058447](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903104058958.png)
+
+
+
+#### 1.2 开启全局事务 - 报错后回滚
+
+在入口Order添加注解@GlobalTransactional
+
+```java
+@GlobalTransactional(name = "zzyy-create-order", rollbackFor = {Exception.class})  //默认AT 自动事务
+@Override
+public void create(Order order) {}
+```
+
+
+
+Seata 会保存当前事务的信息
+
+![image-20250903102839435](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903102840024.png)
+
+![image-20250903102816619](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903102817255.png)
+
+
+
+rm一阶段直接提交，并将信息存入到undo_log表
+
+![image-20250903104409639](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903104410224.png)
+
+![image-20250903104422426](https://gitee.com/yj1109/cloud-image/raw/master/img/20250903104423095.png)
+
+```json
+{
+  "@class": "io.seata.rm.datasource.undo.BranchUndoLog",
+  "xid": "192.168.137.1:8091:3531511990017679384",
+  "branchId": 3531511990017679387,
+  "sqlUndoLogs": [
+    "java.util.ArrayList",
+    [
+      {
+        "@class": "io.seata.rm.datasource.undo.SQLUndoLog",
+        "sqlType": "UPDATE",
+        "tableName": "t_account",
+        "beforeImage": {
+          "@class": "io.seata.rm.datasource.sql.struct.TableRecords",
+          "tableName": "t_account",
+          "rows": [
+            "java.util.ArrayList",
+            [
+              {
+                "@class": "io.seata.rm.datasource.sql.struct.Row",
+                "fields": [
+                  "java.util.ArrayList",
+                  [
+                    {
+                      "@class": "io.seata.rm.datasource.sql.struct.Field",
+                      "name": "id",
+                      "keyType": "PRIMARY_KEY",
+                      "type": -5,
+                      "value": [
+                        "java.lang.Long",
+                        1
+                      ]
+                    },
+                    {
+                      "@class": "io.seata.rm.datasource.sql.struct.Field",
+                      "name": "residue",
+                      "keyType": "NULL",
+                      "type": 3,
+                      "value": [
+                        "java.math.BigDecimal",
+                        1000
+                      ]
+                    },
+                    {
+                      "@class": "io.seata.rm.datasource.sql.struct.Field",
+                      "name": "used",
+                      "keyType": "NULL",
+                      "type": 3,
+                      "value": [
+                        "java.math.BigDecimal",
+                        0
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          ]
+        },
+        "afterImage": {
+          "@class": "io.seata.rm.datasource.sql.struct.TableRecords",
+          "tableName": "t_account",
+          "rows": [
+            "java.util.ArrayList",
+            [
+              {
+                "@class": "io.seata.rm.datasource.sql.struct.Row",
+                "fields": [
+                  "java.util.ArrayList",
+                  [
+                    {
+                      "@class": "io.seata.rm.datasource.sql.struct.Field",
+                      "name": "id",
+                      "keyType": "PRIMARY_KEY",
+                      "type": -5,
+                      "value": [
+                        "java.lang.Long",
+                        1
+                      ]
+                    },
+                    {
+                      "@class": "io.seata.rm.datasource.sql.struct.Field",
+                      "name": "residue",
+                      "keyType": "NULL",
+                      "type": 3,
+                      "value": [
+                        "java.math.BigDecimal",
+                        970
+                      ]
+                    },
+                    {
+                      "@class": "io.seata.rm.datasource.sql.struct.Field",
+                      "name": "used",
+                      "keyType": "NULL",
+                      "type": 3,
+                      "value": [
+                        "java.math.BigDecimal",
+                        30
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    ]
+  ]
+}
+```
+
+
+
+报错后TM会根据undo_log的信息对对应数据回滚，并删除undo_log
+
 
 
 # 十二、Java并发编程
