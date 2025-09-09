@@ -8107,7 +8107,7 @@ tryAcquire()实现不同：
 
 
 
-# 十三、dubbo
+# 十三、Dubbo
 
 ## 1. zookeeper + dubbo实现远程调用
 
@@ -8286,7 +8286,7 @@ public class UserController {
 
 
 
-## （2）Dubbo Admin
+## 2. Dubbo Admin
 
 ### （1）下载源码
 
@@ -8334,5 +8334,69 @@ dubbo-admin-ui目录下npm run dev
 > http://localhost:38080/ 或 http://localhost:38082
 
 ![image-20250909130815868](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909130816311.png)
+
+## 3. Dubbo应用
+
+### （1）服务注册远程RPC调用
+
+服务注册用zookeeper
+
+RPC调用主要是两个注解: @DubboService 和 @DubboReference
+
+### （2）负载均衡
+
+```java
+@DubboReference(loadbalance = LoadbalanceRules.RANDOM)
+private TicketService ticketService;
+```
+
+### （3）集群容错
+
+failover  - 失败后尝试访问其他服务器
+
+failfast - 快速失败 不重试
+
+failsafe 失败不报错，仅记录日志
+
+failback: 失败后自动恢复，后台记录失败，定时重发
+
+forking: 并行调用，有成功就返回
+
+超时时间是2秒，可重试2次
+
+```java
+@DubboReference(loadbalance = LoadbalanceRules.RANDOM,
+        cluster = ClusterRules.FAIL_OVER, retries = 2, timeout = 2000)
+private TicketService ticketService;
+```
+
+### （4）服务降级
+
+```java
+mock = "com.ityj.dubbo.service.fallback.TicketServiceFallback"
+```
+
+```java
+package com.ityj.dubbo.service.fallback;
+
+import com.ityj.dubbo.service.TicketService;
+
+public class TicketServiceFallback implements TicketService {
+    @Override
+    public String getTicket(String ticketNo) {
+        return "失败了。。降级处理！";
+    }
+}
+```
+
+![image-20250909144739038](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909144739666.png)
+
+### （5）熔断限流
+
+引入Resilience 或 Sentinel
+
+
+
+
 
 # 十四、Kubernetes
