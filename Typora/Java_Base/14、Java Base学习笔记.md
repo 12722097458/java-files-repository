@@ -6032,6 +6032,112 @@ public class KafkaComponent {
 
 
 
+
+
+## 12. 特殊功能
+
+### （1）项目启动完毕执行某个方法
+
+#### 1.1 实现CommandLineRunner
+
+```java
+@Component
+public class Start implements CommandLineRunner {
+    @Override
+    public void run(String... args) throws Exception {
+        System.out.println("项目启动完毕了 。。。。Start........");
+    }
+}
+```
+
+
+
+#### 1.2 实现ApplicationRunner
+
+```java
+@Component
+public class StartupApplicationRunners implements ApplicationRunner {
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        System.out.println("项目启动完毕了 。。。。StartupApplicationRunners.run()........");
+    }
+}
+```
+
+
+
+#### 1.3 实现SpringApplicationRunListener
+
+```java
+@Component
+public class StartupListener implements SpringApplicationRunListener {
+
+    // CommandLineRunners and ApplicationRunners have not been called.
+    @Override
+    public void started(ConfigurableApplicationContext context, Duration timeTaken) {
+        System.out.println("项目启动完毕了 。。。。SpringApplicationRunListener.started()........");
+    }
+
+    @Override
+    public void ready(ConfigurableApplicationContext context, Duration timeTaken) {
+        System.out.println("项目启动完毕了 。。。。SpringApplicationRunListener.ready()........");
+    }
+}
+```
+
+```spring.factories
+org.springframework.boot.SpringApplicationRunListener=com.ityj.springboot.component.StartupListener
+```
+
+> spring.factories指定了listener，项目启动才会加载
+
+
+
+#### 1.4 直接在启动方法里
+
+```java
+ConfigurableApplicationContext ioc = SpringApplication.run(Application.class, args);
+System.out.println("项目启动完毕了 。。。.Application.main().... IOC准备完毕");
+```
+
+
+
+#### 1.5 BeanPostProcessor的postProcessAfterInitialization
+
+```java
+@Component
+public class MyBeanPostProcessor implements BeanPostProcessor {
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (HelloController.class.equals(bean.getClass())) {
+            // 执行方法
+            System.out.println("MyBeanPostProcessor.postProcessAfterInitialization ..." + beanName);
+        }
+
+        return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
+    }
+}
+```
+
+#### 1.6 测试
+
+> BeanPostProcessor最先，因为他之后IOC容器不一定初始化好了。
+
+MyBeanPostProcessor.postProcessAfterInitialization ...helloController
+
+
+
+![image-20250909155044824](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909155045406.png)
+
+
+
 # 十一、Spring Cloud
 
 > https://www.bilibili.com/video/BV1gW421P7RD/?spm_id_from=333.1391.0.0
@@ -8400,3 +8506,4 @@ public class TicketServiceFallback implements TicketService {
 
 
 # 十四、Kubernetes
+
