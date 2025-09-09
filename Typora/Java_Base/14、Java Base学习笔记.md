@@ -8104,3 +8104,235 @@ tryAcquire()实现不同：
 
 * 非公平锁，在state为0时直接CAS抢锁
 * 公平锁，state为0是还会判断队列是否有任务
+
+
+
+# 十三、dubbo
+
+## 1. zookeeper + dubbo实现远程调用
+
+> JDK17 + maven3.9.9 + node16.20.2 + zk3.8.4 + springboot3.5.0 + dubbo3.2.10
+
+### （1）初始化provider-ticket
+
+#### 1.1 pom
+
+```xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.0</version>
+    <relativePath/> <!-- lookup parent from repository -->
+</parent>
+
+<dependencies>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- dubbo -->
+    <dependency>
+        <groupId>org.apache.dubbo</groupId>
+        <artifactId>dubbo-spring-boot-starter</artifactId>
+        <version>3.2.10</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+
+    <dependency>
+        <groupId>org.apache.zookeeper</groupId>
+        <artifactId>zookeeper</artifactId>
+        <version>3.9.1</version>
+    </dependency>
+
+    <!-- 包含 Zookeeper 客户端等必要依赖 -->
+    <dependency>
+        <groupId>org.apache.dubbo</groupId>
+        <artifactId>dubbo-dependencies-zookeeper</artifactId>
+        <version>3.2.10</version>
+        <type>pom</type>
+    </dependency>
+
+</dependencies>
+```
+
+#### 1.2 yml
+
+```yml
+dubbo:
+  application:
+    name: provider-ticket
+  registry:
+    address: zookeeper://192.168.137.110:2181
+  scan:
+    base-packages: com.ityj.dubbo.service.impl # 可以用 @DubboComponentScan
+
+server:
+  port: 8181
+```
+
+#### 1.3 启动类
+
+```java
+@SpringBootApplication
+//@DubboComponentScan("com.ityj.dubbo.service")
+public class Application {
+
+    public static void main(String[] args) {
+        ConfigurableApplicationContext ioc = SpringApplication.run(Application.class, args);
+    }
+
+}
+
+```
+
+#### 1.4 业务
+
+```java
+public interface TicketService {
+    String getTicket(String ticketNo);
+}
+
+
+@DubboService  //服务发送出去
+@Component
+public class TicketServiceImpl implements TicketService {
+
+    @Override
+    public String getTicket(String ticketNo) {
+        return "Dubbo provider TicketServiceImpl......" + ticketNo;
+    }
+}
+```
+
+### （2）初始化consumer-user
+
+#### 1.1 pom
+
+同provider-ticket
+
+#### 1.2 yml
+
+```yml
+dubbo:
+  application:
+    name: consumer-user
+  registry:
+    address: zookeeper://192.168.137.110:2181
+server:
+  port: 8888
+```
+
+#### 1.3 启动类
+
+```java
+@SpringBootApplication
+public class Application {
+
+    public static void main(String[] args) {
+        ConfigurableApplicationContext ioc = SpringApplication.run(Application.class, args);
+    }
+
+}
+```
+
+#### 1.4 业务类
+
+* 复制和provider一样的接口
+
+```java
+package com.ityj.dubbo.service;
+
+public interface TicketService {
+    String getTicket(String ticketNo);
+}
+```
+
+* 用@DubboReference注入
+
+```java
+@RestController
+public class UserController {
+
+    @DubboReference
+    private TicketService ticketService;
+
+    // http://localhost:8888/ticket/7
+    @GetMapping("/ticket/{ticketNo}")
+    public String buyTicket(@PathVariable("ticketNo") String ticketNo) {
+        return ticketService.getTicket(ticketNo);
+    }
+
+}
+```
+
+
+
+### （3）测试
+
+> http://localhost:8888/ticket/74
+
+![image-20250909125153533](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909125154024.png)
+
+可以用ZooInspector查看注册进zookeeper的服务
+
+![image-20250909125719475](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909125719871.png)
+
+
+
+## （2）Dubbo Admin
+
+### （1）下载源码
+
+> https://github.com/apache/dubbo-admin/tree/0.6.0-release
+
+
+
+### （2）修改配置
+
+修改zookeeper版本，修复Jdk17连接zookeeper报错：127.0.0.1/＜unresolved＞:2181
+
+```xml
+<dependency>
+    <groupId>org.apache.zookeeper</groupId>
+    <artifactId>zookeeper</artifactId>
+    <version>3.9.1</version>
+</dependency>
+```
+
+更新对应的zookeeper链接
+
+```properties
+admin.registry.address=zookeeper://192.168.137.110:2181
+admin.config-center=zookeeper://192.168.137.110:2181
+admin.metadata-report.address=zookeeper://192.168.137.110:2181
+```
+
+### （3）编译运行
+
+```txt
+1. 编译打包
+在根目录下执行以下命令
+java -jar dubbo-admin-0.1.0.jar
+
+2. 分别启动后端和前端
+java -jar dubbo-admin-distribution/target/dubbo-admin-0.6.0.jar
+
+dubbo-admin-ui目录下npm run dev
+```
+
+![image-20250909130439484](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909130439888.png)
+
+### （4）测试
+
+> http://localhost:38080/ 或 http://localhost:38082
+
+![image-20250909130815868](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909130816311.png)
+
+# 十四、Kubernetes
