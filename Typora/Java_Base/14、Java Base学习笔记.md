@@ -8507,3 +8507,342 @@ public class TicketServiceFallback implements TicketService {
 
 # 十四、Kubernetes
 
+
+
+容器化管理工具，
+
+[Kubernetes](https://kubernetes.io/zh-cn/docs/concepts/overview/) 也称为 K8s，是用于自动部署、扩缩和管理容器化应用程序的开源系统。Kubernetes 源自 [Google 15 年生产环境的运维经验](http://queue.acm.org/detail.cfm?id=2898444)
+
+![image-20250909161829668](https://gitee.com/yj1109/cloud-image/raw/master/img/20250909161830196.png)
+
+
+
+![image.png](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910130410456.png)
+
+
+
+k8s部署一个springboot项目
+
+https://www.bilibili.com/video/BV1dm421u7My/?spm_id_from=333.337.search-card.all.click&vd_source=b23569b676ce26126febad3c290b16e8
+
+Docker
+
+1.编写Dockerfile文件
+
+2.根据Dockerfile创建镜像image
+
+3.可以将镜像推送到docker远程镜像仓库
+
+4.使用docker run创建container
+
+
+
+K8s
+
+1.编写k8s配置文件
+
+vi springboot-demo.yml
+
+2. kubectl apply -f springboot-demo.yml
+
+
+
+deployment/service/ingress
+
+/向容器外暴露一个端口/用一个host映射对应的服务
+
+
+
+1.deployment类型
+
+![image-20250910125504924](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910125505365.png)
+
+![image-20250910125526058](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910125526479.png)
+
+
+
+2.service类型
+
+![image-20250910125651844](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910125652292.png)
+
+
+
+3.ingress
+
+/etc/hosts做了映射
+
+![image-20250910130027561](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910130028041.png)
+
+![image-20250910130055727](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910130055727.png)
+
+![image-20250910130211718](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910130212195.png)
+
+# 十五、Prometheus
+
+
+
+# 十六、ElasticSearch
+
+https://gitee.com/zhengqingya/java-workspace/blob/master/SpringBoot%E7%B3%BB%E5%88%97/04-%E6%95%B4%E5%90%88Elasticsearch/02-spring-data-es/Spring%20Boot%20(4)%20%E6%95%B4%E5%90%88%20Elasticsearch.md
+
+# 十七、Mysql
+
+## 1. 面试题
+
+### （1）B树 VS B+树
+
+![image-20250910131600071](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910131600071.png)
+
+
+
+### （2）innodb是如何用索引实现范围查找
+
+![image-20250910131639207](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910131639207.png)
+
+innodb会按主键建立一个B+树，根节点只存索引。叶子节点才存具体值。
+
+#### 1.1 如果按主键索引a查找
+
+select * from t_user where a = 3;
+
+从上往下找，走了索引
+
+![image-20250910132902280](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910132902704.png)
+
+#### 1.2按普通字段b查找
+
+select * from t_user where b = 3;
+
+全表扫描
+
+![image-20250910132835536](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910132835536.png)
+
+#### 1.3范围查找
+
+select * from t_user where a > 3
+
+能走索引，先执行a=3，再取后面的数据
+
+![image-20250910132950879](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910132952302.png)
+
+
+
+select * from t_user where a <> 3
+
+也走到了索引
+
+![image-20250910133019922](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910133019922.png)
+
+
+
+### （3）联合索引最左前缀法则
+
+CREATE INDEX idx_name234 ON t_user(name2, name3, name4)
+
+![image-20250910140311688](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910140312083.png)
+
+![image-20250910135245085](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910135245497.png)
+
+查询会根据联合索引拿到对应的主键索引值，然后回表查询拿到结果。
+
+#### 1.1 所有字段都在，不管顺序 -> 走索引
+
+![image-20250910140406761](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910140407149.png)
+
+#### 1.2 只要联合索引第一个字段在  ->  走索引
+
+![image-20250910140643391](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910140643806.png)
+
+![image-20250910140659497](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910140659888.png)
+
+#### 1.3 只要联合索引第一个字段不在  ->  不走索引
+
+![image-20250910140850868](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910140851264.png)
+
+
+
+### （4）覆盖索引
+
+#### 1.1查询的字段在索引字段
+
+where条件对应的联合索引 或者 主键索引。
+
+![image-20250910144659489](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910144659905.png)
+
+#### 1.2 查询的字段不在联合索引范围内
+
+index t_user(b,c)
+
+index t_user(name)
+
+![image-20250910144851374](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910144851785.png)
+
+
+
+### （5）索引扫描底层原理
+
+EXPLAIN SELECT NAME FROM t_user
+
+* 底层可以直接从主键对应的B+树扫描（全表扫描），叶子节点存储的是完整数据
+* 也可以从index t_user(name)对应的B+树扫描 --> 因为只返回name字段，所以这个效率更高
+
+![image-20250910145216592](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910145216999.png)
+
+
+
+### （6）Order by 索引的选择
+
+#### 1.1 SELECT * FROM t_user ORDER BY b, c;   --》 全表扫描
+
+![image-20250910150422452](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910150422861.png)
+
+#### 1.2 SELECT b,c,a FROM t_user ORDER BY b, c;  --》 bc联合索引
+
+![image-20250910150505314](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910150505718.png)
+
+### （7）数据类型转换 varchar - int 索引失效
+
+1.1 int数字类型用引号  --》 自动转换成数字 用上索引
+
+![image-20250910151812195](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910151812195.png)
+
+![image-20250910151831743](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910151832749.png)
+
+#### 1.2 varchar类型没用引号  --》 未用索引
+
+底层是将数据表里的所有name字段转换成数字，'asd' --> 0  所以破坏了B+树，没有走索引
+
+![image-20250910154811042](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910154811490.png)
+
+
+
+
+
+![image-20250910152035780](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910152036796.png)
+
+![image-20250910152050792](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910152051618.png)
+
+
+
+#### 1.3 字段做算术运算不走索引
+
+![image-20250910155037760](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910155038224.png)
+
+![image-20250910155051988](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910155052391.png)
+
+### （8）索引类型
+
+![image-20250910160239114](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910160239505.png)
+
+
+
+### （9）索引的优缺点
+
+#### 1.1 优点
+
+* 提高数据检索效率，降低数据库IO成本
+* 唯一索引可保证数据唯一性
+* 减少查询中分组和排序的耗时
+* 加速两个表之间的连接，一般是外键创建索引
+
+#### 1.2 缺点
+
+* 空间换时间，占用物理空间
+* 创建索引和维护索引需要时间。维护B+树成本较高
+* 降低增删改的效率(B+树动态维护)
+
+### （10）聚簇索引和非聚簇索引
+
+![image-20250910163354341](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910163355157.png)
+
+#### 1.1 聚簇索引
+
+* 就是主键索引，叶子节点存的是一行的所有值。
+
+* 一次查询即可拿到数据
+
+* 增删改需要更新索引树，增加系统开销
+
+
+
+#### 1.2 非聚簇索引
+
+* 辅助索引，二级索引。叶子节点存储了对应的主键。需要用主键回表查询具体值。
+* 如果索引覆盖的话，不需要回表查询了
+* 修改或删除时不需要更新索引树，减少了系统开销
+
+
+
+![image-20250910163709836](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910163710280.png)
+
+
+
+
+
+### （11）InnoDb的索引和MyISAM索引区别
+
+* InnoDb的索引包括聚簇索引和非聚簇索引
+* MyISAM只有非聚簇索引
+
+![image-20250910165316398](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910165316837.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
