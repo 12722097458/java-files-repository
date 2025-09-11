@@ -8577,6 +8577,20 @@ deployment/service/ingress
 
 ![image-20250910130211718](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910130212195.png)
 
+
+
+
+
+
+
+svc：相当于大门。请求通过svc找到具体的容器进行操作
+
+controller控制器保证动态扩容
+
+
+
+
+
 # 十五、Prometheus
 
 
@@ -8591,13 +8605,13 @@ https://gitee.com/zhengqingya/java-workspace/blob/master/SpringBoot%E7%B3%BB%E5%
 
 ### （1）B树 VS B+树
 
-![image-20250910131600071](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910131600071.png)
+![image-20250910131600071](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911093117537.png)
 
 
 
 ### （2）innodb是如何用索引实现范围查找
 
-![image-20250910131639207](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910131639207.png)
+![image-20250910131639207](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911093112304.png)
 
 innodb会按主键建立一个B+树，根节点只存索引。叶子节点才存具体值。
 
@@ -8615,7 +8629,7 @@ select * from t_user where b = 3;
 
 全表扫描
 
-![image-20250910132835536](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910132835536.png)
+![image-20250910132835536](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911093106112.png)
 
 #### 1.3范围查找
 
@@ -8631,7 +8645,7 @@ select * from t_user where a <> 3
 
 也走到了索引
 
-![image-20250910133019922](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910133019922.png)
+![image-20250910133019922](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911093100359.png)
 
 
 
@@ -8704,7 +8718,7 @@ EXPLAIN SELECT NAME FROM t_user
 
 1.1 int数字类型用引号  --》 自动转换成数字 用上索引
 
-![image-20250910151812195](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910151812195.png)
+![image-20250910151812195](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911093041536.png)
 
 ![image-20250910151831743](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910151832749.png)
 
@@ -8792,6 +8806,126 @@ EXPLAIN SELECT NAME FROM t_user
 
 
 
+### （12）索引下推
+
+EXPLAIN SELECT * FROM t_user WHERE b > 2 AND c = 3;
+
+索引下推是指在引擎层对b>2扫描后，同时对c=3进行过滤。直接将结果进行回表返回给服务层。
+
+
+
+![image-20250911094408446](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911094409235.png)
+
+![image-20250911093958184](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250911093958184.png)
+
+
+
+![image-20250911094028516](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250911094028516.png)
+
+
+
+
+
+### （13）索引失效场景
+
+1.1 like左边带%    
+
+* 最左匹配原则
+* 如果select的字段是覆盖索引，那么还是会走索引的
+
+![image-20250911095600076](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250911095600076.png)
+
+1.2 类型隐式转换
+
+1.3 where进行运算
+
+1.4 使用or且存在非索引列
+
+1.5 in   
+
+1.6 order by  可能，看具体执行选择
+
+1.7 is null / is not null 可能   -- 回表成本。小的话走索引，大的话不走索引。。
+
+
+
+### (14) Innodb如何实现事务
+
+通过buffer  pool, logBuffer, redo log, undo log来实现事务的。
+
+update:
+
+1. 根据条件找到所在页，并将数据缓存在buffer pool里
+2. 修改buffer pool内存里的数据
+3. 同时生成redolog, undolog用于磁盘持久化或回滚
+
+
+
+### （15）MySql的锁有哪些
+
+#### 1.1 行锁：innodb支持
+
+* 共享锁： 读锁，多个线程能获取同一把锁。select xxx in share mode
+* 排他锁：写锁。只有一个线程能获取这把锁。默认insert/update/delete会上锁。或者手动上锁：select xxx for update.
+* 自增锁： 针对自增字段，如果数据回滚，自增序列不会回滚。
+
+#### 1.2 表锁：innodb和myisam支持
+
+* 共享读锁
+* 排他写锁
+* 意向锁：innodb自带的，不需用户干预
+
+#### 1.3 全局锁：加锁后只能读，写操作挂起。一般用户数据库备份
+
+
+
+常见的锁算法：
+
+比如id有3个(1, 4, 9)
+
+* 记录锁  update t_u xxx where id = 4， 会把这个一条记录上锁。只有一条，行锁可能锁多条
+* 间隙锁： update t_u xxx where id = 5，RR隔离级别下会锁范围(4, 9)，防止幻读
+* 临间锁next-key: 间隙锁+右记录锁  update t_u xxx where id = 5锁(4, 9]
+
+
+
+![image-20250911122125445](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911122125873.png)
+
+
+
+### （16）存储引擎有哪些
+
+![image-20250911105620024](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911105620867.png)
+
+对比InnoDB和MyISAM
+
+* MyISAM会存储两个文件MYD和MYISAM. MYD是数据，MYISAM是索引. InnoDB只有一个ibd文件
+
+![image-20250911105913409](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911105914729.png)
+
+* InnoDB支持事务，行锁和外键
+
+
+
+### （17）事务的基本特性和隔离级别
+
+ACID
+
+Read uncommitted
+
+read committed :  oracle默认，解决脏读问题
+
+repeatable read：mysql默认，解决不可重复读问题
+
+serializable
+
+
+
+脏读：加锁可解决 select ... for update
+
+不可重复读: 读的时候共享锁，写的时候排他锁
+
+幻读
 
 
 
@@ -8803,44 +8937,51 @@ EXPLAIN SELECT NAME FROM t_user
 
 
 
+### （18）分库分表
+
+**水平**
+
+分库：存放在多个数据库里。库多了可以缓解IO和CPU压力
+
+分表：存放在多个表里。比如按照星期存储。 om_credit_transactions_fact_monday， om_credit_transactions_fact_tuesday
+
+表多了可以提高sql执行效率，减轻CPU压力
+
+
+
+**垂直**
+
+分库：结构数据都不一样。 user_db:users,address     prodduct_db: product, comment
+
+分表：按字段拆分成多个。
+
+![image-20250911120927634](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911120928068.png)
+
+
+
+### （19）主从复制，读写分离
+
+主库的所有东西都会复制到从库里。
+
+主库记录binlog，从库有一个线程定期从binlog拉数据
+
+![image-20250911123205182](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911123205632.png)
+
+
+
+![image-20250911122612185](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911122612756.png)
 
 
 
 
 
 
+以下三种技术可以实现分库分表的快速操作：
+mycat
 
+shardingjdbc
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+mybatis-plus 分表插件，基于拦截器可以定制化，实现表名的动态化
 
 
 

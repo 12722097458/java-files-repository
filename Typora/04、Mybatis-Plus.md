@@ -38,6 +38,13 @@ INSERT INTO USER(id,NAME,age,email) VALUES
     <artifactId>mybatis-plus-boot-starter</artifactId>
     <version>3.4.0</version>
 </dependency>
+
+     --  <dependency>
+      -      <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+            <version>3.5.7</version>
+    --    </dependency>
+
 <dependency>
     <groupId>com.alibaba</groupId>
     <artifactId>druid-spring-boot-starter</artifactId>
