@@ -972,7 +972,7 @@ public class ListTest {
 
 ### 1.1 泛型类
 
-![image-20250709142412360](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250709142412360.png)
+![image-20250709142412360](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911163433845.png)
 
 ### 1.2 泛型方法
 
@@ -8605,7 +8605,7 @@ deployment/service/ingress
 
 ![image-20250910130027561](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910130028041.png)
 
-![image-20250910130055727](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250910130055727.png)
+![image-20250910130055727](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911163403190.png)
 
 ![image-20250910130211718](https://gitee.com/yj1109/cloud-image/raw/master/img/20250910130212195.png)
 
@@ -8848,11 +8848,11 @@ EXPLAIN SELECT * FROM t_user WHERE b > 2 AND c = 3;
 
 ![image-20250911094408446](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911094409235.png)
 
-![image-20250911093958184](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250911093958184.png)
+![image-20250911093958184](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911163445953.png)
 
 
 
-![image-20250911094028516](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250911094028516.png)
+![image-20250911094028516](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911163424302.png)
 
 
 
@@ -8865,7 +8865,7 @@ EXPLAIN SELECT * FROM t_user WHERE b > 2 AND c = 3;
 * 最左匹配原则
 * 如果select的字段是覆盖索引，那么还是会走索引的
 
-![image-20250911095600076](C:\Users\yinjun\AppData\Roaming\Typora\typora-user-images\image-20250911095600076.png)
+![image-20250911095600076](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911163539259.png)
 
 1.2 类型隐式转换
 
