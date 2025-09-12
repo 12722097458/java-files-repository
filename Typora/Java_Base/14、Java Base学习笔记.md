@@ -8631,6 +8631,371 @@ controller控制器保证动态扩容
 
 https://gitee.com/zhengqingya/java-workspace/blob/master/SpringBoot%E7%B3%BB%E5%88%97/04-%E6%95%B4%E5%90%88Elasticsearch/02-spring-data-es/Spring%20Boot%20(4)%20%E6%95%B4%E5%90%88%20Elasticsearch.md
 
+
+
+> https://www.bilibili.com/video/BV1V4411M7dK/?spm_id_from=333.337.search-card.all.click&vd_source=b23569b676ce26126febad3c290b16e8
+
+![image-20250912122820164](https://gitee.com/yj1109/cloud-image/raw/master/img/20250912122820628.png)
+
+全文检索：用的是倒排索引
+
+![image-20250912122620898](https://gitee.com/yj1109/cloud-image/raw/master/img/20250912122621329.png)
+
+
+
+什么是Elasticsearch?
+
+分布式，高性能，高可用，可伸缩的搜索和分析系统。
+
+![image-20250912124105606](https://gitee.com/yj1109/cloud-image/raw/master/img/20250912124106067.png)
+
+![image-20250912124504509](https://gitee.com/yj1109/cloud-image/raw/master/img/20250912124504948.png)
+
+![image-20250912124732349](https://gitee.com/yj1109/cloud-image/raw/master/img/20250912124732827.png)
+
+
+
+
+
+下载elasticsearch-9.1.3和kibana-9.1.3，分别启动
+
+es + kibana
+
+添加配置
+
+```shell
+# Disabled security features
+xpack.security.enabled: false
+```
+
+```shell
+es启动成功：
+http://localhost:9200/
+
+kibana启动成功:
+http://localhost:5601/app/dev_tools#/console/shell
+
+```
+
+下载分词器插件放到es的插件目录里
+
+> https://release.infinilabs.com/analysis-ik/stable/
+
+
+
+
+
+kibana
+
+```shell
+创建索引库：PUT /索引库名
+查询索引库：GET /索引库名
+删除索引库：DELETE /索引库名
+修改索引库（添加字段）：PUT /索引库名/_mapping
+
+
+```
+
+索引的增删改查
+
+1.创建
+
+```shell
+PUT /index_test
+{
+  "mappings": {
+    "properties": {
+      "column1":{
+        "type": "text",
+        "analyzer": "ik_smart"
+      },
+      "column2":{
+        "type": "keyword",
+        "index": "false"
+      },
+      "column3":{
+        "properties": {
+          "子字段1": {
+            "type": "keyword"
+          },
+          "子字段2": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+
+
+2. 查看index
+
+   ```shell
+   
+   GET /index_test
+   ```
+
+   
+
+3. index新增字段
+
+   ```shell
+   PUT /index_test/_mapping
+   {
+     "properties": {
+       "new_column":{
+         "type": "integer"
+       }
+     }
+   }
+   
+   ```
+
+4. index 删除字段
+
+   ```shell
+   DELETE /index_test
+   ```
+
+   
+
+
+
+文档的增删改查
+
+1. 增
+
+```shell
+POST /index_test/_doc/1
+{
+    "info": "真相只有一个！",
+    "email": "zy@itcast.cn",
+    "name": {
+        "firstName": "柯",
+        "lastName": "南"
+    }
+}
+
+```
+
+2. 删
+
+```shell
+DELETE /index_test/_doc/1
+```
+
+3. 改
+
+```shell
+POST /index_test/_update/1
+ {
+    "doc":{"info":"真相只有一111111111个"
+  }
+}
+```
+
+
+
+4. 查
+
+```shell
+
+GET /index_test/_doc/1
+//批量查询：查询该索引库下的全部文档
+GET /index_test/_search
+
+
+GET /index_test/_search
+{
+  "query": {
+    "match": {
+      "info": "真相"
+    }
+  }
+}
+
+
+
+```
+
+
+
+
+
+
+
+Java API
+
+> https://www.cnblogs.com/buchizicai/p/17093719.html
+
+新建索引
+
+```java
+@Configuration
+public class ESConfig {
+    @Bean
+    public RestHighLevelClient client(){
+        return new RestHighLevelClient(RestClient.builder(
+                HttpHost.create("http://localhost:9200")
+        ));
+    }
+}
+```
+
+```java
+package com.ityj.springboot.util;
+
+public class HotelConstants {
+    public static final String MAPPING_TEMPLATE = "{\n" +
+            "  \"mappings\": {\n" +
+            "    \"properties\": {\n" +
+            "      \"id\": {\n" +
+            "        \"type\": \"keyword\"\n" +
+            "      },\n" +
+            "      \"name\":{\n" +
+            "        \"type\": \"text\",\n" +
+            "        \"analyzer\": \"ik_max_word\",\n" +
+            "        \"copy_to\": \"all\"\n" +
+            "      },\n" +
+            "      \"address\":{\n" +
+            "        \"type\": \"keyword\",\n" +
+            "        \"index\": false\n" +
+            "      },\n" +
+            "      \"price\":{\n" +
+            "        \"type\": \"integer\"\n" +
+            "      },\n" +
+            "      \"score\":{\n" +
+            "        \"type\": \"integer\"\n" +
+            "      },\n" +
+            "      \"brand\":{\n" +
+            "        \"type\": \"keyword\",\n" +
+            "        \"copy_to\": \"all\"\n" +
+            "      },\n" +
+            "      \"city\":{\n" +
+            "        \"type\": \"keyword\",\n" +
+            "        \"copy_to\": \"all\"\n" +
+            "      },\n" +
+            "      \"starName\":{\n" +
+            "        \"type\": \"keyword\"\n" +
+            "      },\n" +
+            "      \"business\":{\n" +
+            "        \"type\": \"keyword\"\n" +
+            "      },\n" +
+            "      \"location\":{\n" +
+            "        \"type\": \"geo_point\"\n" +
+            "      },\n" +
+            "      \"pic\":{\n" +
+            "        \"type\": \"keyword\",\n" +
+            "        \"index\": false\n" +
+            "      },\n" +
+            "      \"all\":{\n" +
+            "        \"type\": \"text\",\n" +
+            "        \"analyzer\": \"ik_max_word\"\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "}";
+}
+```
+
+```xml
+<dependency>
+    <groupId>org.elasticsearch.client</groupId>
+    <artifactId>elasticsearch-rest-high-level-client</artifactId>
+    <version>7.17.29</version>
+</dependency>
+```
+
+
+
+
+
+```java
+package com.ityj.springboot.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.xcontent.XContentType;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.io.IOException;
+
+import static com.ityj.springboot.util.HotelConstants.MAPPING_TEMPLATE;
+
+@Slf4j
+@SpringBootTest
+public class ESTest {
+
+    @Autowired
+    private RestHighLevelClient restHighLevelClient;
+
+    @Test
+    void createHotelIndex() throws IOException {
+        // 1.创建Request对象
+        CreateIndexRequest request = new CreateIndexRequest("hotel");
+        // 2.准备请求的参数：DSL语句
+        request.source(MAPPING_TEMPLATE, XContentType.JSON);
+        // 3.发送请求
+        restHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
+    }
+
+}
+
+```
+
+
+
+测试
+
+![image-20250912155057176](https://gitee.com/yj1109/cloud-image/raw/master/img/20250912155057850.png)
+
+
+
+删除索引：
+
+```java
+@Test
+void testDeleteHotelIndex() throws IOException {
+    // 1.创建Request对象
+    DeleteIndexRequest request = new DeleteIndexRequest("hotel");
+    // 2.发送请求
+    restHighLevelClient.indices().delete(request, RequestOptions.DEFAULT);
+}
+```
+
+
+
+索引查询
+
+```java
+@Test
+void testExistsHotelIndex() throws IOException {
+    // 1.创建Request对象
+    GetIndexRequest request = new GetIndexRequest("hotel");
+    // 2.发送请求
+    boolean exists = restHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
+    // 3.输出
+    System.err.println(exists ? "索引库已经存在！" : "索引库不存在！");
+}
+```
+
+
+
+
+
+
+
+
+
+
+
 # 十七、Mysql
 
 ## 1. 面试题
