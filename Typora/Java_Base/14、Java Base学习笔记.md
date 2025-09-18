@@ -17,7 +17,7 @@ byte是计算机中最基本的存储单元，每个字节由8个bit构成
 
 ## 2、CPU、内存和硬盘
 
-![image-20250626132744552](https://gitee.com/yj1109/cloud-image/raw/master/img/20250626132744660.png)
+![image-20250917111119313](https://gitee.com/yj1109/cloud-image/raw/master/img/20250917111119789.png)
 
 CPU运行速度很快，而硬盘读取速度太慢。内存一定程度上解决了这个问题。
 
@@ -109,7 +109,20 @@ int res4 = -12 % -5;   // -2
 
 int aa = (int)  -3.3;  // -3   向0靠拢
 int bb = (int)  3.3;  // 3
+
+
+
+float ff = 1.11111111111111111111111F;
+double dd = 1.11111111111111111111111D;
+System.out.println("ff = " + ff);   // 1.1111112
+System.out.println("dd = " + dd);   // 1.1111111111111112
 ```
+
+
+
+![image-20250917123539851](https://gitee.com/yj1109/cloud-image/raw/master/img/20250917123540291.png)
+
+
 
 
 
@@ -518,9 +531,17 @@ class ProxyServer implements NetWork {
 
 #### 应用- 工厂模式
 
-
-
 ### 1.10 类的成员之五-内部类
+
+```java
+/*
+*   成员内部类（Member Inner Class）   OuterClass.InnerClass innerObject = outerObject.new InnerClass();
+    静态内部类（Static Nested Class）  OuterClass.StaticNestedClass nestedObject = new OuterClass.StaticNestedClass();
+    局部内部类（Local Inner Class）    LocalInner localInner = new LocalInner();
+    匿名内部类（Anonymous Inner Class）  函数式接口
+*
+* */
+```
 
 #### 1.1 成员内部类（静态和非静态）
 
@@ -1024,8 +1045,11 @@ public class ListTest {
 
 > Serializable和serialVersionUID缺一不可
 
-    public class Person implements Serializable {
-    private  static final long serialVersionUID = 42324234232L;
+```java
+public class Person implements Serializable {
+	private  static final long serialVersionUID = 42324234232L;
+}
+```
 
 ```java
 package com.ityj.advance.io;
@@ -1624,6 +1648,8 @@ public class PrepareStatementTest {
 
 
 ## 3. ACID
+
+锁、redolog、undolog、mvcc
 
 ![image-20250711162748942](https://gitee.com/yj1109/cloud-image/raw/master/img/20250711162749576.png)
 
@@ -2716,7 +2742,8 @@ public void testDi_auto() {
 >
 > servlet的init()方法
 >
-> BeanPostProcessor.postProcessBeforeInitialization()  前后两个方法
+> 1. BeanPostProcessor.postProcessBeforeInitialization()  前后两个方法
+> 2. before-method 
 >
 > ### 4. **销毁（Destruction）**
 >
@@ -3059,7 +3086,7 @@ public void testFullAnnotation() {
 
 ## 8. AOP
 
-通过切入点(pointcut)表达式可以找到连接点(join point，就是需要增强的方法add()...).
+通过切入点(pointcut)表达式可以找到连接点(join point就是需要增强的方法add()...).
 
 通知(Advice)里的代码就是对连接点进行增强。
 
@@ -3458,9 +3485,11 @@ soeid
 
 
 
-
-
 #### 1.4 统一异常处理
+
+@ControllerAdvice
+
+@ExceptionHandler
 
 
 
@@ -3630,17 +3659,6 @@ public class TestJdbc {
 ![image-20250717155023581](https://gitee.com/yj1109/cloud-image/raw/master/img/20250717155023849.png)
 
 ```java
-package com.ityj.spring.tx.service.impl;
-
-import com.ityj.spring.tx.dao.StudentDao;
-import com.ityj.spring.tx.entity.Student;
-import com.ityj.spring.tx.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
 @Service
 public class Service2 {
 
@@ -3659,16 +3677,6 @@ public class Service2 {
 ```
 
 ```java
-package com.ityj.spring.tx.service.impl;
-
-import com.ityj.spring.tx.dao.StudentDao;
-import com.ityj.spring.tx.entity.Student;
-import com.ityj.spring.tx.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 @Service
 public class StudentServiceImpl implements StudentService {
 
@@ -3696,12 +3704,6 @@ public class StudentServiceImpl implements StudentService {
 #### 1.3 测试
 
 ```java
-package com.ityj.spring.tx.controller;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
 @SpringJUnitConfig(locations = "classpath:bean-tx.xml")
 public class StudentControllerTest {
 
@@ -3733,19 +3735,6 @@ public class StudentControllerTest {
 ### （3）tx全注解（配置类）
 
 ```java
-package com.ityj.spring.tx.config;
-
-import com.alibaba.druid.pool.DruidDataSourceFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import javax.sql.DataSource;
-import java.util.Map;
-
 @Configuration
 @ComponentScan(basePackages = "com.ityj.spring.tx")
 @EnableTransactionManagement
@@ -4538,7 +4527,7 @@ public String errorTest() {
 
 ![image-20250724153457429](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724153458173.png)
 
-![](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724153945571.png)## 13. MVC 完全配置化
+## ![](https://gitee.com/yj1109/cloud-image/raw/master/img/20250724153945571.png)14. MVC 完全配置化
 
 ```java
 AbstractAnnotationConfigDispatcherServletInitializer
@@ -5010,10 +4999,6 @@ List<Student> queryByName(@Param("name") String name, @Param("age") int age);
 ### （5）IOC容器初始化过程
 
 > https://www.bilibili.com/video/BV14WtLeDEit?spm_id_from=333.788.videopod.episodes&vd_source=b23569b676ce26126febad3c290b16e8&p=83
-
-> 
-
-
 
 ```java
 入口：
