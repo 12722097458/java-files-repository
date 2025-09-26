@@ -9393,4 +9393,127 @@ explain 索引
 
 ![image-20250911163114999](https://gitee.com/yj1109/cloud-image/raw/master/img/20250911163115563.png)
 
+## 2. 基本语法
+
+### （1）inner/left/right/cross join ... on
+
+- 内连接（INNER JOIN）只返回两个表中都有匹配的行。
+
+- 左连接（LEFT JOIN）返回左表（这里是 Employees 表）的所有行，如果右表（这里是 EmployeeUNI 表）中没有匹配的行，则结果集中的对应列将为 NULL。
+
+  https://leetcode.cn/problems/replace-employee-id-with-the-unique-identifier/description/?envType=study-plan-v2&envId=sql-free-50
+
+- cross join 就是一张表计算2次  contract c1, contract c2
+
+  https://leetcode.cn/problems/rising-temperature/description/?envType=study-plan-v2&envId=sql-free-50
+
+
+
+### （2）datediff(date1, date2)
+
+```sql
+SELECT DATEDIFF('2025-09-26', '2025-09-25')  -- 1
+SELECT DATEDIFF('2025-09-25', '2025-09-26')  -- -1
+
+DATEDIFF('2025-09-26', date) between 0 and 29 -- 统计2025-09-26前30天的数据，包括9.26
+```
+
+
+
+### （3）having
+
+先group by , 后having
+
+```sql
+select * from Employee e
+group by e.managerId
+having count(e.managerId) >= 5
+```
+
+> https://leetcode.cn/problems/managers-with-at-least-5-direct-reports/?envType=study-plan-v2&envId=sql-free-50
+
+
+
+## （4）ifnull(x, 0)  / avg()  /  round(xx, 2)
+
+> https://leetcode.cn/problems/confirmation-rate/?envType=study-plan-v2&envId=sql-free-50
+
+```sql
+select round(123.4567, 3)   -- 123.457            
+select ifnull(null, 'input is null!')  -- input is null!
+-- 3 7 2 6
+SELECT AVG(user_id) avg_id FROM Signups ;  -- 结果是18 / 4 = 4.5
+-- 3 7 2 6
+-- SELECT AVG(user_id) avg_id FROM Signups ;  -- 结果是18 / 4 = 4.5
+SELECT AVG(user_id=3) avg_id FROM Signups ;  -- 结果是user_id=3 的行数所占的比例， 1 / 4 = 0.25
+
+```
+
+### （5）mod(x, y)  相当于 x % y
+
+```sql
+mod(11, 2)  -- 1
+```
+
+### （6）DATE_FORMAT
+
+```sql
+select DATE_FORMAT(NOW(), '%Y-%m-%d %T')   -- 2025-09-26 05:04:04  
+```
+
+### （7）IF
+
+```sql
+select IF(3 = 122, 1, 0) from dual   -- 0.......如果3==122 ? 1 : 0
+可以结合count/sum等使用:
+	count(if(state='approved', 1, null))
+	sum(if(state='approved', amount, 0))
+```
+
+### （8） DATE_ADD(now(), INTERVAL 1 DAY)
+
+```sql
+select DATE_ADD(now(), INTERVAL 1 DAY) -- 2025-09-27 05:24:14  当前日期是2025-09-26 05:24:14
+
+```
+
+
+
+### （9）SUBSTRING/UPPER/LOWER/CONCAT
+
+* SUBSTRING(column_name, start, length)：这将从列的值中提取一个子字符串，从指定的起始位置开始，直到指定的长度。start从1开始，不像java的索引0
+* SUBSTRING(column_name, start)
+
+* UPPER(expression)：这会将字符串表达式转换为大写。
+
+* LOWER(expression)：这会将字符串表达式转换为小写。
+
+* CONCAT(string1, string2, ...)：这会将两个或多个字符串连接成一个字符串。
+* LEFT(string, length)
+* RIGHT(string, length)
+* LPAD(string, length, value) 在左边填充
+* RPAD  右边填充
+
+```sql
+-- select substring("abcd", 1, 2) -- ab                      
+-- select substring("abcd", 2) -- bcd
+-- select upper('jUN')  -- JUN
+-- select CONCAT('A', 'B', 'C')  -- ABC
+-- select left('abcd', 2) -- ab
+-- select lpad('abcd', 10, '*') -- ******abcd
+-- select lpad('abcd', 3, '*')   -- abc
+```
+
+
+
+### （10） CHAR_LENGTH
+
+```sql
+char_length('abc')   -- 3
+```
+
+
+
+
+
 # 十八、Spring Security
