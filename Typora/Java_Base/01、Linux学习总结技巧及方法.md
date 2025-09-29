@@ -1535,6 +1535,112 @@ netstat -tnlp  查看使用的端口
 
 ## 7、jmap -histo pid 查看当前对象的内存分布情况
 
+
+
+## 8、awk
+
+
+
+## 9、sed流编辑器
+
+```shell
+$ cat awk_test.txt
+01 line
+02 line
+03 line
+04 line
+05 line
+```
+
+- `-n`：静默模式，只显示处理后的行
+- `-i`：直接修改文件内容（慎用）
+- `-e`：执行多个sed命令
+
+### （1） 打印特定行
+
+```shell
+sed -n '3p' awk_test.txt             # 打印第3行
+sed -n '2,4p'  awk_test.txt          # 打印2-4行
+sed -n '1~2p'  awk_test.txt            # 打印奇数行（从第1行开始，步长为2）  2~2就是偶数行
+```
+
+### （2）查找和替换（最常用）
+
+```shell
+sed 's/line/newline/' awk_test.txt               # 将每行第一个old替换为new  --只打印 不修改   -i才修改
+sed 's/line/newline/g' awk_test.txt              # 全局替换（所有old都替换）
+```
+
+### （3）删除行
+
+```shell
+sed '3d' awk_test.txt               # 删除第5行   不是真的删除-i才修改
+sed '10,20d' filename         # 删除10-20行
+sed '/pattern/d' filename     # 删除包含pattern的行
+sed '/start/,/end/d' filename # 删除从start到end模式之间的所有行
+```
+
+### （4）插入和添加文本
+
+```shell
+sed '3i\insert' awk_test.txt          # 在第3行前插入-i才修改
+sed '3a\追加的内容' filename    # 在第3行后追加
+sed '$a\最后一行追加' filename  # 在文件末尾追加
+```
+
+
+
+## 10、awk 文本处理工具
+
+### 内置变量
+
+- `NR`：当前行号
+- `NF`：当前行的字段数
+- `$0`：整行内容
+- `$1, $2, ...`：第1、2...个字段
+
+### （1） 基本打印
+
+```shell
+awk '{print $0}' awk_test.txt       # 打印整行（等同于cat）
+awk '{print $1}' filename      # 打印每行第一个字段
+awk '{print $1, $3}' filename  # 打印第1和第3个字段
+```
+
+
+
+### （2） 条件过滤
+
+```shell
+awk 'NR==3' awk_test.txt             # 打印第5行
+awk 'NR>=10 && NR<=20' filename # 打印10-20行
+awk '/pattern/' filename       # 打印包含pattern的行
+awk '$1=="abc"' filename       # 打印第一个字段等于abc的行
+```
+
+
+
+### （3） 字段处理
+
+```shell
+awk -F: '{print $1}' awk_test.txt     # 以冒号分隔，打印第一个字段
+awk -F'[ ,]' '{print $2}' filename  # 以空格或逗号分隔
+awk '{print NF}' filename           # 打印每行的字段数
+awk '{print $NF}' filename          # 打印最后一个字段
+```
+
+
+
+### （4）计算和统计
+
+```shell
+awk '{sum+=$1} END{print sum}' filename      # 计算第一列总和
+awk '{count++} END{print count}' filename    # 统计行数
+awk '{if($1>100) print $0}' filename         # 打印第一列大于100的行
+```
+
+
+
 # 七、Docker
 
 # 八、Nginx

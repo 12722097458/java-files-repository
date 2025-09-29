@@ -9434,7 +9434,7 @@ having count(e.managerId) >= 5
 
 
 
-## （4）ifnull(x, 0)  / avg()  /  round(xx, 2)
+### （4）ifnull(x, 0)  / avg()  /  round(xx, 2)
 
 > https://leetcode.cn/problems/confirmation-rate/?envType=study-plan-v2&envId=sql-free-50
 
