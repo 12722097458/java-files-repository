@@ -1537,20 +1537,20 @@ netstat -tnlp  查看使用的端口
 
 
 
-## 8、awk
 
 
-
-## 9、sed流编辑器
+## 8、sed流编辑器
 
 ```shell
-$ cat awk_test.txt
+awk_test.txt
 01 line
 02 line
 03 line
 04 line
 05 line
 ```
+
+sed: 
 
 - `-n`：静默模式，只显示处理后的行
 - `-i`：直接修改文件内容（慎用）
@@ -1590,7 +1590,7 @@ sed '$a\最后一行追加' filename  # 在文件末尾追加
 
 
 
-## 10、awk 文本处理工具
+## 9、awk 文本处理工具
 
 ### 内置变量
 
@@ -1599,11 +1599,20 @@ sed '$a\最后一行追加' filename  # 在文件末尾追加
 - `$0`：整行内容
 - `$1, $2, ...`：第1、2...个字段
 
+```shell
+$ cat awk_test.txt
+01,line,haha2
+02,line,haha2
+03,haha,haha2
+04,haha,haha2
+05,haha,haha2
+```
+
 ### （1） 基本打印
 
 ```shell
 awk '{print $0}' awk_test.txt       # 打印整行（等同于cat）
-awk '{print $1}' filename      # 打印每行第一个字段
+awk '{print $1}' filename      # 打印每行第一个字段   默认按空格分割
 awk '{print $1, $3}' filename  # 打印第1和第3个字段
 ```
 
@@ -1618,28 +1627,33 @@ awk '/pattern/' filename       # 打印包含pattern的行
 awk '$1=="abc"' filename       # 打印第一个字段等于abc的行
 ```
 
-
+![image-20251010100258912](https://gitee.com/yj1109/cloud-image/raw/master/img/20251010100259209.png)
 
 ### （3） 字段处理
 
 ```shell
-awk -F: '{print $1}' awk_test.txt     # 以冒号分隔，打印第一个字段
+awk -F, '{print $1}' awk_test.txt     # 以逗号分隔，打印第一个字段
 awk -F'[ ,]' '{print $2}' filename  # 以空格或逗号分隔
 awk '{print NF}' filename           # 打印每行的字段数
 awk '{print $NF}' filename          # 打印最后一个字段
 ```
 
-
+![image-20251010100408983](https://gitee.com/yj1109/cloud-image/raw/master/img/20251010100409164.png)
 
 ### （4）计算和统计
 
 ```shell
-awk '{sum+=$1} END{print sum}' filename      # 计算第一列总和
-awk '{count++} END{print count}' filename    # 统计行数
-awk '{if($1>100) print $0}' filename         # 打印第一列大于100的行
+awk -F, '{sum+=$1} END{print sum}' awk_test.txt      # 计算第一列总和
+awk '{count++} END{print count}' awk_test.txt    # 统计行数
+awk -F, '{sum+=$1} {if($1>3) print $0}' awk_test.txt           # 打印第一列大于100的行
+
 ```
 
+![image-20251010102659769](https://gitee.com/yj1109/cloud-image/raw/master/img/20251010102700055.png)
 
+![image-20251010102732647](https://gitee.com/yj1109/cloud-image/raw/master/img/20251010102732924.png)
+
+![image-20251010102817104](https://gitee.com/yj1109/cloud-image/raw/master/img/20251010102817263.png)
 
 # 七、Docker
 
