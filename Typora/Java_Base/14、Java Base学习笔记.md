@@ -9517,3 +9517,177 @@ char_length('abc')   -- 3
 
 
 # 十八、Spring Security
+
+
+
+# 十九、Spring AI Alibaba
+
+> bilibili: https://www.bilibili.com/video/BV1pvWGznEqh/?spm_id_from=333.1387.favlist.content.click&vd_source=b23569b676ce26126febad3c290b16e8
+>
+> alibaba: https://java2ai.com/?spm=5176.29160081.0.0.2856aa5cHiZsZE
+>
+> 版本选择： https://java2ai.com/docs/1.0.0.2/faq/?spm=5176.29160081.0.0.2856aa5cHiZsZE
+>
+> 获取阿里云百炼access key: https://bailian.console.aliyun.com/?tab=model#/api-key配置到电脑环境变量 ALIYUN-BAILIAN-ACCESS-KEY
+>
+> 模型名称：https://bailian.console.aliyun.com/?tab=model#/model-market/detail/qwen3-max
+>
+> qwen3-max / deepseek-v3.2-exp
+>
+> API url前缀示例： https://bailian.console.aliyun.com/?tab=api#/api/?type=model&url=2712576
+>
+> 使用SDK调用时需配置的base_url：`https://dashscope.aliyuncs.com/compatible-mode/v1`
+
+
+
+
+
+## 1、ChatModel
+
+| Spring AI Alibaba | Spring AI | Spring Boot | jdk  | meven |      |
+| ----------------- | --------- | ----------- | ---- | ----- | ---- |
+| 1.0.0.2           | 1.0.0     | 3.5.0       | 17   | 3.9.9 |      |
+
+
+
+
+
+
+
+通过DashScope协议调用deepseek/qwen3-max
+
+
+
+
+
+## 2、ollama
+
+1. 下载
+
+https://ollama.com/download
+
+2. 安装
+
+指定安装目录：
+
+```shell
+OllamaSetup.exe /DIR=D:\2025\java\software\ai\Ollama
+```
+
+3. 指定大模型下载目录
+
+   ```shell
+   新建一个环境变量
+   OLLAMA_MODELS
+   D:\2025\java\software\ai\Ollama\models
+   ```
+
+
+
+对于 0.12.3版本，不用改环境变量，直接通过UI修改
+
+![image-20251010153616862](https://gitee.com/yj1109/cloud-image/raw/master/img/20251010153617439.png)
+
+3. 从远程仓库下载大模型到本地
+
+```shell
+ollama run qwen3:0.6b   -- 下载一个最小的模型
+ollama ps
+```
+
+5. 运行大模型
+
+```shell
+ollama run qwen3:0.6b
+```
+
+6. 基本指令
+
+```shell
+ollama --version
+ollama ps   -- 查看运行的模型
+ollama list -- 查看本地仓库的模型
+netstat -ano | findstr 11434   --默认端口是11434
+
+```
+
+
+
+
+
+
+
+## 3、ChatClient
+
+
+
+
+
+## 4、SSE(Server Sent Event)
+
+![image-20251010163613597](https://gitee.com/yj1109/cloud-image/raw/master/img/20251010163614203.png)
+
+
+
+
+
+
+
+## 5、prompt提示词
+
+system
+
+user
+
+assistant
+
+tool
+
+
+
+## 6、PromptTemplate
+
+
+
+## 7、Structured Output格式化输出
+
+
+
+## 8、Persistent对话持久化 ChatMemory
+
+```
+RedisChatMemoryRepository
+MessageWindowChatMemory
+```
+
+
+
+## 9、文生图
+
+> https://bailian.console.aliyun.com/?tab=model#/model-market/detail/wanx2.0-t2i-turbo
+
+wanx2.0-t2i-turbo  -- 0.04元/张
+
+
+
+## 10、文生音
+
+
+
+## 11、向量化和向量数据库
+
+文本向量化
+
+嵌入模型
+
+
+
+> docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server
+
+RDBMS： 关系型数据库   - 精确查找
+
+vectorDB:  向量数据库  - 相似性搜索
+
+​	苹果 - [1,3,5,2,34,4]
+
+淘宝搜索苹果   -- 猜你喜欢就可以用向量数据库来处理
