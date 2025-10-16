@@ -9544,6 +9544,9 @@ char_length('abc')   -- 3
 
 ## 1、ChatModel
 
+> 对话模型(ChatModel)是底层接口，直接与具体大语言模型交互，
+> 提供call()和stream()方法，适合简单大模型交互场景
+
 | Spring AI Alibaba | Spring AI | Spring Boot | jdk  | meven |      |
 | ----------------- | --------- | ----------- | ---- | ----- | ---- |
 | 1.0.0.2           | 1.0.0     | 3.5.0       | 17   | 3.9.9 |      |
@@ -9561,6 +9564,8 @@ char_length('abc')   -- 3
 
 
 ## 2、ollama
+
+> Ollama本地大模型部署，大模型下载到本地用ollama启动并运行
 
 1. 下载
 
@@ -9619,7 +9624,7 @@ netstat -ano | findstr 11434   --默认端口是11434
 
 ## 3、ChatClient
 
-
+> ChatClient是高级封装，基于ChatModel构建，适合快速构建标准化复杂AI服务，支持同步和流式交互，集成多种高级功能。
 
 
 
@@ -9635,25 +9640,59 @@ netstat -ano | findstr 11434   --默认端口是11434
 
 ## 5、prompt提示词
 
+四大角色：
+
 system
 
 user
 
-assistant
+assistant：AI的返回
 
-tool
+tool：相当于工具类utils, 比如天气查询服务
 
 
 
 ## 6、PromptTemplate
 
+字符串占位符
+
+```java
+@GetMapping("/promptTemplate")
+public Flux<String> promptTemplate(@RequestParam(value = "topic") String topic, @RequestParam(value = "count") int count) {
+    PromptTemplate promptTemplate = new PromptTemplate("请给我讲一个关于{topic}的故事，字数控制在{count}内!");
+    Prompt prompt = promptTemplate.create(Map.of("topic", topic, "count", count));
+    return qwenChatClient.prompt(prompt)
+            .stream().content();
+}
+```
+
 
 
 ## 7、Structured Output格式化输出
 
+输出成一个对象
+
+```java
+@GetMapping("/output")
+public Student systemAndUser(@RequestParam(value = "age") int age,
+                                  @RequestParam(value = "name") String name) {
+    return qwenChatClient.prompt()
+            .user(new Consumer<ChatClient.PromptUserSpec>() {
+                @Override
+                public void accept(ChatClient.PromptUserSpec promptUserSpec) {
+                    promptUserSpec.text("我的学号是10002,今年{age}岁了，名字是{name}").params(Map.of("age", age, "name", name));
+                }
+            }).call().entity(Student.class);
+}
+```
+
+
+
 
 
 ## 8、Persistent对话持久化 ChatMemory
+
+对话持久化到redis里，下次对话可以读取历史记录
 
 ```
 RedisChatMemoryRepository
@@ -9662,19 +9701,82 @@ MessageWindowChatMemory
 
 
 
+```yml
+spring:
+  data:
+    redis:
+      host: 192.168.137.110
+      port: 6379
+```
+
+```java
+@Configuration
+public class RedisChatMemoryRepositoryConfig {
+
+    @Value("${spring.data.redis.host}")
+    private String host;
+    @Value("${spring.data.redis.port}")
+    private int port;
+
+    @Bean
+    public RedisChatMemoryRepository redisChatMemoryRepository() {
+        return RedisChatMemoryRepository.builder().port(port).host(host).build();
+    }
+
+}
+```
+
+```java
+@Bean("qwenChatClient")
+public ChatClient getQwenChatClient(@Autowired @Qualifier(value = "qwenChatModel")ChatModel qwenChatModel,
+                                    RedisChatMemoryRepository redisChatMemoryRepository) {
+
+    MessageWindowChatMemory messageWindowChatMemory = MessageWindowChatMemory.builder()
+            .maxMessages(10).chatMemoryRepository(redisChatMemoryRepository).build();
+    return ChatClient.builder(qwenChatModel)
+            .defaultAdvisors(MessageChatMemoryAdvisor.builder(messageWindowChatMemory).build())
+            .build();
+}
+```
+
+```java
+@GetMapping("/chat/persistent")
+public Flux<String> chatStream(@RequestParam(value = "content", defaultValue = "你是谁？") String content,
+                               @RequestParam(value = "userId") String userId) {
+    return qwenChatClient.prompt()
+            .user(content)
+            .advisors(new Consumer<ChatClient.AdvisorSpec>() {
+                @Override
+                public void accept(ChatClient.AdvisorSpec advisorSpec) {
+                    advisorSpec.param(CONVERSATION_ID, userId);   // redis结构是list,  key是 spring_ai_alibaba_chat_memory:1001
+                }
+            })
+            .stream().content();
+}
+```
+
 ## 9、文生图
 
 > https://bailian.console.aliyun.com/?tab=model#/model-market/detail/wanx2.0-t2i-turbo
 
 wanx2.0-t2i-turbo  -- 0.04元/张
 
-
+```java
+@GetMapping("/imageModel")
+public String chatStream(@RequestParam(value = "content", defaultValue = "生成一只萨摩耶图片") String content) {
+    return imageModel.call(new ImagePrompt(content))
+            .getResult().getOutput().getUrl();
+}
+```
 
 ## 10、文生音
 
+```java
+@Resource
+private SpeechSynthesisModel speechSynthesisModel;
+```
 
-
-## 11、向量化和向量数据库
+## 11、向量化和向量数据库（embedding model）
 
 文本向量化
 
@@ -9691,3 +9793,359 @@ vectorDB:  向量数据库  - 相似性搜索
 ​	苹果 - [1,3,5,2,34,4]
 
 淘宝搜索苹果   -- 猜你喜欢就可以用向量数据库来处理
+
+
+
+redisStack
+
+
+
+```yml
+spring:
+  ai:
+    vectorstore:
+      redis:
+        initialize-schema: true
+        index-name: my-default-index
+        prefix: my-custom-prefix
+
+  data:
+    redis:
+      host: 192.168.137.110
+      port: 6379
+```
+
+```java
+@RestController
+@Slf4j
+public class Embed2VectorController {
+    @Resource
+    private EmbeddingModel embeddingModel;
+
+    @Resource
+    private VectorStore vectorStore;
+
+    /**
+     * 文本向量化
+     * http://localhost:8010/text2embed?msg=射雕英雄传
+     *
+     * @param msg
+     * @return
+     */
+    @GetMapping("/text2embed")
+    public EmbeddingResponse text2Embed(@RequestParam(name = "msg") String msg) {
+        EmbeddingResponse embeddingResponse = embeddingModel.call(new EmbeddingRequest(List.of(msg), null));
+
+        System.out.println(Arrays.toString(embeddingResponse.getResult().getOutput()));
+
+        return embeddingResponse;
+    }
+
+    @GetMapping("/embed2vector/add")
+    public void add() {
+        List<Document> documents = List.of(
+                new Document("i study LLM"),
+                new Document("i love java")
+        );
+
+        vectorStore.add(documents);
+    }
+
+    @GetMapping("/embed2vector/get")
+    public List getAll(@RequestParam(name = "msg") String msg) {
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(msg)
+                .topK(2)
+                .build();
+
+        List<Document> list = vectorStore.similaritySearch(searchRequest);
+
+        System.out.println(list);
+
+        return list;
+    }
+}
+```
+
+## 12、RAG (Retrieval-Augmented Generation)检索智能增强
+
+
+
+
+
+![image-20251016095653102](https://gitee.com/yj1109/cloud-image/raw/master/img/20251016095653562.png)
+
+
+
+![image-20251016095707304](https://gitee.com/yj1109/cloud-image/raw/master/img/20251016095707783.png)
+
+
+
+RAG技术就像给AI大模型装上了「实时百科大脑」，为了让大模型获取足够的上下文，以便获得更加广泛的信息源，通过先查资料后回答的机制，让AI摆脱传统模型的”知识遗忘和幻觉回复”困境
+
+（考试准备了一个小抄，不会了先看小抄）
+
+
+
+### （1）本地存入redisStack向量数据库，大模型学习
+
+```txt
+00000 系统OK正确执行后的返回
+A0001 用户端错误一级宏观错误码
+A0100 用户注册错误二级宏观错误码
+B1111 支付接口超时
+C2222 Kafka消息解压严重
+```
+
+
+
+### （2）通过远程知识库进行学习
+
+![image-20251016162104433](https://gitee.com/yj1109/cloud-image/raw/master/img/20251016162104992.png)
+
+```java
+@GetMapping("/rag")
+public Flux<String> rag(@RequestParam(name = "msg") String msg) {
+    String systemInfo = """
+            你是一个运维工程师,按照给出的编码给出对应故障解释,否则回复找不到信息。
+            """;
+    //1 RetrieverOptions参数配置
+    DashScopeDocumentRetrieverOptions documentRetrieverOptions = DashScopeDocumentRetrieverOptions.builder()
+            .withIndexName("ops-errorcode")// 百炼平台云知识库名称
+            .build();
+
+    //2 百炼平台RAG知识库构建器
+    DocumentRetriever retriever = new DashScopeDocumentRetriever(dashScopeApi, documentRetrieverOptions);
+
+    return chatClient
+            .prompt()
+            .system(systemInfo)
+            .user(msg)
+            .advisors(new DocumentRetrievalAdvisor(retriever))
+            .stream()
+            .content();
+}
+```
+
+
+
+## 13、ToolCalling 工具调用
+
+大模型是预训练数据，只收集知识库里截止某个时间点之前的数据 
+
+可以指定第三方工具，让大模型进行调用，并把结果进行返回。
+
+
+
+```java
+public class DateTimeTools
+{
+    /**
+     * 1.定义 function call（tool call）
+     * 2. returnDirect
+     *    true = tool直接返回不走大模型，直接给客户
+     *    false = 拿到tool返回的结果，给大模型，最后由大模型回复
+     */
+    @Tool(description = "获取当前时间", returnDirect = false)
+    public String getCurrentTime()
+    {
+        return LocalDateTime.now().toString();
+    }
+}
+```
+
+```java
+@RequestMapping("callWithTool")
+public Flux<String> callWithTool(@RequestParam(name = "msg", defaultValue = "现在几点了") String msg) {
+    return chatClient.prompt()
+            .tools(new DateTimeTools())
+            .user(msg).stream().content();
+}
+```
+
+## 14、MCP （Model Context Protocol）模型上下文协议
+
+https://mcp.so/zh/servers
+
+之前每个大模型(如DeepSeek、ChatGPT)需要为每个工具单独开发接口(Tool/FunctionCalling)，导致重复劳动
+
+MCP 厉害的地方在于，不用重复造轮子。
+
+过去每个软件（比如微信、Excel）都要单独给 AI 做接口，
+
+现在 MCP 统一了标准，就像所有电器都用 USB-C 充电口，AI 一个接口就能连接所有工具
+
+
+
+Java界的SpringCloud Openfeign，只不过Openfeign是用于微服务通讯的，
+而MCP用于大模型通讯的，但它们都是为了通讯获取某项数据的一种机制
+
+![image-20251016162545927](https://gitee.com/yj1109/cloud-image/raw/master/img/20251016162546415.png)
+
+### （1）本地构建一个mcp server， 供自己调用
+
+#### 1.1 server 暴露功能
+
+```java
+@Service
+public class WeatherService
+{
+    @Tool(description = "根据城市名称获取天气预报")
+    public String getWeatherByCity(String city)
+    {
+        Map<String, String> map = Map.of(
+                "北京", "11111降雨频繁，其中今天和后天雨势较强，部分地区有暴雨并伴强对流天气，需注意",
+                "上海", "22222多云,15℃~27℃,南风3级，当前温度27℃。",
+                "深圳", "333333多云40天，阴16天，雨30天，晴3天"
+        );
+        return map.getOrDefault(city, "抱歉：未查询到对应城市！");
+    }
+}
+```
+
+```java
+@Configuration
+public class McpServerConfig
+{
+    /**
+     * 将工具方法暴露给外部 mcp client 调用
+     */
+    @Bean
+    public ToolCallbackProvider weatherTools(WeatherService weatherService)
+    {
+        return MethodToolCallbackProvider.builder()
+                .toolObjects(weatherService)
+                .build();
+    }
+}
+```
+
+```yml
+spring:yml
+  ai:
+    mcp:
+      server:
+        type: async
+        name: my-weather-mcp-server
+        version: 1.0.0
+```
+
+#### 1.2 client引入mcp server的功能
+
+```yml
+spring:
+    mcp:
+      client:
+        enabled: true
+        type: async
+        request-timeout: 60s
+        toolcallback:
+          enabled: true
+        sse:
+          connections:
+            my-weather-mcp-server:
+              url: http://localhost:8013
+```
+
+```java
+@Bean("qwenChatClient")
+public ChatClient getQwenChatClient(@Autowired @Qualifier(value = "qwenChatModel")ChatModel qwenChatModel, ToolCallbackProvider toolCallbackProvider) {
+    return ChatClient.builder(qwenChatModel)
+            .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks()) //mcp协议，配置见yml文件
+            .build();
+}
+```
+
+```java
+@RequestMapping("mcp")
+public Flux<String> mcp(@RequestParam(name = "msg", defaultValue = "北京天气怎么样") String msg) {
+    return chatClient.prompt().user(msg).stream().content();
+}
+```
+
+### （2）调用远程rag server baiduMap
+
+https://mcp.so/zh/server/baidu-map/baidu-maps
+
+```json
+{
+  "mcpServers": {
+    "baidu-map": {
+      "command": "C:\\\\Program Files\\\\nodejs\\\\npx.cmd",
+      "args": [
+        "-y",
+        "@baidumap/mcp-server-baidu-map"
+      ],
+      "env": {
+        "BAIDU_MAP_API_KEY": "DpfAn2Hkvlyadx0YtYVmI4TXDgWt8Ode"
+      }
+    }
+  }
+}
+```
+
+```yml
+spring:
+  ai:
+    mcp:
+      client:
+        enabled: true
+        stdio:
+          servers-configuration: classpath:/baidumap.json
+```
+
+```java
+@Bean("qwenChatClient")
+public ChatClient getQwenChatClient(@Autowired @Qualifier(value = "qwenChatModel")ChatModel qwenChatModel, ToolCallbackProvider toolCallbackProvider) {
+    return ChatClient.builder(qwenChatModel)
+            .defaultToolCallbacks(toolCallbackProvider.getToolCallbacks()) //mcp协议，配置见yml文件
+            .build();
+}
+```
+
+```java
+@RequestMapping("mcp")
+public Flux<String> mcp(@RequestParam(name = "msg", defaultValue = "北京天气怎么样") String msg) {
+    return chatClient.prompt().user(msg).stream().content();
+}
+```
+
+
+
+## 15、agent智能体  工作流
+
+阿里云百炼平台构建一个工作流，java agent智能体调用这个工作流
+
+![image-20251016163143217](https://gitee.com/yj1109/cloud-image/raw/master/img/20251016163143858.png)
+
+```java
+@RestController
+public class MenuCallAgentController
+{
+    // 百炼平台的appid
+    @Value("${api.healtheat.appid}")
+    private String APPID;
+    // 百炼云端智能体调用对象
+       private DashScopeAgent agent;
+    //构造方法注入，创建百炼云端智能体对象
+       public MenuCallAgentController(DashScopeAgentApi agentApi)
+    {
+        this.agent = new DashScopeAgent(agentApi);
+    }
+
+    /**
+     * http://localhost:8016/eatAgent
+     * @param topic
+     * @return
+     */
+    @GetMapping("/eatAgent")
+    public String eatAgent(@RequestParam(name = "topic",defaultValue = "今天中午吃什么") String topic)
+    {
+        DashScopeAgentOptions options = DashScopeAgentOptions.builder().withAppId(APPID).build();
+
+        Prompt prompt = new Prompt(topic, options);
+
+        return agent.call(prompt).getResult().getOutput().getText();
+    }
+}
+```
